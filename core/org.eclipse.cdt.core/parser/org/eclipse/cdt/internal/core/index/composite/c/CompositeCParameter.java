@@ -46,4 +46,8 @@ class CompositeCParameter extends CompositeCBinding implements IParameter {
 	public IValue getInitialValue() {
 		return null;
 	}
+	
+	public short getExtendedBits() {
+		return ((IParameter) rbinding).getExtendedBits();
+	}
 }

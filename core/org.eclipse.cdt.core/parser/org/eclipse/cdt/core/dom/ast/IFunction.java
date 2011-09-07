@@ -53,4 +53,10 @@ public interface IFunction extends IBinding {
 	 * Returns {@code true} if this function takes variable arguments.
 	 */
 	public boolean takesVarArgs();
+	
+	/**
+	 * These bits are for custom C/C++ dialects that are willing to keep
+	 * extended information in the CDT AST and index.
+	 */
+	public short getExtendedBits();
 }

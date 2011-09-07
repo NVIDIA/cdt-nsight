@@ -316,4 +316,12 @@ public class CPPFunctionSpecialization extends CPPSpecialization implements ICPP
 		}
 		return specializedExceptionSpec;
 	}
+	
+	public short getExtendedBits() {
+		ICPPFunction binding = (ICPPFunction) getSpecializedBinding();
+		if (binding != null) {
+			return binding.getExtendedBits();
+		}
+		return 0;
+	}
 }

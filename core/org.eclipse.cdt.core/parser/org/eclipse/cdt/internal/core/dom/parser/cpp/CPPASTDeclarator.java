@@ -48,6 +48,7 @@ public class CPPASTDeclarator extends ASTNode implements ICPPASTDeclarator, IAST
     private IASTDeclarator nested;
     private IASTPointerOperator[] pointerOps;
     private boolean isPackExpansion;
+	private short extendedBits;
    
     public CPPASTDeclarator() {
 	}
@@ -79,6 +80,7 @@ public class CPPASTDeclarator extends ASTNode implements ICPPASTDeclarator, IAST
 		copy.setInitializer(initializer == null ? null : initializer.copy(style));
 		copy.setNestedDeclarator(nested == null ? null : nested.copy(style));
 		copy.isPackExpansion= isPackExpansion;
+		copy.setExtendedBits(extendedBits);
 		for (IASTPointerOperator pointer : getPointerOperators())
 			copy.addPointerOperator(pointer == null ? null : pointer.copy(style));
 		copy.setOffsetAndLength(this);
@@ -275,5 +277,14 @@ public class CPPASTDeclarator extends ASTNode implements ICPPASTDeclarator, IAST
     	}
 
     	return implicitNames;  
+	}
+	
+	public short getExtendedBits() {
+		return extendedBits;
+	}
+	
+	public void setExtendedBits(short bits) {
+		assertNotFrozen();
+		extendedBits = bits;
 	}
 }

@@ -135,4 +135,8 @@ public class CPPTemplateNonTypeParameter extends CPPTemplateParameter implements
 	public boolean isMutable() {
 		return false;
 	}
+	
+	public short getExtendedBits() {
+		return 0;
+	}
 }

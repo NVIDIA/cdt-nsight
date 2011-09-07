@@ -111,4 +111,8 @@ public class CPPBuiltinParameter extends PlatformObject implements ICPPParameter
 	public boolean isParameterPack() {
 		return false;
 	}
+	
+	public short getExtendedBits() {
+		return 0;
+	}
 }

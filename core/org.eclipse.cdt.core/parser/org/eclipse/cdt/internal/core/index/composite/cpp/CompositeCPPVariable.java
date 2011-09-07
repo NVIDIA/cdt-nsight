@@ -55,4 +55,8 @@ class CompositeCPPVariable extends CompositeCPPBinding implements ICPPVariable {
 	public IValue getInitialValue() {
 		return ((ICPPVariable)rbinding).getInitialValue();
 	}
+	
+	public short getExtendedBits() {
+		return ((ICPPVariable)rbinding).getExtendedBits();
+	}
 }

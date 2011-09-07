@@ -96,4 +96,8 @@ public class CPPFieldSpecialization extends CPPSpecialization implements ICPPFie
 		}
 		return value;
 	}
+	
+	public short getExtendedBits() {
+		return getField().getExtendedBits();
+	}
 }

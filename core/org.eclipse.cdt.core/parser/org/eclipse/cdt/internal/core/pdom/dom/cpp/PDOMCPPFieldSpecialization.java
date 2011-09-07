@@ -117,4 +117,8 @@ class PDOMCPPFieldSpecialization extends PDOMCPPSpecialization implements ICPPFi
 	public boolean isMutable() {
 		return getField().isMutable();
 	}
+	
+	public short getExtendedBits() {
+		return getField().getExtendedBits();
+	}
 }

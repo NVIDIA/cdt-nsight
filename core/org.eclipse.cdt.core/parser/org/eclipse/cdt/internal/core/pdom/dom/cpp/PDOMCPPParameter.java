@@ -234,4 +234,8 @@ class PDOMCPPParameter extends PDOMNamedNode implements ICPPParameter, IPDOMBind
 	public IValue getInitialValue() {
 		return null;
 	}
+	
+	public short getExtendedBits() {
+		return 0;
+	}
 }

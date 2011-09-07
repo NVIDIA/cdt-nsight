@@ -12,6 +12,7 @@
 package org.eclipse.cdt.internal.core.index.composite.cpp;
 
 import org.eclipse.cdt.core.dom.ast.ASTTypeUtil;
+import org.eclipse.cdt.core.dom.ast.IFunction;
 import org.eclipse.cdt.core.dom.ast.IScope;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPFunction;
@@ -109,5 +110,9 @@ class CompositeCPPFunction extends CompositeCPPBinding implements ICPPFunction {
 			result[i]= cf.getCompositeType(es[i]);
 		}
 		return result;
+	}
+
+	public short getExtendedBits() {
+		return ((IFunction) rbinding).getExtendedBits();
 	}
 }

@@ -96,4 +96,8 @@ public class CPPParameterSpecialization extends CPPSpecialization implements ICP
 	public IValue getInitialValue() {
 		return null;
 	}
+	
+	public short getExtendedBits() {
+		return getParameter().getExtendedBits();
+	}
 }

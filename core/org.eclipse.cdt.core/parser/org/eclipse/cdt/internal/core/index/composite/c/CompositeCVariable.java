@@ -46,4 +46,8 @@ class CompositeCVariable extends CompositeCBinding implements IVariable {
 	public IValue getInitialValue() {
 		return ((IVariable)rbinding).getInitialValue();
 	}
+	
+	public short getExtendedBits() {
+		return ((IVariable) rbinding).getExtendedBits();
+	}
 }

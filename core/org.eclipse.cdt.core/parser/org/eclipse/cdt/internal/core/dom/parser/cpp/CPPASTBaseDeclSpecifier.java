@@ -28,6 +28,7 @@ public abstract class CPPASTBaseDeclSpecifier extends ASTNode implements ICPPAST
     private int sc;
     private boolean virtual;
     private boolean explicit;
+	private short extendedBits;
     
     public boolean isFriend() {
         return friend;
@@ -110,6 +111,7 @@ public abstract class CPPASTBaseDeclSpecifier extends ASTNode implements ICPPAST
     	other.virtual = virtual;
     	other.explicit = explicit;
     	other.sc = sc;
+    	other.extendedBits = extendedBits;
     	other.setOffsetAndLength(this);
     }
     
@@ -120,4 +122,13 @@ public abstract class CPPASTBaseDeclSpecifier extends ASTNode implements ICPPAST
 	public String toString() {
     	return ASTStringUtil.getSignatureString(this, null);
     }
+	
+	public void setExtendedBits(short extendedBits) {
+		assertNotFrozen();
+		this.extendedBits = extendedBits;
+	}
+	
+	public short getExtendedBits() {
+		return extendedBits;
+	}
 }

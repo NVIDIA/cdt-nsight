@@ -143,4 +143,8 @@ class AutoTypeResolver implements ICPPFunctionTemplate {
 	public boolean isGloballyQualified() throws DOMException {
 		throw new UnsupportedOperationException(UNEXPECTED_CALL);
 	}
+
+	public short getExtendedBits() {
+		return 0;
+	}
 }

@@ -91,5 +91,14 @@ public interface IASTDeclSpecifier extends IASTNode {
 	@Deprecated
 	public static final int sc_last = sc_register;
 
+	/**
+	 * Not allowed on frozen AST
+	 */
+	public void setExtendedBits(short extendedBits);
 
+	/**
+	 * Returns "extended bits" that store dialect-specific flags.
+	 * @since 9.0
+	 */
+	public short getExtendedBits();
 }

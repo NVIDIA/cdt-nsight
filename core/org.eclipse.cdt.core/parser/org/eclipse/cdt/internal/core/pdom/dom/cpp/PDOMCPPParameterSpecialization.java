@@ -139,4 +139,8 @@ class PDOMCPPParameterSpecialization extends PDOMCPPSpecialization implements IC
 	public IValue getInitialValue() {
 		return null;
 	}
+	
+	public short getExtendedBits() {
+		return getParameter().getExtendedBits();
+	}
 }

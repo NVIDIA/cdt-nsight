@@ -65,4 +65,8 @@ class CompositeCFunction extends CompositeCBinding implements IFunction {
 	public boolean takesVarArgs() {
 		return ((IFunction)rbinding).takesVarArgs();
 	}
+
+	public short getExtendedBits() {
+		return ((IFunction)rbinding).getExtendedBits();
+	}
 }

@@ -129,4 +129,8 @@ public class CKnRParameter extends PlatformObject implements IParameter {
 	public IValue getInitialValue() {
 		return null;
 	}
+	
+	public short getExtendedBits() {
+		return 0;
+	}
 }

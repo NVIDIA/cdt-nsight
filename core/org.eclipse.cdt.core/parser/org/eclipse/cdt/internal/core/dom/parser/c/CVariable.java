@@ -200,4 +200,32 @@ public class CVariable extends PlatformObject implements IInternalVariable, ICIn
 
 		return ASTQueries.findOutermostDeclarator((IASTDeclarator) node);
 	}
+	
+	public short getExtendedBits() {
+		short bits = -1;
+		IASTNode[] declarations = getDeclarations();
+		if (declarations != null && declarations.length > 0) {
+			for (IASTNode node : declarations) {
+				bits = getExtendedBits(node);
+				if (bits >= 0) {
+					return bits;
+				}
+			}
+		}
+		IASTNode node = getDefinition();
+		bits = getExtendedBits(node);
+		return bits < 0 ? 0 : bits;
+	}
+
+	private short getExtendedBits(IASTNode node) {
+		IASTDeclSpecifier declSpecifier = null;
+		while (declSpecifier == null && node != null) {
+			if (node instanceof IASTSimpleDeclaration) {
+				declSpecifier = ((IASTSimpleDeclaration) node).getDeclSpecifier();
+			} else {
+				node = node.getParent();
+			}
+		}
+		return declSpecifier != null ? declSpecifier.getExtendedBits() : -1;
+	}
 }
