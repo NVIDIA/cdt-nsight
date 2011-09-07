@@ -59,4 +59,10 @@ public interface IFunction extends IBinding {
 	 * @since 5.4
 	 */
 	public boolean isNoReturn();
+	
+	/**
+	 * These bits are for custom C/C++ dialects that are willing to keep
+	 * extended information in the CDT AST and index.
+	 */
+	public short getExtendedBits();
 }

@@ -52,4 +52,9 @@ class CompositeCParameter extends CompositeCBinding implements IParameter {
 	public IValue getInitialValue() {
 		return null;
 	}
+	
+	@Override
+	public short getExtendedBits() {
+		return ((IParameter) rbinding).getExtendedBits();
+	}
 }

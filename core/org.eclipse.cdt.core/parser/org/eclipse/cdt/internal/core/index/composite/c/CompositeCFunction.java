@@ -80,4 +80,9 @@ class CompositeCFunction extends CompositeCBinding implements IFunction {
 	public boolean isNoReturn() {
 		return ((IFunction) rbinding).isNoReturn();
 	}
+
+	@Override
+	public short getExtendedBits() {
+		return ((IFunction)rbinding).getExtendedBits();
+	}
 }

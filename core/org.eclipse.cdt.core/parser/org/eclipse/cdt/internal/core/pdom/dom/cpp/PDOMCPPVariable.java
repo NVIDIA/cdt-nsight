@@ -36,8 +36,9 @@ class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
 	private static final int TYPE_OFFSET = PDOMCPPBinding.RECORD_SIZE;
 	private static final int VALUE_OFFSET = TYPE_OFFSET + Database.TYPE_SIZE;
 	protected static final int ANNOTATIONS = VALUE_OFFSET + Database.VALUE_SIZE; // byte
+	private static final int EXTENDED_BITS = ANNOTATIONS + 1;
 	@SuppressWarnings("hiding")
-	protected static final int RECORD_SIZE = ANNOTATIONS + 1;
+	protected static final int RECORD_SIZE = EXTENDED_BITS + 2;
 	
 	public PDOMCPPVariable(PDOMLinkage linkage, PDOMNode parent, IVariable variable) throws CoreException {
 		super(linkage, parent, variable.getNameCharArray());
@@ -46,6 +47,7 @@ class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
 		Database db = getDB();
 		setType(parent.getLinkage(), variable.getType());
 		db.putByte(record + ANNOTATIONS, encodeFlags(variable));
+		db.putShort(record + EXTENDED_BITS, variable.getExtendedBits());
 		setValue(db, variable);
 	}
 
@@ -63,6 +65,7 @@ class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
 			setType(linkage, newType);
 			setValue(db, var);
 			db.putByte(record + ANNOTATIONS, encodeFlags(var));
+			db.putShort(record + EXTENDED_BITS, var.getExtendedBits());
 		}
 	}
 
@@ -146,5 +149,15 @@ class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
 			return CPPVariableReadWriteFlags.getReadWriteFlags(name);
 		}
 		return 0;
+	}
+	
+	@Override
+	public short getExtendedBits() {
+		try {
+			return getDB().getShort(record + EXTENDED_BITS);
+		} catch (CoreException e) {
+			CCorePlugin.log(e);
+			return 0;
+		}
 	}
 }	

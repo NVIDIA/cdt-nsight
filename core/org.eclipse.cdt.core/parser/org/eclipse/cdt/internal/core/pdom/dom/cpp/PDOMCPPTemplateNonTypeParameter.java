@@ -222,4 +222,8 @@ class PDOMCPPTemplateNonTypeParameter extends PDOMCPPBinding implements IPDOMMem
 		return null;
 	}
 
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }

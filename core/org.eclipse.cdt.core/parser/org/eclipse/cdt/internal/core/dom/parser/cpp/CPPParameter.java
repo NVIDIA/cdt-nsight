@@ -25,6 +25,7 @@ import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IScope;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.IValue;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPParameterPackType;
@@ -288,5 +289,23 @@ public class CPPParameter extends PlatformObject implements ICPPParameter, ICPPI
 
 	public int getParameterPosition() {
 		return fPosition;
+	}
+	
+	@Override
+	public short getExtendedBits() {
+		IASTNode node= getPrimaryDeclaration();
+		while (node != null && !(node instanceof IASTFunctionDeclarator)) {
+			node= node.getParent();
+		}
+		if (node instanceof ICPPASTFunctionDeclarator) {
+			ICPPASTParameterDeclaration[] parameters = ((ICPPASTFunctionDeclarator) node).getParameters();
+			for (ICPPASTParameterDeclaration declaration : parameters) {
+				if (declaration.getDeclarator().getName().equals(getPrimaryDeclaration())) {
+					return declaration.getDeclSpecifier().getExtendedBits();
+				}
+			}
+
+		}
+		return 0;
 	}
 }

@@ -54,11 +54,13 @@ class PDOMCFunction extends PDOMBinding implements IFunction {
 	 */
 	private static final int ANNOTATIONS = FUNCTION_TYPE + Database.TYPE_SIZE; // byte
 	
+	private static final int EXTENDED_BITS = ANNOTATIONS + 1;
+	
 	/**
 	 * The size in bytes of a PDOMCPPFunction record in the database.
 	 */
 	@SuppressWarnings("hiding")
-	public static final int RECORD_SIZE = ANNOTATIONS + 1;
+	public static final int RECORD_SIZE = EXTENDED_BITS + 2;
 
 	public PDOMCFunction(PDOMLinkage linkage, long record) {
 		super(linkage, record);
@@ -205,5 +207,19 @@ class PDOMCFunction extends PDOMBinding implements IFunction {
 	@Override
 	public IScope getFunctionScope() {
 		return null;
+	}
+	
+	private short fExtendedBits = -1;
+	
+	@Override
+	public short getExtendedBits() {
+		if (fExtendedBits == -1) {
+			try {
+				fExtendedBits = getDB().getShort(EXTENDED_BITS);
+			} catch (CoreException e) {
+				fExtendedBits = 0;
+			}
+		}
+		return fExtendedBits;
 	}
 }

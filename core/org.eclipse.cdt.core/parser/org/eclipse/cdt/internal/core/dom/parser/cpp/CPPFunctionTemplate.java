@@ -394,4 +394,28 @@ public class CPPFunctionTemplate extends CPPTemplateDefinition
 		}
 		return null;
 	}
+	
+	@Override
+	public short getExtendedBits() {
+		IASTName name = (IASTName) getDefinition();
+		IASTNode[] ns = getDeclarations();
+		int i = -1;
+		do {
+			if (name != null) {
+				IASTNode parent = name.getParent();
+				while (parent != null && !(parent instanceof IASTDeclaration))
+					parent = parent.getParent();
+
+				IASTDeclSpecifier declSpec = getDeclSpecifier((IASTDeclaration) parent);
+				if (declSpec != null) {
+					return declSpec.getExtendedBits();
+				}
+			}
+			if (ns != null && ++i < ns.length)
+				name = (IASTName) ns[i];
+			else
+				break;
+		} while (name != null);
+		return 0;
+	}
 }

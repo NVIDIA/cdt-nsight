@@ -39,6 +39,7 @@ public class CASTDeclarator extends ASTAttributeOwner implements IASTDeclarator,
     private IASTDeclarator nestedDeclarator;
     private IASTPointerOperator[] pointerOps;
     private int pointerOpsPos= -1;
+	private short extendedBits;
 
     public CASTDeclarator() {
 	}
@@ -66,6 +67,7 @@ public class CASTDeclarator extends ASTAttributeOwner implements IASTDeclarator,
 		copy.setName(name == null ? null : name.copy(style));
 		copy.setInitializer(initializer == null ? null : initializer.copy(style));
 		copy.setNestedDeclarator(nestedDeclarator == null ? null : nestedDeclarator.copy(style));
+		copy.setExtendedBits(extendedBits);
 		for (IASTPointerOperator pointer : getPointerOperators()) {
 			copy.addPointerOperator(pointer == null ? null : pointer.copy(style));
 		}
@@ -242,5 +244,13 @@ public class CASTDeclarator extends ASTAttributeOwner implements IASTDeclarator,
             other.setParent(child.getParent());
             nestedDeclarator= (IASTDeclarator) other;
         }
+	}
+
+	public short getExtendedBits() {
+		return extendedBits;
+	}
+
+	public void setExtendedBits(short bits) {
+		extendedBits = bits;
 	}
 }

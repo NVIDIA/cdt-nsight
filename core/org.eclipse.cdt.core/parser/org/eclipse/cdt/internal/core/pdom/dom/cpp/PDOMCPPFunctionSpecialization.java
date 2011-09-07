@@ -63,19 +63,21 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 	
 	private static final int REQUIRED_ARG_COUNT_OFFSET= ANNOTATION_OFFSET + 2;
 
+	private static final int EXTENSION_BITS_OFFSET = REQUIRED_ARG_COUNT_OFFSET + 4;
 	/**
 	 * The size in bytes of a PDOMCPPFunction record in the database.
 	 */
 	@SuppressWarnings("hiding")
-	protected static final int RECORD_SIZE = REQUIRED_ARG_COUNT_OFFSET + 4;
+	protected static final int RECORD_SIZE = EXTENSION_BITS_OFFSET + 2;
 
 	private static final short ANNOT_PARAMETER_PACK = 8;
 	private static final short ANNOT_IS_DELETED = 9;
 
+
 	private ICPPFunctionType fType; // No need for volatile, all fields of ICPPFunctionTypes are final.
 	private short fAnnotation= -1;
 	private int fRequiredArgCount= -1;
-	
+
 	public PDOMCPPFunctionSpecialization(PDOMLinkage linkage, PDOMNode parent, ICPPFunction astFunction, PDOMBinding specialized) throws CoreException {
 		super(linkage, parent, (ICPPSpecialization) astFunction, specialized);
 		
@@ -113,6 +115,8 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 		}
 		fAnnotation = getAnnotation(astFunction);
 		db.putShort(record + ANNOTATION_OFFSET, fAnnotation);	
+		fExtendedBits = astFunction.getExtendedBits();
+		db.putShort(record + EXTENSION_BITS_OFFSET, fExtendedBits);
 		db.putInt(record + REQUIRED_ARG_COUNT_OFFSET, astFunction.getRequiredArgumentCount());
 		long typelist= 0;
 		if (astFunction instanceof ICPPMethod && ((ICPPMethod) astFunction).isImplicit()) {
@@ -299,5 +303,19 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 			CCorePlugin.log(e);
 			return null;
 		}
+	}
+
+	private short fExtendedBits = -1;
+	
+	@Override
+	public short getExtendedBits() {
+		if (fExtendedBits == -1) {
+			try {
+				fExtendedBits = getDB().getShort(record + EXTENSION_BITS_OFFSET);
+			} catch (CoreException e) {
+				fExtendedBits = 0;
+			}
+		}
+		return fExtendedBits;
 	}
 }

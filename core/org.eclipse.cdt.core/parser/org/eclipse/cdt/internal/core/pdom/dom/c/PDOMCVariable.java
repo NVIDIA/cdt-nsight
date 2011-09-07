@@ -49,12 +49,17 @@ class PDOMCVariable extends PDOMBinding implements IVariable {
 	 * record).
 	 */
 	private static final int ANNOTATIONS = VALUE_OFFSET + Database.VALUE_SIZE;
+
+	/**
+	 * Offset of "extra bits" (relative to the beginning of the record)
+	 */
+	private static final int EXTRA_BITS = ANNOTATIONS + 1;
 	
 	/**
 	 * The size in bytes of a PDOMCVariable record in the database.
 	 */
 	@SuppressWarnings("hiding")
-	protected static final int RECORD_SIZE = ANNOTATIONS + 1;
+	protected static final int RECORD_SIZE = EXTRA_BITS + 2;
 	
 	public PDOMCVariable(PDOMLinkage linkage, PDOMNode parent, IVariable variable) throws CoreException {
 		super(linkage, parent, variable.getNameCharArray());
@@ -63,6 +68,7 @@ class PDOMCVariable extends PDOMBinding implements IVariable {
 		linkage.storeType(record + TYPE_OFFSET, variable.getType());
 		linkage.storeValue(record + VALUE_OFFSET, variable.getInitialValue());
 		db.putByte(record + ANNOTATIONS, PDOMCAnnotation.encodeAnnotation(variable));
+		db.putShort(record + EXTRA_BITS, variable.getExtendedBits());
 	}
 
 	@Override
@@ -73,6 +79,7 @@ class PDOMCVariable extends PDOMBinding implements IVariable {
 			linkage.storeType(record + TYPE_OFFSET, var.getType());
 			linkage.storeValue(record + VALUE_OFFSET, var.getInitialValue());
 			db.putByte(record + ANNOTATIONS, PDOMCAnnotation.encodeAnnotation(var));
+			db.putShort(record + EXTRA_BITS, var.getExtendedBits());
 		}
 	}
 
@@ -136,5 +143,15 @@ class PDOMCVariable extends PDOMBinding implements IVariable {
 			return CVariableReadWriteFlags.getReadWriteFlags(name);
 		}
 		return 0;
+	}
+	
+	@Override
+	public short getExtendedBits() {
+		try {
+			return getDB().getShort(record + EXTRA_BITS);
+		} catch (CoreException e) {
+			CCorePlugin.log(e);
+			return 0;
+		}
 	}
 }

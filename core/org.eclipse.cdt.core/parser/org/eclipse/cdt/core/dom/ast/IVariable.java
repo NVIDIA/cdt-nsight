@@ -52,4 +52,9 @@ public interface IVariable extends IBinding {
 	 * Returns whether this variable is declared register.
 	 */
 	public boolean isRegister();
+	
+	/**
+	 * Language-specific attribute bits.
+	 */
+	public short getExtendedBits();
 }

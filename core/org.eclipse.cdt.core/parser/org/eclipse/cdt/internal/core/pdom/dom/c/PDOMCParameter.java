@@ -203,4 +203,9 @@ final class PDOMCParameter extends PDOMNamedNode implements IParameter, IPDOMBin
 	public boolean isStatic() {
 		return false;
 	}
+	
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }

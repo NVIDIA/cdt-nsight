@@ -75,12 +75,14 @@ class PDOMCPPFunction extends PDOMCPPBinding implements ICPPFunction, IPDOMOverl
 	private static final int ANNOTATION = EXCEPTION_SPEC + Database.PTR_SIZE; // short
 	
 	private static final int REQUIRED_ARG_COUNT = ANNOTATION + 2;
+	
+	private static final int EXTENDED_BITS = REQUIRED_ARG_COUNT + 4;
 
 	/**
 	 * The size in bytes of a PDOMCPPFunction record in the database.
 	 */
 	@SuppressWarnings("hiding")
-	protected static final int RECORD_SIZE = REQUIRED_ARG_COUNT + 4;
+	protected static final int RECORD_SIZE = EXTENDED_BITS + 2;
 
 	private short fAnnotation= -1;
 	private int fRequiredArgCount= -1;
@@ -93,6 +95,8 @@ class PDOMCPPFunction extends PDOMCPPBinding implements ICPPFunction, IPDOMOverl
 		getDB().putInt(record + SIGNATURE_HASH, sigHash != null ? sigHash.intValue() : 0);
 		db.putShort(record + ANNOTATION, getAnnotation(function));
 		db.putInt(record + REQUIRED_ARG_COUNT, function.getRequiredArgumentCount());
+		short extendedBits = function.getExtendedBits();
+		db.putShort(record + EXTENDED_BITS, extendedBits);
 		if (setTypes) {
 			initData(function.getType(), function.getParameters(), extractExceptionSpec(function));
 		}
@@ -168,6 +172,11 @@ class PDOMCPPFunction extends PDOMCPPBinding implements ICPPFunction, IPDOMOverl
 			
 			long oldRec = db.getRecPtr(record + EXCEPTION_SPEC);
 			storeExceptionSpec(extractExceptionSpec(func));
+			
+			short newBits = func.getExtendedBits();
+			db.putShort(record + EXTENDED_BITS, newBits);
+			fExtendedBits = newBits;
+			
 			if (oldRec != 0) {
 				PDOMCPPTypeList.clearTypes(this, oldRec);
 			}
@@ -394,5 +403,19 @@ class PDOMCPPFunction extends PDOMCPPBinding implements ICPPFunction, IPDOMOverl
 			CCorePlugin.log(e);
 			return null;
 		}
+	}
+
+	private short fExtendedBits = -1;
+	
+	@Override
+	public short getExtendedBits() {
+		if (fExtendedBits == -1) {
+			try {
+				fExtendedBits = getDB().getShort(record + EXTENDED_BITS);
+			} catch (CoreException e) {
+				fExtendedBits = 0;
+			}			
+		}
+		return fExtendedBits;
 	}
 }

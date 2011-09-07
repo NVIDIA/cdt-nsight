@@ -164,4 +164,9 @@ public class CPPLambdaExpressionParameter extends PlatformObject implements ICPP
 	public IValue getInitialValue() {
 		return null;
 	}
+	
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }

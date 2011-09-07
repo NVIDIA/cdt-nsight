@@ -24,6 +24,7 @@ public abstract class CASTBaseDeclSpecifier extends ASTNode implements ICASTDecl
     protected boolean isVolatile;
     protected boolean isRestrict;
     protected boolean isInline;
+    protected short extendedBits;
 
     
 	@Override
@@ -87,6 +88,18 @@ public abstract class CASTBaseDeclSpecifier extends ASTNode implements ICASTDecl
     	copy.isVolatile = isVolatile;
     	copy.isRestrict = isRestrict;
     	copy.isInline = isInline;
+    	copy.extendedBits = extendedBits;
     	copy.setOffsetAndLength(this);
+    }
+    
+    @Override
+	public void setExtendedBits(short extendedBits) {
+    	assertNotFrozen();
+		this.extendedBits = extendedBits;
+    }
+    
+    @Override
+	public short getExtendedBits() {
+    	return extendedBits;
     }
 }

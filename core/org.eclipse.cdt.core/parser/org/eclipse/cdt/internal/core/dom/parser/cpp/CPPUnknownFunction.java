@@ -121,4 +121,9 @@ public class CPPUnknownFunction extends CPPUnknownBinding implements ICPPFunctio
 	public boolean hasParameterPack() {
 		return false;
 	}
+	
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }

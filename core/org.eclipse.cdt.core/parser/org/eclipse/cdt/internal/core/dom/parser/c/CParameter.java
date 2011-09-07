@@ -189,4 +189,9 @@ public class CParameter extends PlatformObject implements IParameter {
 	public String toString() {
 		return getName();
 	}
+	
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }

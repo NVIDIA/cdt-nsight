@@ -172,4 +172,9 @@ class AutoTypeResolver implements ICPPFunctionTemplate {
 	public boolean isNoReturn() {
 		throw new UnsupportedOperationException(UNEXPECTED_CALL);
 	}
+
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }

@@ -97,4 +97,9 @@ public class CBuiltinParameter extends PlatformObject implements IParameter {
 	public IValue getInitialValue() {
 		return null;
 	}
+	
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }

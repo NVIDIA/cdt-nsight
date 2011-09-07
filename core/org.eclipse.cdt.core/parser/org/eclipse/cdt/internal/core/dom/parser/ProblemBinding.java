@@ -351,4 +351,7 @@ public class ProblemBinding extends PlatformObject implements IProblemBinding, I
 	public boolean isParameterPack() {
 		return false;
 	}
+	public short getExtendedBits() {
+		return 0;
+	}
 }

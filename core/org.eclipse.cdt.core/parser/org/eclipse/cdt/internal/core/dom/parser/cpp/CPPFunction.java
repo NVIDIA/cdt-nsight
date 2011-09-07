@@ -601,4 +601,37 @@ public class CPPFunction extends PlatformObject implements ICPPFunction, ICPPInt
 		ICPPASTFunctionDeclarator dtor = getPreferredDtor();
 		return dtor != null && AttributeUtil.hasNoreturnAttribute(dtor);
 	}
+	
+	@Override
+	public short getExtendedBits() {
+		resolveAllDeclarations();
+	    IASTDeclarator dtor = getDefinition();
+	    IASTNode[] ds = getDeclarations();
+
+        int i = -1;
+        do {
+            if (dtor != null) {
+                IASTNode parent = dtor.getParent();
+	            while (!(parent instanceof IASTDeclaration))
+	                parent = parent.getParent();
+	            
+	            IASTDeclSpecifier declSpec = null;
+	            if (parent instanceof IASTSimpleDeclaration) {
+	                declSpec = ((IASTSimpleDeclaration)parent).getDeclSpecifier();
+	            } else if (parent instanceof IASTFunctionDefinition) {
+	                declSpec = ((IASTFunctionDefinition)parent).getDeclSpecifier();
+	            }
+	            if (declSpec != null) {
+	            	return declSpec.getExtendedBits();
+	            }
+            }
+            if (ds != null && ++i < ds.length) {
+            	dtor = (IASTDeclarator) ds[i];
+            } else {
+                break;
+            }
+        } while (dtor != null);
+        return 0;
+	}
+
 }
