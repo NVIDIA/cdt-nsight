@@ -936,7 +936,7 @@ public class CSourceViewerConfiguration extends TextSourceViewerConfiguration {
         return conrolCreator;
     }
 
-	protected ILanguage getLanguage() {
+	public ILanguage getLanguage() {
 		if (fTextEditor == null) {
 			return GPPLanguage.getDefault();
 		}

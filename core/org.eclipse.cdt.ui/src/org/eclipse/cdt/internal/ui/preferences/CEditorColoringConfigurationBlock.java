@@ -17,7 +17,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.PixelConverter;
@@ -66,12 +72,13 @@ import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.cdt.ui.PreferenceConstants;
 import org.eclipse.cdt.ui.text.ICPartitions;
 import org.eclipse.cdt.ui.text.IColorManager;
+import org.eclipse.cdt.ui.text.IHighlightConfiguration;
 
 import org.eclipse.cdt.internal.ui.editor.CSourceViewer;
-import org.eclipse.cdt.internal.ui.editor.SemanticHighlighting;
 import org.eclipse.cdt.internal.ui.editor.SemanticHighlightingManager;
 import org.eclipse.cdt.internal.ui.editor.SemanticHighlightingManager.HighlightedRange;
 import org.eclipse.cdt.internal.ui.editor.SemanticHighlightings;
+import org.eclipse.cdt.internal.ui.preferences.OverlayPreferenceStore.TypeDescriptor;
 import org.eclipse.cdt.internal.ui.text.SimpleCSourceViewerConfiguration;
 import org.eclipse.cdt.internal.ui.text.util.CColorManager;
 
@@ -81,7 +88,7 @@ import org.eclipse.cdt.internal.ui.text.util.CColorManager;
  * @since 4.0
  */
 class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
-	
+
 	/**
 	 * Item in the highlighting color list.
 	 */
@@ -98,93 +105,122 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		private String fStrikethroughKey;
 		/** Underline preference key */
 		private String fUnderlineKey;
-		
+
 		/**
 		 * Initialize the item with the given values.
-		 * @param displayName the display name
-		 * @param colorKey the color preference key
-		 * @param boldKey the bold preference key
-		 * @param italicKey the italic preference key
-		 * @param strikethroughKey the strikethrough preference key
-		 * @param underlineKey the underline preference key
+		 * 
+		 * @param displayName
+		 *            the display name
+		 * @param colorKey
+		 *            the color preference key
+		 * @param boldKey
+		 *            the bold preference key
+		 * @param italicKey
+		 *            the italic preference key
+		 * @param strikethroughKey
+		 *            the strikethrough preference key
+		 * @param underlineKey
+		 *            the underline preference key
 		 */
-		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
-			fDisplayName= displayName;
-			fColorKey= colorKey;
-			fBoldKey= boldKey;
-			fItalicKey= italicKey;
-			fStrikethroughKey= strikethroughKey;
-			fUnderlineKey= underlineKey;
+		public HighlightingColorListItem(String displayName, String colorKey, String boldKey,
+				String italicKey, String strikethroughKey, String underlineKey) {
+			fDisplayName = displayName;
+			fColorKey = colorKey;
+			fBoldKey = boldKey;
+			fItalicKey = italicKey;
+			fStrikethroughKey = strikethroughKey;
+			fUnderlineKey = underlineKey;
 		}
-		
+
 		/**
 		 * @return the bold preference key
 		 */
 		public String getBoldKey() {
 			return fBoldKey;
 		}
-		
+
 		/**
 		 * @return the bold preference key
 		 */
 		public String getItalicKey() {
 			return fItalicKey;
 		}
-		
+
 		/**
 		 * @return the strikethrough preference key
 		 */
 		public String getStrikethroughKey() {
 			return fStrikethroughKey;
 		}
-		
+
 		/**
 		 * @return the underline preference key
 		 */
 		public String getUnderlineKey() {
 			return fUnderlineKey;
 		}
-		
+
 		/**
 		 * @return the color preference key
 		 */
 		public String getColorKey() {
 			return fColorKey;
 		}
-		
+
 		/**
 		 * @return the display name
 		 */
 		public String getDisplayName() {
 			return fDisplayName;
 		}
+		
+		public boolean isSemantic() {
+			return false;
+		}
 	}
-	
+
 	private static class SemanticHighlightingColorListItem extends HighlightingColorListItem {
-	
+
 		/** Enablement preference key */
 		private final String fEnableKey;
-		
+		/** <code>true</code> if this highlight is n/a when semantic highlighting is disabled **/
+		private boolean isSemantic;
+
 		/**
 		 * Initialize the item with the given values.
-		 * @param displayName the display name
-		 * @param colorKey the color preference key
-		 * @param boldKey the bold preference key
-		 * @param italicKey the italic preference key
-		 * @param strikethroughKey the strikethroughKey preference key
-		 * @param underlineKey the underlineKey preference key
-		 * @param enableKey the enable preference key
+		 * 
+		 * @param displayName
+		 *            the display name
+		 * @param colorKey
+		 *            the color preference key
+		 * @param boldKey
+		 *            the bold preference key
+		 * @param italicKey
+		 *            the italic preference key
+		 * @param strikethroughKey
+		 *            the strikethroughKey preference key
+		 * @param underlineKey
+		 *            the underlineKey preference key
+		 * @param enableKey
+		 *            the enable preference key
 		 */
-		public SemanticHighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey, String enableKey) {
+		public SemanticHighlightingColorListItem(String displayName, String colorKey, String boldKey,
+				String italicKey, String strikethroughKey, String underlineKey, String enableKey, boolean isSemantic) {
 			super(displayName, colorKey, boldKey, italicKey, strikethroughKey, underlineKey);
-			fEnableKey= enableKey;
+			fEnableKey = enableKey;
+			this.isSemantic = isSemantic;
 		}
-	
+
 		/**
 		 * @return the enablement preference key
 		 */
 		public String getEnableKey() {
 			return fEnableKey;
+		}
+		
+		@Override
+		public boolean isSemantic() {
+			return isSemantic;
 		}
 	}
 
@@ -199,7 +235,7 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		public String getText(Object element) {
 			if (element instanceof String)
 				return (String) element;
-			return ((HighlightingColorListItem)element).getDisplayName();
+			return ((HighlightingColorListItem) element).getDisplayName();
 		}
 
 		/*
@@ -215,8 +251,10 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		 */
 		@Override
 		public Color getForeground(Object element) {
-			if (element instanceof SemanticHighlightingColorListItem) {
-				if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)) {
+			if (element instanceof SemanticHighlightingColorListItem
+					&& ((SemanticHighlightingColorListItem) element).isSemantic()) {
+				if (!getPreferenceStore()
+						.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)) {
 					return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
 				}
 			}
@@ -228,24 +266,25 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * Color list content provider.
 	 */
 	private class ColorListContentProvider implements ITreeContentProvider {
-	
+
 		/*
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
 		@Override
 		public Object[] getElements(Object inputElement) {
-			return new String[] {fCodeCategory, fAssemblyCategory, fCommentsCategory, fPreprocessorCategory, fDoxygenCategory};
+			return categories.keySet().toArray();
 		}
-	
+
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
 		@Override
 		public void dispose() {
 		}
-	
+
 		/*
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
+		 * java.lang.Object, java.lang.Object)
 		 */
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -254,17 +293,11 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof String) {
-				String entry= (String) parentElement;
-				if (fCodeCategory.equals(entry))
-					return fListModel.subList(11, fListModel.size()).toArray();
-				if (fAssemblyCategory.equals(entry))
-					return fListModel.subList(6, 8).toArray();
-				if (fCommentsCategory.equals(entry))
-					return fListModel.subList(0, 3).toArray();
-				if (fPreprocessorCategory.equals(entry))
-					return fListModel.subList(3, 6).toArray();
-				if (fDoxygenCategory.equals(entry))
-					return fListModel.subList(8, 11).toArray();
+				String entry = (String) parentElement;
+				Collection<HighlightingColorListItem> entries = categories.get(entry);
+				if (entries != null) {
+					return entries.toArray();
+				}
 			}
 			return new Object[0];
 		}
@@ -273,16 +306,12 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		public Object getParent(Object element) {
 			if (element instanceof String)
 				return null;
-			int index= fListModel.indexOf(element);
-			if (index >= 11)
-				return fCodeCategory;
-			if (index >= 8)
-				return fDoxygenCategory;
-			if (index >= 6)
-				return fAssemblyCategory;
-			if (index >= 3)
-				return fPreprocessorCategory;
-			return fCommentsCategory;
+			for (Entry<String, Collection<HighlightingColorListItem>> entry : categories.entrySet()) {
+				if (entry.getValue().contains(element)) {
+					return entry.getKey();
+				}
+			}
+			return null;
 		}
 
 		@Override
@@ -294,20 +323,27 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	/**
 	 * Preference key suffix for bold preferences.
 	 */
-	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
+	private static final String BOLD = PreferenceConstants.EDITOR_BOLD_SUFFIX;
 	/**
 	 * Preference key suffix for italic preferences.
-	 */
-	private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
+	 *///	/**
+//	 * Highlighting informs what preference stores keep its settings.
+//	 * Semantic Highlighting Manager will watch all stores and 
+//	 * notify the highlighting when preferences change.
+//	 */
+//	IPreferenceStore getPreferenceStore();
+
+
+	private static final String ITALIC = PreferenceConstants.EDITOR_ITALIC_SUFFIX;
 	/**
 	 * Preference key suffix for strikethrough preferences.
 	 */
-	private static final String STRIKETHROUGH= PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
+	private static final String STRIKETHROUGH = PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
 	/**
 	 * Preference key suffix for underline preferences.
 	 */
-	private static final String UNDERLINE= PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
-	
+	private static final String UNDERLINE = PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
+
 	/**
 	 * The keys of the overlay store.
 	 */
@@ -357,10 +393,6 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private Button fUnderlineCheckBox;
 	/**
-	 * Highlighting color list
-	 */
-	private final java.util.List<HighlightingColorListItem> fListModel= new ArrayList<HighlightingColorListItem>();
-	/**
 	 * Highlighting color list viewer
 	 */
 	private StructuredViewer fListViewer;
@@ -381,62 +413,98 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private FontMetrics fFontMetrics;
 
+	/**
+	 * Highlightings per category collection
+	 */
+	private Map<String, Collection<HighlightingColorListItem>> categories = new TreeMap<String, Collection<HighlightingColorListItem>>();
+
 	public CEditorColoringConfigurationBlock(OverlayPreferenceStore store) {
 		super(store);
-		
-		fColorManager= new CColorManager(false);
-		
-		for (String[] element : fSyntaxColorListModel)
-			fListModel.add(new HighlightingColorListItem (
-					element[0],
-					element[1],
-					element[1] + BOLD,
-					element[1] + ITALIC,
-					element[1] + STRIKETHROUGH,
-					element[1] + UNDERLINE));
 
-		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
-		for (SemanticHighlighting semanticHighlighting : semanticHighlightings)
-			fListModel.add(
-					new SemanticHighlightingColorListItem(
-							semanticHighlighting.getDisplayName(),
-							SemanticHighlightings.getColorPreferenceKey(semanticHighlighting),
-							SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting),
-							SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting),
-							SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting),
-							SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting),
-							SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting)
-					));
-		
+		fColorManager = new CColorManager(false);
+
+		addToCategory(fCommentsCategory, 0, 3);
+		addToCategory(fPreprocessorCategory, 3, 6);
+		addToCategory(fAssemblyCategory, 6, 8);
+		addToCategory(fDoxygenCategory, 8, 11);
+		addToCategory(fCodeCategory, 11, fSyntaxColorListModel.length);
+
+		IHighlightConfiguration[] highlightings = SemanticHighlightings.getConfigurableHighlightings();
+		for (IHighlightConfiguration highlighting : highlightings) {
+			getOrCreateCategoryItemCollection(highlighting.getCategory()).add(toListItem(highlighting));
+		}
 		store.addKeys(createOverlayStoreKeys());
 	}
 
-	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		List<OverlayPreferenceStore.OverlayKey> overlayKeys= new ArrayList<OverlayPreferenceStore.OverlayKey>();
+	private static SemanticHighlightingColorListItem toListItem(IHighlightConfiguration semanticHighlighting) {
+		return new SemanticHighlightingColorListItem(semanticHighlighting.getDisplayName(),
+				semanticHighlighting.getColorPreferenceKey(), semanticHighlighting.getBoldPreferenceKey(),
+				semanticHighlighting.getItalicPreferenceKey(),
+				semanticHighlighting.getStrikethroughPreferenceKey(),
+				semanticHighlighting.getUnderlinePreferenceKey(),
+				semanticHighlighting.getEnabledPreferenceKey(), semanticHighlighting.isSemanticHighlighting());
+	}
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED));
-		
-		for (int i= 0, n= fListModel.size(); i < n; i++) {
-			HighlightingColorListItem item= fListModel.get(i);
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getBoldKey()));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getStrikethroughKey()));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getUnderlineKey()));
-			
-			if (item instanceof SemanticHighlightingColorListItem)
-				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ((SemanticHighlightingColorListItem) item).getEnableKey()));
+	private void addToCategory(String category, int from, int to) {
+		Collection<HighlightingColorListItem> items = getOrCreateCategoryItemCollection(category);
+		for (int i = from; i < to; i++) {
+			String[] element = fSyntaxColorListModel[i];
+			items.add(new HighlightingColorListItem(element[0], element[1], element[1] + BOLD, element[1]
+					+ ITALIC, element[1] + STRIKETHROUGH, element[1] + UNDERLINE));
 		}
-		
-		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
+	}
+
+	private Collection<HighlightingColorListItem> getOrCreateCategoryItemCollection(String category) {
+		Collection<HighlightingColorListItem> items = categories.get(category);
+		if (items == null) {
+			items = new TreeSet<CEditorColoringConfigurationBlock.HighlightingColorListItem>(
+					new Comparator<HighlightingColorListItem>() {
+						public int compare(HighlightingColorListItem o1, HighlightingColorListItem o2) {
+							return o1.getDisplayName().compareTo(o2.getDisplayName());
+						}
+					});
+			categories.put(category, items);
+		}
+		return items;
+	}
+
+	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
+		List<OverlayPreferenceStore.OverlayKey> overlayKeys = new ArrayList<OverlayPreferenceStore.OverlayKey>();
+
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN,
+				PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED));
+
+		for (Entry<String, Collection<HighlightingColorListItem>> entry : categories.entrySet()) {
+			for (HighlightingColorListItem item : entry.getValue()) {
+				addNonNullKey(overlayKeys, item.getColorKey(), OverlayPreferenceStore.STRING);
+				addNonNullKey(overlayKeys, item.getBoldKey(), OverlayPreferenceStore.BOOLEAN);
+				addNonNullKey(overlayKeys, item.getItalicKey(), OverlayPreferenceStore.STRING);
+				addNonNullKey(overlayKeys, item.getStrikethroughKey(), OverlayPreferenceStore.STRING);
+				addNonNullKey(overlayKeys, item.getUnderlineKey(), OverlayPreferenceStore.STRING);
+
+				if (item instanceof SemanticHighlightingColorListItem)
+					addNonNullKey(overlayKeys, ((SemanticHighlightingColorListItem) item).getEnableKey(),
+							OverlayPreferenceStore.BOOLEAN);
+			}
+		}
+
+		OverlayPreferenceStore.OverlayKey[] keys = new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
 		return keys;
+	}
+
+	private void addNonNullKey(List<OverlayPreferenceStore.OverlayKey> overlayKeys, String key,
+			TypeDescriptor type) {
+		if (key != null) {
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(type, key));
+		}
 	}
 
 	/**
 	 * Creates page for hover preferences.
 	 * 
-	 * @param parent the parent composite
+	 * @param parent
+	 *            the parent composite
 	 * @return the control for the preference page
 	 */
 	@Override
@@ -444,63 +512,59 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		initializeDialogUnits(parent);
 		return createSyntaxPage(parent);
 	}
-	
-	/**
-     * Returns the number of pixels corresponding to the width of the given
-     * number of characters.
-     * <p>
-     * This method may only be called after <code>initializeDialogUnits</code>
-     * has been called.
-     * </p>
-     * <p>
-     * Clients may call this framework method, but should not override it.
-     * </p>
-     * 
-     * @param chars
-     *            the number of characters
-     * @return the number of pixels
-     */
-    private int convertWidthInCharsToPixels(int chars) {
-        // test for failure to initialize for backward compatibility
-        if (fFontMetrics == null)
-            return 0;
-        return Dialog.convertWidthInCharsToPixels(fFontMetrics, chars);
-    }
 
 	/**
-     * Returns the number of pixels corresponding to the height of the given
-     * number of characters.
-     * <p>
-     * This method may only be called after <code>initializeDialogUnits</code>
-     * has been called.
-     * </p>
-     * <p>
-     * Clients may call this framework method, but should not override it.
-     * </p>
-     * 
-     * @param chars
-     *            the number of characters
-     * @return the number of pixels
-     */
-    private int convertHeightInCharsToPixels(int chars) {
-        // test for failure to initialize for backward compatibility
-        if (fFontMetrics == null)
-            return 0;
-        return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
-    }
-    
+	 * Returns the number of pixels corresponding to the width of the given number of characters.
+	 * <p>
+	 * This method may only be called after <code>initializeDialogUnits</code> has been called.
+	 * </p>
+	 * <p>
+	 * Clients may call this framework method, but should not override it.
+	 * </p>
+	 * 
+	 * @param chars
+	 *            the number of characters
+	 * @return the number of pixels
+	 */
+	private int convertWidthInCharsToPixels(int chars) {
+		// test for failure to initialize for backward compatibility
+		if (fFontMetrics == null)
+			return 0;
+		return Dialog.convertWidthInCharsToPixels(fFontMetrics, chars);
+	}
+
+	/**
+	 * Returns the number of pixels corresponding to the height of the given number of characters.
+	 * <p>
+	 * This method may only be called after <code>initializeDialogUnits</code> has been called.
+	 * </p>
+	 * <p>
+	 * Clients may call this framework method, but should not override it.
+	 * </p>
+	 * 
+	 * @param chars
+	 *            the number of characters
+	 * @return the number of pixels
+	 */
+	private int convertHeightInCharsToPixels(int chars) {
+		// test for failure to initialize for backward compatibility
+		if (fFontMetrics == null)
+			return 0;
+		return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
+	}
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
-		fListViewer.setInput(fListModel);
+
+		fListViewer.setInput(categories);
 		fListViewer.setSelection(new StructuredSelection(fCodeCategory));
 	}
 
 	@Override
 	public void performDefaults() {
 		super.performDefaults();
-		
+
 		fListViewer.refresh();
 
 		handleSyntaxColorListSelection();
@@ -523,7 +587,7 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	}
 
 	private void handleSyntaxColorListSelection() {
-		HighlightingColorListItem item= getHighlightingColorListItem();
+		HighlightingColorListItem item = getHighlightingColorListItem();
 		if (item == null) {
 			fEnableCheckbox.setEnabled(false);
 			fSyntaxForegroundColorEditor.getButton().setEnabled(false);
@@ -534,44 +598,52 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			fUnderlineCheckBox.setEnabled(false);
 			return;
 		}
-		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), item.getColorKey());
-		fSyntaxForegroundColorEditor.setColorValue(rgb);
-		fBoldCheckBox.setSelection(getPreferenceStore().getBoolean(item.getBoldKey()));
-		fItalicCheckBox.setSelection(getPreferenceStore().getBoolean(item.getItalicKey()));
-		fStrikethroughCheckBox.setSelection(getPreferenceStore().getBoolean(item.getStrikethroughKey()));
-		fUnderlineCheckBox.setSelection(getPreferenceStore().getBoolean(item.getUnderlineKey()));
+		boolean globalEnabled = true;
+		boolean enabled = true;
 		if (item instanceof SemanticHighlightingColorListItem) {
-			boolean semanticHighlightingEnabled= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
-			fEnableCheckbox.setEnabled(semanticHighlightingEnabled);
-			boolean enable= semanticHighlightingEnabled && getPreferenceStore().getBoolean(((SemanticHighlightingColorListItem) item).getEnableKey());
-			fEnableCheckbox.setSelection(enable);
-			fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
-			fColorEditorLabel.setEnabled(enable);
-			fBoldCheckBox.setEnabled(enable);
-			fItalicCheckBox.setEnabled(enable);
-			fStrikethroughCheckBox.setEnabled(enable);
-			fUnderlineCheckBox.setEnabled(enable);
+			globalEnabled = getPreferenceStore().getBoolean(
+					PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)
+					|| !item.isSemantic();
+			enabled = getPreferenceStore().getBoolean(
+							((SemanticHighlightingColorListItem) item).getEnableKey());
+			fEnableCheckbox.setEnabled(globalEnabled);
+			fEnableCheckbox.setSelection(enabled);
+			
+			enabled &= globalEnabled;
 		} else {
-			fSyntaxForegroundColorEditor.getButton().setEnabled(true);
-			fColorEditorLabel.setEnabled(true);
-			fBoldCheckBox.setEnabled(true);
-			fItalicCheckBox.setEnabled(true);
-			fStrikethroughCheckBox.setEnabled(true);
-			fUnderlineCheckBox.setEnabled(true);
 			fEnableCheckbox.setEnabled(false);
 			fEnableCheckbox.setSelection(true);
 		}
-	}
-	
-	private Control createSyntaxPage(final Composite parent) {
 		
-		Composite colorComposite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
+		String colorKey = item.getColorKey();
+		fSyntaxForegroundColorEditor.getButton().setEnabled(enabled && colorKey != null);
+		fColorEditorLabel.setEnabled(enabled && colorKey != null);
+		if (colorKey != null) {
+			RGB rgb = PreferenceConverter.getColor(getPreferenceStore(), colorKey);
+			fSyntaxForegroundColorEditor.setColorValue(rgb);
+		}
+		setCheckbox(fBoldCheckBox, enabled, item.getBoldKey());
+		setCheckbox(fItalicCheckBox, enabled, item.getItalicKey());
+		setCheckbox(fStrikethroughCheckBox, enabled, item.getStrikethroughKey());
+		setCheckbox(fUnderlineCheckBox, enabled, item.getUnderlineKey());
+	}
+
+	private void setCheckbox(Button checkBox, boolean enabled, String key) {
+		checkBox.setEnabled(enabled && key != null);
+		if (key != null) {
+			checkBox.setSelection(getPreferenceStore().getBoolean(key));
+		}
+	}
+
+	private Control createSyntaxPage(final Composite parent) {
+
+		Composite colorComposite = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
 		colorComposite.setLayout(layout);
 
-		Link link= new Link(colorComposite, SWT.NONE);
+		Link link = new Link(colorComposite, SWT.NONE);
 		link.setText(PreferencesMessages.CEditorColoringConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -581,34 +653,34 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		});
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-//		link.setToolTipText(PreferencesMessages.CEditorColoringConfigurationBlock_link_tooltip);
-		
-		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-		gridData.widthHint= 150; // only expand further if anyone else requires it
-		gridData.horizontalSpan= 2;
+		// link.setToolTipText(PreferencesMessages.CEditorColoringConfigurationBlock_link_tooltip);
+
+		GridData gridData = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gridData.widthHint = 150; // only expand further if anyone else requires it
+		gridData.horizontalSpan = 2;
 		link.setLayoutData(gridData);
 
 		addFiller(colorComposite, 1);
 
-		fEnableSemanticHighlightingCheckbox= addCheckBox(colorComposite,
+		fEnableSemanticHighlightingCheckbox = addCheckBox(colorComposite,
 				PreferencesMessages.CEditorColoringConfigurationBlock_enable_semantic_highlighting,
 				PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0);
-		
+
 		Label label;
-		label= new Label(colorComposite, SWT.LEFT);
+		label = new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.CEditorColoringConfigurationBlock_coloring_element);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	
-		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
+
+		Composite editorComposite = new Composite(colorComposite, SWT.NONE);
+		layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
 		editorComposite.setLayout(layout);
-		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		editorComposite.setLayoutData(gd);
-	
-		fListViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
+
+		fListViewer = new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
 		fListViewer.setLabelProvider(new ColorListLabelProvider());
 		fListViewer.setContentProvider(new ColorListContentProvider());
 		fListViewer.setSorter(new ViewerSorter() {
@@ -628,90 +700,92 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				return 0;
 			}
 		});
-		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
-		gd.heightHint= convertHeightInCharsToPixels(9);
-		int maxWidth= 0;
-		for (HighlightingColorListItem item : fListModel) {
-			maxWidth= Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
+		gd = new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
+		gd.heightHint = convertHeightInCharsToPixels(9);
+		int maxWidth = 0;
+		for (Entry<String, Collection<HighlightingColorListItem>> entry : categories.entrySet()) {
+			for (HighlightingColorListItem item : entry.getValue()) {
+				maxWidth = Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
+			}
 		}
-		ScrollBar vBar= ((Scrollable) fListViewer.getControl()).getVerticalBar();
+		ScrollBar vBar = ((Scrollable) fListViewer.getControl()).getVerticalBar();
 		if (vBar != null)
 			maxWidth += vBar.getSize().x * 3; // scrollbars and tree indentation guess
-		gd.widthHint= maxWidth;
-		
+		gd.widthHint = maxWidth;
+
 		fListViewer.getControl().setLayoutData(gd);
-		
-		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
+
+		Composite stylesComposite = new Composite(editorComposite, SWT.NONE);
+		layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.numColumns = 2;
 		stylesComposite.setLayout(layout);
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
+
+		fEnableCheckbox = new Button(stylesComposite, SWT.CHECK);
 		fEnableCheckbox.setText(PreferencesMessages.CEditorColoringConfigurationBlock_enable);
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		gd.horizontalSpan= 2;
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment = GridData.BEGINNING;
+		gd.horizontalSpan = 2;
 		fEnableCheckbox.setLayoutData(gd);
-		
-		fColorEditorLabel= new Label(stylesComposite, SWT.LEFT);
+
+		fColorEditorLabel = new Label(stylesComposite, SWT.LEFT);
 		fColorEditorLabel.setText(PreferencesMessages.CEditorColoringConfigurationBlock_color);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent = 20;
 		fColorEditorLabel.setLayoutData(gd);
-	
-		fSyntaxForegroundColorEditor= new ColorSelector(stylesComposite);
-		Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+
+		fSyntaxForegroundColorEditor = new ColorSelector(stylesComposite);
+		Button foregroundColorButton = fSyntaxForegroundColorEditor.getButton();
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		foregroundColorButton.setLayoutData(gd);
-		
-		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
+
+		fBoldCheckBox = new Button(stylesComposite, SWT.CHECK);
 		fBoldCheckBox.setText(PreferencesMessages.CEditorColoringConfigurationBlock_bold);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
-		gd.horizontalSpan= 2;
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent = 20;
+		gd.horizontalSpan = 2;
 		fBoldCheckBox.setLayoutData(gd);
-		
-		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
+
+		fItalicCheckBox = new Button(stylesComposite, SWT.CHECK);
 		fItalicCheckBox.setText(PreferencesMessages.CEditorColoringConfigurationBlock_italic);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
-		gd.horizontalSpan= 2;
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent = 20;
+		gd.horizontalSpan = 2;
 		fItalicCheckBox.setLayoutData(gd);
-		
-		fStrikethroughCheckBox= new Button(stylesComposite, SWT.CHECK);
+
+		fStrikethroughCheckBox = new Button(stylesComposite, SWT.CHECK);
 		fStrikethroughCheckBox.setText(PreferencesMessages.CEditorColoringConfigurationBlock_strikethrough);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
-		gd.horizontalSpan= 2;
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent = 20;
+		gd.horizontalSpan = 2;
 		fStrikethroughCheckBox.setLayoutData(gd);
-		
-		fUnderlineCheckBox= new Button(stylesComposite, SWT.CHECK);
+
+		fUnderlineCheckBox = new Button(stylesComposite, SWT.CHECK);
 		fUnderlineCheckBox.setText(PreferencesMessages.CEditorColoringConfigurationBlock_underline);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= 20;
-		gd.horizontalSpan= 2;
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent = 20;
+		gd.horizontalSpan = 2;
 		fUnderlineCheckBox.setLayoutData(gd);
-		
-		label= new Label(colorComposite, SWT.LEFT);
+
+		label = new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.CEditorColoringConfigurationBlock_preview);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
-		Control previewer= createPreviewer(colorComposite);
-		gd= new GridData(GridData.FILL_BOTH);
-		gd.widthHint= convertWidthInCharsToPixels(20);
-		gd.heightHint= convertHeightInCharsToPixels(5);
+
+		Control previewer = createPreviewer(colorComposite);
+		gd = new GridData(GridData.FILL_BOTH);
+		gd.widthHint = convertWidthInCharsToPixels(20);
+		gd.heightHint = convertHeightInCharsToPixels(5);
 		previewer.setLayoutData(gd);
-		
+
 		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSyntaxColorListSelection();
 			}
 		});
-		
+
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -719,11 +793,12 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			}
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HighlightingColorListItem item= getHighlightingColorListItem();
-				PreferenceConverter.setValue(getPreferenceStore(), item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
+				HighlightingColorListItem item = getHighlightingColorListItem();
+				PreferenceConverter.setValue(getPreferenceStore(), item.getColorKey(),
+						fSyntaxForegroundColorEditor.getColorValue());
 			}
 		});
-	
+
 		fBoldCheckBox.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -731,11 +806,11 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			}
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HighlightingColorListItem item= getHighlightingColorListItem();
+				HighlightingColorListItem item = getHighlightingColorListItem();
 				getPreferenceStore().setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
 			}
 		});
-				
+
 		fItalicCheckBox.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -743,7 +818,7 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			}
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HighlightingColorListItem item= getHighlightingColorListItem();
+				HighlightingColorListItem item = getHighlightingColorListItem();
 				getPreferenceStore().setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
 			}
 		});
@@ -754,11 +829,12 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			}
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HighlightingColorListItem item= getHighlightingColorListItem();
-				getPreferenceStore().setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
+				HighlightingColorListItem item = getHighlightingColorListItem();
+				getPreferenceStore().setValue(item.getStrikethroughKey(),
+						fStrikethroughCheckBox.getSelection());
 			}
 		});
-		
+
 		fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -766,11 +842,11 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			}
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HighlightingColorListItem item= getHighlightingColorListItem();
+				HighlightingColorListItem item = getHighlightingColorListItem();
 				getPreferenceStore().setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
 			}
 		});
-				
+
 		fEnableCheckbox.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -778,23 +854,24 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			}
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HighlightingColorListItem item= getHighlightingColorListItem();
+				HighlightingColorListItem item = getHighlightingColorListItem();
 				if (item instanceof SemanticHighlightingColorListItem) {
-					boolean enable= fEnableCheckbox.getSelection();
-					getPreferenceStore().setValue(((SemanticHighlightingColorListItem) item).getEnableKey(), enable);
+					boolean enable = fEnableCheckbox.getSelection();
+					getPreferenceStore().setValue(((SemanticHighlightingColorListItem) item).getEnableKey(),
+							enable);
 					fEnableCheckbox.setSelection(enable);
-					fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
-					fColorEditorLabel.setEnabled(enable);
-					fBoldCheckBox.setEnabled(enable);
-					fItalicCheckBox.setEnabled(enable);
-					fStrikethroughCheckBox.setEnabled(enable);
-					fUnderlineCheckBox.setEnabled(enable);
+					fSyntaxForegroundColorEditor.getButton().setEnabled(enable && item.getColorKey() != null);
+					fColorEditorLabel.setEnabled(enable && item.getColorKey() != null);
+					fBoldCheckBox.setEnabled(enable && item.getBoldKey() != null);
+					fItalicCheckBox.setEnabled(enable && item.getItalicKey() != null);
+					fStrikethroughCheckBox.setEnabled(enable && item.getStrikethroughKey() != null);
+					fUnderlineCheckBox.setEnabled(enable && item.getUnderlineKey() != null);
 					uninstallSemanticHighlighting();
 					installSemanticHighlighting();
 				}
 			}
 		});
-		
+
 		fEnableSemanticHighlightingCheckbox.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -803,7 +880,7 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fListViewer.refresh(true);
-				HighlightingColorListItem item= getHighlightingColorListItem();
+				HighlightingColorListItem item = getHighlightingColorListItem();
 				if (item instanceof SemanticHighlightingColorListItem) {
 					handleSyntaxColorListSelection();
 					uninstallSemanticHighlighting();
@@ -811,50 +888,54 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				}
 			}
 		});
-		
+
 		colorComposite.layout(false);
-				
+
 		return colorComposite;
 	}
 	
 	private void addFiller(Composite composite, int horizontalSpan) {
-		PixelConverter pixelConverter= new PixelConverter(composite);
-		Label filler= new Label(composite, SWT.LEFT );
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= horizontalSpan;
-		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
+		PixelConverter pixelConverter = new PixelConverter(composite);
+		Label filler = new Label(composite, SWT.LEFT);
+		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan = horizontalSpan;
+		gd.heightHint = pixelConverter.convertHeightInCharsToPixels(1) / 2;
 		filler.setLayoutData(gd);
 	}
 
 	private Control createPreviewer(Composite parent) {
-		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
-		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), generalTextStore });
-		fPreviewViewer = new CSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
-		SimpleCSourceViewerConfiguration configuration = new SimpleCSourceViewerConfiguration(fColorManager, store, null, ICPartitions.C_PARTITIONING, false);
+		IPreferenceStore generalTextStore = EditorsUI.getPreferenceStore();
+		IPreferenceStore store = new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(),
+				generalTextStore });
+		fPreviewViewer = new CSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL
+				| SWT.BORDER, store);
+		SimpleCSourceViewerConfiguration configuration = new SimpleCSourceViewerConfiguration(fColorManager,
+				store, null, ICPartitions.C_PARTITIONING, false);
 		fPreviewViewer.configure(configuration);
-		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
+		Font font = JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
 		CSourcePreviewerUpdater.registerPreviewer(fPreviewViewer, configuration, store);
 		fPreviewViewer.setEditable(false);
-		
-		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
-		IDocument document= new Document(content);
-		CUIPlugin.getDefault().getTextTools().setupCDocumentPartitioner(document, ICPartitions.C_PARTITIONING, null);
+
+		String content = loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
+		IDocument document = new Document(content);
+		CUIPlugin.getDefault().getTextTools()
+				.setupCDocumentPartitioner(document, ICPartitions.C_PARTITIONING, null);
 		fPreviewViewer.setDocument(document);
-	
+
 		installSemanticHighlighting();
-		
+
 		return fPreviewViewer.getControl();
 	}
 
 	private String loadPreviewContentFromFile(String filename) {
 		String line;
-		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
-		StringBuffer buffer= new StringBuffer(512);
-		BufferedReader reader= null;
+		String separator = System.getProperty("line.separator"); //$NON-NLS-1$
+		StringBuffer buffer = new StringBuffer(512);
+		BufferedReader reader = null;
 		try {
-			reader= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));
-			while ((line= reader.readLine()) != null) {
+			reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));
+			while ((line = reader.readLine()) != null) {
 				buffer.append(line);
 				buffer.append(separator);
 			}
@@ -862,7 +943,10 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			CUIPlugin.log(io);
 		} finally {
 			if (reader != null) {
-				try { reader.close(); } catch (IOException e) {}
+				try {
+					reader.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 		return buffer.toString();
@@ -873,8 +957,9 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private void installSemanticHighlighting() {
 		if (fSemanticHighlightingManager == null) {
-			fSemanticHighlightingManager= new SemanticHighlightingManager();
-			fSemanticHighlightingManager.install(fPreviewViewer, fColorManager, getPreferenceStore(), createPreviewerRanges());
+			fSemanticHighlightingManager = new SemanticHighlightingManager();
+			fSemanticHighlightingManager.install(fPreviewViewer, fColorManager, getPreferenceStore(),
+					createPreviewerRanges());
 		}
 	}
 
@@ -884,7 +969,7 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	private void uninstallSemanticHighlighting() {
 		if (fSemanticHighlightingManager != null) {
 			fSemanticHighlightingManager.uninstall();
-			fSemanticHighlightingManager= null;
+			fSemanticHighlightingManager = null;
 		}
 	}
 
@@ -895,55 +980,65 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
-			{ createHighlightedRange( 2,  8,  5, SemanticHighlightings.MACRO_DEFINITION) },
-			{ createHighlightedRange( 3, 16,  3, SemanticHighlightings.NAMESPACE) },
-			{ createHighlightedRange( 5, 21,  4, SemanticHighlightings.TYPEDEF) },
-			{ createHighlightedRange( 6, 11,  6, SemanticHighlightings.FUNCTION_DECLARATION),  createHighlightedRange( 6, 11,  6, SemanticHighlightings.FUNCTION) },
-			{ createHighlightedRange( 6, 18,  4, SemanticHighlightings.TYPEDEF) },
-			{ createHighlightedRange( 6, 23,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
-			{ createHighlightedRange( 7,  6,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
-			{ createHighlightedRange( 7, 22,  7, SemanticHighlightings.EXTERNAL_SDK), createHighlightedRange( 7, 22,  7, SemanticHighlightings.FUNCTION) },
-			{ createHighlightedRange( 7, 30,  6, SemanticHighlightings.GLOBAL_VARIABLE) },
-			{ createHighlightedRange( 8, 2,   4, SemanticHighlightings.GLOBAL_VARIABLE) },
-			{ createHighlightedRange( 8, 7,   2, SemanticHighlightings.OVERLOADED_OPERATOR) },
-			{ createHighlightedRange( 9,  9,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
-			{ createHighlightedRange(11,  6,  7, SemanticHighlightings.CLASS) },
-			{ createHighlightedRange(13,  7,  6, SemanticHighlightings.ENUM) },
-			{ createHighlightedRange(13, 16,  4, SemanticHighlightings.ENUMERATOR) },
-			{ createHighlightedRange(13, 22,  3, SemanticHighlightings.ENUMERATOR) },
-			{ createHighlightedRange(13, 27,  3, SemanticHighlightings.ENUMERATOR) },
-			{ createHighlightedRange(14, 14, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(13, 14, 11, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(15,  6,  5, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(16, 10,  6, SemanticHighlightings.ENUM) },
-			{ createHighlightedRange(16, 17,  7, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(15, 17,  7, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(17,  7,  6, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(16,  7,  6, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(17, 14,  6, SemanticHighlightings.ENUM) },
-			{ createHighlightedRange(17, 21,  1, SemanticHighlightings.PARAMETER_VARIABLE) },
-			{ createHighlightedRange(18,  8,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
-			{ createHighlightedRange(18, 20,  5, SemanticHighlightings.MACRO_REFERENCE) },
-			{ createHighlightedRange(19,  0,  5, SemanticHighlightings.LABEL) },
-			{ createHighlightedRange(19,  7,  6, SemanticHighlightings.FUNCTION) },
-			{ createHighlightedRange(19, 14,  5, SemanticHighlightings.LOCAL_VARIABLE) },
-			{ createHighlightedRange(20,  4,  7, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(21,  4, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(20,  4, 12, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(22,  4,  7, SemanticHighlightings.PROBLEM) },
-			{ createHighlightedRange(24, 14, 12, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(23, 14, 12, SemanticHighlightings.METHOD) },
-		};
+				{ createHighlightedRange(2, 8, 5, SemanticHighlightings.MACRO_DEFINITION) },
+				{ createHighlightedRange(3, 16, 3, SemanticHighlightings.NAMESPACE) },
+				{ createHighlightedRange(5, 21, 4, SemanticHighlightings.TYPEDEF) },
+				{ createHighlightedRange(6, 11, 6, SemanticHighlightings.FUNCTION_DECLARATION),
+						createHighlightedRange(6, 11, 6, SemanticHighlightings.FUNCTION) },
+				{ createHighlightedRange(6, 18, 4, SemanticHighlightings.TYPEDEF) },
+				{ createHighlightedRange(6, 23, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
+				{ createHighlightedRange(7, 6, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
+				{ createHighlightedRange(7, 22, 7, SemanticHighlightings.EXTERNAL_SDK),
+						createHighlightedRange(7, 22, 7, SemanticHighlightings.FUNCTION) },
+				{ createHighlightedRange(7, 30, 6, SemanticHighlightings.GLOBAL_VARIABLE) },
+				{ createHighlightedRange(8, 2, 4, SemanticHighlightings.GLOBAL_VARIABLE) },
+				{ createHighlightedRange(8, 7, 2, SemanticHighlightings.OVERLOADED_OPERATOR) },
+				{ createHighlightedRange(9, 9, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
+				{ createHighlightedRange(11, 6, 7, SemanticHighlightings.CLASS) },
+				{ createHighlightedRange(13, 7, 6, SemanticHighlightings.ENUM) },
+				{ createHighlightedRange(13, 16, 4, SemanticHighlightings.ENUMERATOR) },
+				{ createHighlightedRange(13, 22, 3, SemanticHighlightings.ENUMERATOR) },
+				{ createHighlightedRange(13, 27, 3, SemanticHighlightings.ENUMERATOR) },
+				{ createHighlightedRange(14, 14, 11, SemanticHighlightings.STATIC_FIELD),
+						createHighlightedRange(13, 14, 11, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange(15, 6, 5, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange(16, 10, 6, SemanticHighlightings.ENUM) },
+				{ createHighlightedRange(16, 17, 7, SemanticHighlightings.METHOD_DECLARATION),
+						createHighlightedRange(15, 17, 7, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(17, 7, 6, SemanticHighlightings.METHOD_DECLARATION),
+						createHighlightedRange(16, 7, 6, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(17, 14, 6, SemanticHighlightings.ENUM) },
+				{ createHighlightedRange(17, 21, 1, SemanticHighlightings.PARAMETER_VARIABLE) },
+				{ createHighlightedRange(18, 8, 5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
+				{ createHighlightedRange(18, 20, 5, SemanticHighlightings.MACRO_REFERENCE) },
+				{ createHighlightedRange(19, 0, 5, SemanticHighlightings.LABEL) },
+				{ createHighlightedRange(19, 7, 6, SemanticHighlightings.FUNCTION) },
+				{ createHighlightedRange(19, 14, 5, SemanticHighlightings.LOCAL_VARIABLE) },
+				{ createHighlightedRange(20, 4, 7, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(21, 4, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION),
+						createHighlightedRange(20, 4, 12, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(22, 4, 7, SemanticHighlightings.PROBLEM) },
+				{ createHighlightedRange(24, 14, 12, SemanticHighlightings.METHOD_DECLARATION),
+						createHighlightedRange(23, 14, 12, SemanticHighlightings.METHOD) }, };
 	}
 
 	/**
 	 * Create a highlighted range on the previewers document with the given line, column, length and key.
 	 * 
-	 * @param line the line
-	 * @param column the column
-	 * @param length the length
-	 * @param key the key
+	 * @param line
+	 *            the line
+	 * @param column
+	 *            the column
+	 * @param length
+	 *            the length
+	 * @param key
+	 *            the key
 	 * @return the highlighted range
 	 */
 	private HighlightedRange createHighlightedRange(int line, int column, int length, String key) {
 		try {
-			IDocument document= fPreviewViewer.getDocument();
-			int offset= document.getLineOffset(line) + column;
+			IDocument document = fPreviewViewer.getDocument();
+			int offset = document.getLineOffset(line) + column;
 			return new HighlightedRange(offset, length, key);
 		} catch (BadLocationException x) {
 			CUIPlugin.log(x);
@@ -957,29 +1052,27 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @return the current highlighting color list item
 	 */
 	private HighlightingColorListItem getHighlightingColorListItem() {
-		IStructuredSelection selection= (IStructuredSelection) fListViewer.getSelection();
-		Object element= selection.getFirstElement();
+		IStructuredSelection selection = (IStructuredSelection) fListViewer.getSelection();
+		Object element = selection.getFirstElement();
 		if (element instanceof String)
 			return null;
 		return (HighlightingColorListItem) element;
 	}
-	
+
 	/**
-     * Initializes the computation of horizontal and vertical dialog units based
-     * on the size of current font.
-     * <p>
-     * This method must be called before any of the dialog unit based conversion
-     * methods are called.
-     * </p>
-     * 
-     * @param testControl
-     *            a control from which to obtain the current font
-     */
-    private void initializeDialogUnits(Control testControl) {
-        // Compute and store a font metric
-        GC gc = new GC(testControl);
-        gc.setFont(JFaceResources.getDialogFont());
-        fFontMetrics = gc.getFontMetrics();
-        gc.dispose();
-    }
+	 * Initializes the computation of horizontal and vertical dialog units based on the size of current font.
+	 * <p>
+	 * This method must be called before any of the dialog unit based conversion methods are called.
+	 * </p>
+	 * 
+	 * @param testControl
+	 *            a control from which to obtain the current font
+	 */
+	private void initializeDialogUnits(Control testControl) {
+		// Compute and store a font metric
+		GC gc = new GC(testControl);
+		gc.setFont(JFaceResources.getDialogFont());
+		fFontMetrics = gc.getFontMetrics();
+		gc.dispose();
+	}
 }

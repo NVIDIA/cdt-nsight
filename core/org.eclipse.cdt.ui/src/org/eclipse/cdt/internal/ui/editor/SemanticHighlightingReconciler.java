@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *     Anton Leherbauer (Wind River Systems) - Adapted for CDT
  *     Markus Schorn (Wind River Systems)
+ *     Eugene Ostroukhov (NVIDIA) - Allow contributing highlightings through
+ *                                  extension point
  *******************************************************************************/
 package org.eclipse.cdt.internal.ui.editor;
 
@@ -44,6 +46,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.ui.CUIPlugin;
+import org.eclipse.cdt.ui.text.ISemanticHighlighting;
 
 import org.eclipse.cdt.internal.core.model.ASTCache;
 
@@ -169,7 +172,7 @@ public class SemanticHighlightingReconciler implements ICReconcilingListener {
 			boolean consumed= false;
 			fToken.update(node);
 			for (int i= 0, n= fJobSemanticHighlightings.length; i < n; ++i) {
-				SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
+				ISemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
 				if (fJobHighlightings[i].isEnabled() && semanticHighlighting.consumes(fToken)) {
 					if (node instanceof IASTName) {
 						addNameLocation((IASTName)node, fJobHighlightings[i]);
@@ -267,7 +270,7 @@ public class SemanticHighlightingReconciler implements ICReconcilingListener {
 	/** The semantic highlighting presenter */
 	protected SemanticHighlightingPresenter fPresenter;
 	/** Semantic highlightings */
-	protected SemanticHighlighting[] fSemanticHighlightings;
+	protected ISemanticHighlighting[] fSemanticHighlightings;
 	/** Highlightings */
 	private HighlightingStyle[] fHighlightings;
 
@@ -293,7 +296,7 @@ public class SemanticHighlightingReconciler implements ICReconcilingListener {
 	/** The semantic highlighting presenter - cache for background thread, only valid during {@link #reconciled(IASTTranslationUnit, boolean, IProgressMonitor)} */
 	protected SemanticHighlightingPresenter fJobPresenter;
 	/** Semantic highlightings - cache for background thread, only valid during {@link #reconciled(IASTTranslationUnit, boolean, IProgressMonitor)} */
-	protected SemanticHighlighting[] fJobSemanticHighlightings;
+	protected ISemanticHighlighting[] fJobSemanticHighlightings;
 	/** Highlightings - cache for background thread, only valid during {@link #reconciled(IASTTranslationUnit, boolean, IProgressMonitor)} */
 	private HighlightingStyle[] fJobHighlightings;
 
@@ -350,7 +353,7 @@ public class SemanticHighlightingReconciler implements ICReconcilingListener {
 
 	private boolean requiresImplicitNames() {
 		for (int i = 0; i < fSemanticHighlightings.length; i++) {
-			SemanticHighlighting sh = fSemanticHighlightings[i];
+			ISemanticHighlighting sh = fSemanticHighlightings[i];
 			if (sh.requiresImplicitNames() && fHighlightings[i].isEnabled()) {
 				return true;
 			}
@@ -439,7 +442,7 @@ public class SemanticHighlightingReconciler implements ICReconcilingListener {
 	 * @param semanticHighlightings the semantic highlightings
 	 * @param highlightings the highlightings
 	 */
-	public void install(CEditor editor, ISourceViewer sourceViewer, SemanticHighlightingPresenter presenter, SemanticHighlighting[] semanticHighlightings, HighlightingStyle[] highlightings) {
+	public void install(CEditor editor, ISourceViewer sourceViewer, SemanticHighlightingPresenter presenter, ISemanticHighlighting[] semanticHighlightings, HighlightingStyle[] highlightings) {
 		fPresenter= presenter;
 		fSemanticHighlightings= semanticHighlightings;
 		fHighlightings= highlightings;

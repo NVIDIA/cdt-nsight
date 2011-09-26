@@ -10,6 +10,8 @@
  *     Sergey Prigogin (Google)
  *     Anton Leherbauer (Wind River Systems)
  *     Markus Schorn (Wind River Systems)
+ *     Eugene Ostroukhov (NVIDIA) - implemented highlighting extension 
+ *                                  through extension point
  *******************************************************************************/
 package org.eclipse.cdt.internal.ui.editor;
 
@@ -49,6 +51,7 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.cdt.ui.CUIPlugin;
+import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.ui.PreferenceConstants;
 import org.eclipse.cdt.ui.text.CSourceViewerConfiguration;
 import org.eclipse.cdt.ui.text.ICColorConstants;
@@ -130,6 +133,11 @@ public class CSourceViewer extends ProjectionViewer implements IPropertyChangeLi
 	 * Flag indicating whether to use spaces exclusively for indentation.
 	 */
 	private boolean fUseSpaces;
+	
+	/**
+	 * Editor language
+	 */
+	private ILanguage fLanguage;
 
 	/**
      * Creates new source viewer. 
@@ -175,6 +183,7 @@ public class CSourceViewer extends ProjectionViewer implements IPropertyChangeLi
 
 		if (configuration instanceof CSourceViewerConfiguration) {
 			CSourceViewerConfiguration cConfiguration= (CSourceViewerConfiguration)configuration;
+			fLanguage = cConfiguration.getLanguage();
 			fOutlinePresenter= cConfiguration.getOutlinePresenter(this);
 			if (fOutlinePresenter != null)
 				fOutlinePresenter.install(this);
@@ -639,5 +648,9 @@ public class CSourceViewer extends ProjectionViewer implements IPropertyChangeLi
 				fBackgroundColor= null;
 			}
 		}
+	}
+
+	public ILanguage getLanguage() {
+		return fLanguage;
 	}
 }

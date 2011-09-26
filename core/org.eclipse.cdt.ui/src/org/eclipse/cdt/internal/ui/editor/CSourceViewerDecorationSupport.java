@@ -35,14 +35,6 @@ import org.eclipse.cdt.internal.ui.LineBackgroundPainter;
  * @since 4.0
  */
 public class CSourceViewerDecorationSupport extends SourceViewerDecorationSupport {
-
-	/** The key to use for the {@link LineBackgroundPainter} */
-	private static final String INACTIVE_CODE_KEY = "inactiveCode"; //$NON-NLS-1$
-
-	/** The preference key for the inactive code highlight color */
-	private String fInactiveCodeColorKey;
-	/** The preference key for the inactive code highlight enablement */
-	private String fInactiveCodeEnableKey;
 	/** The generic line background painter instance. */
 	private LineBackgroundPainter fLineBackgroundPainter;
 	/** The shared colors instance (duplicate of private base class member) */
@@ -58,7 +50,7 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 	/** The editor we are associated with */
 	private CEditor fEditor;
 	/** The inactive code highlighting */
-	private InactiveCodeHighlighting fInactiveCodeHighlighting;
+	private BackgroundHighlightingManager fBackgroundHighlighting;
 
 	/**
 	 * Inherited constructor.
@@ -103,28 +95,8 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 			}
 		} else if (p.equals(fCLPColorKey)) {
 			updateCLPColor();
-		} else if (p.equals(fInactiveCodeEnableKey)) {
-			if (isInactiveCodePositionsActive()) {
-				showInactiveCodePositions(true);
-			} else {
-				hideInactiveCodePositions();
-			}
-		} else if (p.equals(fInactiveCodeColorKey)) {
-			updateInactiveCodeColor();
 		}
 		super.handlePreferenceStoreChanged(event);
-	}
-
-	/**
-	 * Update the color for inactive code positions.
-	 */
-	private void updateInactiveCodeColor() {
-		if (fLineBackgroundPainter != null) {
-			fLineBackgroundPainter.setBackgroundColor(INACTIVE_CODE_KEY, getColor(fInactiveCodeColorKey));
-			if (isInactiveCodePositionsActive()) {
-				fLineBackgroundPainter.redraw();
-			}
-		}
 	}
 
 	/**
@@ -144,12 +116,8 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 	 */
 	private void hideCLP() {
 		if (fLineBackgroundPainter != null) {
-			if (!isInactiveCodePositionsActive()) {
-				uninstallLineBackgroundPainter();
-			} else {
-				fLineBackgroundPainter.enableCursorLine(false);
-				fLineBackgroundPainter.redraw();
-			}
+			fLineBackgroundPainter.enableCursorLine(false);
+			fLineBackgroundPainter.redraw();
 		}
 	}
 
@@ -170,16 +138,6 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 	private boolean isCLPActive() {
 		if (fPrefStore != null) {
 			return fPrefStore.getBoolean(fCLPEnableKey);
-		}
-		return false;
-	}
-
-	/**
-	 * @return true if inactive code highlighting is active.
-	 */
-	private boolean isInactiveCodePositionsActive() {
-		if (fPrefStore != null) {
-			return fPrefStore.getBoolean(fInactiveCodeEnableKey);
 		}
 		return false;
 	}
@@ -218,9 +176,7 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 		if (isCLPActive()) {
 			showCLP();
 		}
-		if (isInactiveCodePositionsActive()) {
-			showInactiveCodePositions(false);
-		}
+		initBackgroundHighlight(false);
 	}
 
 	/*
@@ -239,7 +195,6 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 		if (fLineBackgroundPainter == null) {
 			if (fViewer instanceof ITextViewerExtension2) {
 				fLineBackgroundPainter = new LineBackgroundPainter(fViewer);
-				fLineBackgroundPainter.setBackgroundColor(INACTIVE_CODE_KEY, getColor(fInactiveCodeColorKey));
 				fLineBackgroundPainter.setCursorLineColor(getColor(fCLPColorKey));
 				fLineBackgroundPainter.enableCursorLine(isCLPActive());
 				((ITextViewerExtension2)fViewer).addPainter(fLineBackgroundPainter);
@@ -252,9 +207,9 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 	 */
 	private void uninstallLineBackgroundPainter() {
 		if (fLineBackgroundPainter != null) {
-			if (fInactiveCodeHighlighting != null) {
-				fInactiveCodeHighlighting.uninstall();
-				fInactiveCodeHighlighting= null;
+			if (fBackgroundHighlighting != null) {
+				fBackgroundHighlighting.uninstall();
+				fBackgroundHighlighting= null;
 			}
 			if (fViewer instanceof ITextViewerExtension2) {
 				((ITextViewerExtension2)fViewer).removePainter(fLineBackgroundPainter);
@@ -270,28 +225,13 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 	 * 
 	 * @param refresh trigger a refresh of the positions
 	 */
-	private void showInactiveCodePositions(boolean refresh) {
+	private void initBackgroundHighlight(boolean refresh) {
 		installLineBackgroundPainter();
 		if (fLineBackgroundPainter != null) {
-			fInactiveCodeHighlighting= new InactiveCodeHighlighting(INACTIVE_CODE_KEY);
-			fInactiveCodeHighlighting.install(fEditor, fLineBackgroundPainter);
+			fBackgroundHighlighting= new BackgroundHighlightingManager();
+			fBackgroundHighlighting.install(fEditor, fLineBackgroundPainter);
 			if (refresh) {
-				fInactiveCodeHighlighting.refresh();
-			}
-		}
-	}
-
-	/**
-	 * Hide inactive code positions.
-	 */
-	private void hideInactiveCodePositions() {
-		if (fLineBackgroundPainter != null) {
-			if (fInactiveCodeHighlighting != null) {
-				fInactiveCodeHighlighting.uninstall();
-				fInactiveCodeHighlighting= null;
-			}
-			if (!isCLPActive()) {
-				uninstallLineBackgroundPainter();
+				fBackgroundHighlighting.refresh();
 			}
 		}
 	}
@@ -307,15 +247,4 @@ public class CSourceViewerDecorationSupport extends SourceViewerDecorationSuppor
 		fCLPColorKey = colorKey;
 		super.setCursorLinePainterPreferenceKeys(enableKey + "-overridden", colorKey); //$NON-NLS-1$
 	}
-
-	/**
-	 * Set the preference keys for the inactive code painter.
-	 * @param enableKey
-	 * @param colorKey
-	 */
-	public void setInactiveCodePainterPreferenceKeys(String enableKey, String colorKey) {
-		fInactiveCodeEnableKey = enableKey;
-		fInactiveCodeColorKey = colorKey;
-	}
-
 }

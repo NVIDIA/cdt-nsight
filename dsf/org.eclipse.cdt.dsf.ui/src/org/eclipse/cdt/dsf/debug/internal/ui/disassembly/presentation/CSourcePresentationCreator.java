@@ -85,7 +85,7 @@ public class CSourcePresentationCreator extends PresentationReconciler implement
 		 * @see org.eclipse.cdt.internal.ui.text.CSourceViewerConfiguration#getLanguage()
 		 */
 		@Override
-		protected ILanguage getLanguage() {
+		public ILanguage getLanguage() {
 			return fLanguage;
 		}
 

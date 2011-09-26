@@ -13,6 +13,8 @@
  *     Sergey Prigogin (Google)
  *     Axel Mueller - [289339] Surround with
  *     Tomasz Wesolowski - [320561] Override indicators
+ *     Eugene Ostroukhov (NVIDIA) - implemented highlighting extension 
+ *                                  through extension point
  *******************************************************************************/
 package org.eclipse.cdt.internal.ui.editor;
 
@@ -1353,10 +1355,6 @@ public class CEditor extends TextEditor implements ICEditor, ISelectionChangedLi
 	public static final String MATCHING_BRACKETS = "matchingBrackets"; //$NON-NLS-1$
 	/** Preference key for matching brackets color */
 	public static final String MATCHING_BRACKETS_COLOR = "matchingBracketsColor"; //$NON-NLS-1$
-	/** Preference key for inactive code painter enablement */
-	public static final String INACTIVE_CODE_ENABLE = "inactiveCodeEnable"; //$NON-NLS-1$
-	/** Preference key for inactive code painter color */
-	public static final String INACTIVE_CODE_COLOR = "inactiveCodeColor"; //$NON-NLS-1$
 	/** Preference key for automatically closing strings */
 	private static final String CLOSE_STRINGS = PreferenceConstants.EDITOR_CLOSE_STRINGS;
 	/** Preference key for automatically closing brackets and parenthesis */
@@ -1819,7 +1817,7 @@ public class CEditor extends TextEditor implements ICEditor, ISelectionChangedLi
 					return;
 				}
 
-				if (SemanticHighlightings.affectsEnablement(getPreferenceStore(), event)
+				if (SemanticHighlightings.affectsEnablement(getPreferenceStore(), event, asv.getLanguage())
 						|| (isEnableScalablilityMode() && PreferenceConstants.SCALABILITY_SEMANTIC_HIGHLIGHT.equals(property))) {
 					if (isSemanticHighlightingEnabled()) {
 						installSemanticHighlighting();
@@ -2657,7 +2655,6 @@ public class CEditor extends TextEditor implements ICEditor, ISelectionChangedLi
 		//Enhance the stock source viewer decorator with a bracket matcher
 		support.setCharacterPairMatcher(fBracketMatcher);
 		support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
-		((CSourceViewerDecorationSupport) support).setInactiveCodePainterPreferenceKeys(INACTIVE_CODE_ENABLE, INACTIVE_CODE_COLOR);
 	}
 
 	/**
@@ -3247,7 +3244,16 @@ public class CEditor extends TextEditor implements ICEditor, ISelectionChangedLi
 	 * @since 4.0
 	 */
 	protected boolean isSemanticHighlightingEnabled() {
-		return SemanticHighlightings.isEnabled(getPreferenceStore()) && !(isEnableScalablilityMode() && getPreferenceStore().getBoolean(PreferenceConstants.SCALABILITY_SEMANTIC_HIGHLIGHT));
+		return SemanticHighlightings.isEnabled(getPreferenceStore(), getLanguage()) && !(isEnableScalablilityMode() && getPreferenceStore().getBoolean(PreferenceConstants.SCALABILITY_SEMANTIC_HIGHLIGHT));
+	}
+
+	private ILanguage getLanguage() {
+		ISourceViewer sourceViewer = getSourceViewer();
+		if (sourceViewer instanceof CSourceViewer) {
+			return ((CSourceViewer) sourceViewer).getLanguage();
+		} else {
+			return null;
+		}
 	}
 
 	/**

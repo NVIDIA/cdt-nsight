@@ -29,6 +29,7 @@
    <extension-point id="LanguageSettingsProviderAssociation" name="%LanguageSettingsProviderAssociationExtensionPoint" schema="schema/LanguageSettingsProviderAssociation.exsd"/>
    <extension-point id="RefreshExclusionContributor" name="%extension-point.name" schema="schema/RefreshExclusionContributor.exsd"/>
    <extension-point id="projectTypePages" name="%projectTypePages" schema="schema/projectTypePages.exsd"/>
+   <extension-point id="semanticHighlighting" name="%semanticHighlighting.name" schema="schema/semanticHighlighting.exsd"/>
 
    <extension
          point="org.eclipse.core.runtime.adapters">
@@ -4572,6 +4573,16 @@
           id="org.eclipse.cdt.ui.ResourceExclusionContributor"
           name="%RefreshExclusionContributor.name">
     </exclusionContributor>
+ </extension>
+ <extension
+       point="org.eclipse.cdt.ui.semanticHighlighting">
+    <backgroundHighlighting
+          class="org.eclipse.cdt.internal.ui.editor.InactiveCodeHighlighting"
+          layer="1500">
+    </backgroundHighlighting>
+    <highlightConfiguration
+          class="org.eclipse.cdt.internal.ui.preferences.InactiveBackgroundConfiguration">
+    </highlightConfiguration>
  </extension>
 
 </plugin>
