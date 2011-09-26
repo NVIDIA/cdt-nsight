@@ -8,12 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Anton Leherbauer (Wind River Systems) - Adapted for CDT
+ *     Eugene Ostroukhov (NVIDIA) - Allow contributing highlightings through
+ *                                  extension point
  *******************************************************************************/
 
 package org.eclipse.cdt.internal.ui.editor;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -55,11 +56,16 @@ import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.index.IIndexBinding;
 import org.eclipse.cdt.core.index.IIndexFile;
 import org.eclipse.cdt.core.index.IIndexName;
+import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.cdt.ui.PreferenceConstants;
+import org.eclipse.cdt.ui.text.AbstractConfigurableHighlighting;
+import org.eclipse.cdt.ui.text.IHighlightConfiguration;
+import org.eclipse.cdt.ui.text.ISemanticHighlighting;
 
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPUnknownBinding;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.OverloadableOperator;
+
 
 /**
  * Semantic highlightings.
@@ -186,19 +192,20 @@ public class SemanticHighlightings {
 	 */
 	public static final String OVERLOADED_OPERATOR="overloadedOperator"; //$NON-NLS-1$
 	
-
-	/** Init debugging mode */
-	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.cdt.ui/debug/SemanticHighlighting"));  //$NON-NLS-1$//$NON-NLS-2$
-	
 	/**
 	 * Semantic highlightings
 	 */
-	private static SemanticHighlighting[] fgSemanticHighlightings;
+	private static AbstractConfigurableHighlighting[] fgSemanticHighlightings;
+	
+	/**
+	 * Registry of the per-language highlighters.
+	 */
+	private static final SemanticHighlightingRegistry fHRegistry = new SemanticHighlightingRegistry();
 
 	/**
 	 * Semantic highlighting for static fields.
 	 */
-	private static final class StaticFieldHighlighting extends SemanticHighlighting {
+	private static final class StaticFieldHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -271,7 +278,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for fields.
 	 */
-	private static final class FieldHighlighting extends SemanticHighlighting {
+	private static final class FieldHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -344,7 +351,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for method declarations.
 	 */
-	private static final class MethodDeclarationHighlighting extends SemanticHighlighting {
+	private static final class MethodDeclarationHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -443,7 +450,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for static method invocations.
 	 */
-	private static final class StaticMethodInvocationHighlighting extends SemanticHighlighting {
+	private static final class StaticMethodInvocationHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -519,7 +526,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for methods.
 	 */
-	private static final class MethodHighlighting extends SemanticHighlighting {
+	private static final class MethodHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -595,7 +602,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for function declarations.
 	 */
-	private static final class FunctionDeclarationHighlighting extends SemanticHighlighting {
+	private static final class FunctionDeclarationHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -689,7 +696,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for functions.
 	 */
-	private static final class FunctionHighlighting extends SemanticHighlighting {
+	private static final class FunctionHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -764,7 +771,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for local variable declarations.
 	 */
-	private static final class LocalVariableDeclarationHighlighting extends SemanticHighlighting {
+	private static final class LocalVariableDeclarationHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -847,7 +854,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for local variables.
 	 */
-	private static final class LocalVariableHighlighting extends SemanticHighlighting {
+	private static final class LocalVariableHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -945,7 +952,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for global variables.
 	 */
-	private static final class GlobalVariableHighlighting extends SemanticHighlighting {
+	private static final class GlobalVariableHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1030,7 +1037,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for parameter variables.
 	 */
-	private static final class ParameterVariableHighlighting extends SemanticHighlighting {
+	private static final class ParameterVariableHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1096,7 +1103,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for template parameters.
 	 */
-	private static final class TemplateParameterHighlighting extends SemanticHighlighting {
+	private static final class TemplateParameterHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1165,7 +1172,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for classes.
 	 */
-	private static final class ClassHighlighting extends SemanticHighlighting {
+	private static final class ClassHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1237,7 +1244,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for enums.
 	 */
-	private static final class EnumHighlighting extends SemanticHighlighting {
+	private static final class EnumHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1306,7 +1313,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for macro references.
 	 */
-	private static final class MacroReferenceHighlighting extends SemanticHighlighting {
+	private static final class MacroReferenceHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1375,7 +1382,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for macro definitions.
 	 */
-	private static final class MacroDefinitionHighlighting extends SemanticHighlighting {
+	private static final class MacroDefinitionHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1444,7 +1451,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for typedefs.
 	 */
-	private static final class TypedefHighlighting extends SemanticHighlighting {
+	private static final class TypedefHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1517,7 +1524,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for namespaces.
 	 */
-	private static final class NamespaceHighlighting extends SemanticHighlighting {
+	private static final class NamespaceHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1583,7 +1590,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for labels.
 	 */
-	private static final class LabelHighlighting extends SemanticHighlighting {
+	private static final class LabelHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1649,7 +1656,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for enumerators.
 	 */
-	private static final class EnumeratorHighlighting extends SemanticHighlighting {
+	private static final class EnumeratorHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1722,7 +1729,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for problems.
 	 */
-	private static final class ProblemHighlighting extends SemanticHighlighting {
+	private static final class ProblemHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1800,7 +1807,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for external SDK references.
 	 */
-	private static final class ExternalSDKHighlighting extends SemanticHighlighting {
+	private static final class ExternalSDKHighlighting extends AbstractConfigurableHighlighting {
 		
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1914,7 +1921,7 @@ public class SemanticHighlightings {
 	/**
 	 * Semantic highlighting for functions.
 	 */
-	private static final class OverloadedOperatorHighlighting extends SemanticHighlighting {
+	private static final class OverloadedOperatorHighlighting extends AbstractConfigurableHighlighting {
 
 		/*
 		 * @see org.eclipse.cdt.internal.ui.editor.SemanticHighlighting#getPreferenceKey()
@@ -1999,73 +2006,113 @@ public class SemanticHighlightings {
 			return false;
 		}
 	}
-	
-	/**
-	 * A named preference that controls the given semantic highlighting's color.
-	 *
-	 * @param semanticHighlighting the semantic highlighting
-	 * @return the color preference key
-	 */
-	public static String getColorPreferenceKey(SemanticHighlighting semanticHighlighting) {
-		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_COLOR_SUFFIX;
-	}
-
-	/**
-	 * A named preference that controls if the given semantic highlighting has the text attribute bold.
-	 *
-	 * @param semanticHighlighting the semantic highlighting
-	 * @return the bold preference key
-	 */
-	public static String getBoldPreferenceKey(SemanticHighlighting semanticHighlighting) {
-		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
-	}
-
-	/**
-	 * A named preference that controls if the given semantic highlighting has the text attribute italic.
-	 *
-	 * @param semanticHighlighting the semantic highlighting
-	 * @return the italic preference key
-	 */
-	public static String getItalicPreferenceKey(SemanticHighlighting semanticHighlighting) {
-		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
-	}
-
-	/**
-	 * A named preference that controls if the given semantic highlighting has the text attribute strikethrough.
-	 *
-	 * @param semanticHighlighting the semantic highlighting
-	 * @return the strikethrough preference key
-	 */
-	public static String getStrikethroughPreferenceKey(SemanticHighlighting semanticHighlighting) {
-		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
-	}
-
-	/**
-	 * A named preference that controls if the given semantic highlighting has the text attribute underline.
-	 *
-	 * @param semanticHighlighting the semantic highlighting
-	 * @return the underline preference key
-	 */
-	public static String getUnderlinePreferenceKey(SemanticHighlighting semanticHighlighting) {
-		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
-	}
-
-	/**
-	 * A named preference that controls if the given semantic highlighting is enabled.
-	 *
-	 * @param semanticHighlighting the semantic highlighting
-	 * @return the enabled preference key
-	 */
-	public static String getEnabledPreferenceKey(SemanticHighlighting semanticHighlighting) {
-		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
-	}
 
 	/**
 	 * @return The semantic highlightings, the order defines the precedence of matches, the first match wins.
 	 */
-	public static SemanticHighlighting[] getSemanticHighlightings() {
+	public static ISemanticHighlighting[] getSemanticHighlightings(ILanguage language) {
+		return fHRegistry.getHighlighters(language);
+	}
+
+	/**
+	 * Initialize default preferences in the given preference store.
+	 */
+	public static void initDefaults(IPreferenceStore store) {
+		store.setDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, true);
+
+		IHighlightConfiguration[] configurations= getConfigurableHighlightings();
+		for (IHighlightConfiguration configuration : configurations) {
+			setDefaults(configuration, store);
+		}
+	}
+
+	public final static void setDefaults(IHighlightConfiguration configuration, IPreferenceStore store) {
+		if (configuration.getColorPreferenceKey() != null) {
+			PreferenceConverter.setDefault(store, configuration.getColorPreferenceKey(),
+					configuration.getDefaultColor());
+		}
+		setIfKeyNonNull(store, configuration.getBoldPreferenceKey(), configuration.isBoldByDefault());
+		setIfKeyNonNull(store, configuration.getItalicPreferenceKey(), configuration.isItalicByDefault());
+		setIfKeyNonNull(store, configuration.getUnderlinePreferenceKey(),
+				configuration.isUnderlineByDefault());
+		setIfKeyNonNull(store, configuration.getStrikethroughPreferenceKey(),
+				configuration.isStrikethroughByDefault());
+		setIfKeyNonNull(store, configuration.getEnabledPreferenceKey(), configuration.isEnabledByDefault());
+	}
+
+	private static void setIfKeyNonNull(IPreferenceStore store, String key, boolean value) {
+		if (key != null) {
+			store.setDefault(key, value);
+		}
+	}
+	
+	/**
+	 * Tests whether <code>event</code> in <code>store</code> affects the
+	 * enablement of semantic highlighting.
+	 *
+	 * @param store the preference store where <code>event</code> was observed
+	 * @param event the property change under examination
+	 * @return <code>true</code> if <code>event</code> changed semantic
+	 *         highlighting enablement, <code>false</code> if it did not
+	 */
+	public static boolean affectsEnablement(IPreferenceStore store, PropertyChangeEvent event, ILanguage language) {
+		if (event.getProperty().equals(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)) {
+			return true;
+		}
+		ISemanticHighlighting affectedHighlighting = null;
+		ISemanticHighlighting[] highlightings= getSemanticHighlightings(language);
+		for (ISemanticHighlighting highlighting : highlightings) {
+			if (highlighting.affectsEnablement(event)){
+				affectedHighlighting = highlighting;
+				break;
+				
+			}
+		}
+		if (affectedHighlighting == null)
+			return false;
+
+		for (ISemanticHighlighting highlighting : highlightings) {
+			if (!highlighting.equals(affectedHighlighting) && highlighting.isEnabled()) {
+				return false;
+			}
+		}
+
+		// all others are disabled, so toggling relevantKey affects the enablement
+		return true;
+	}
+
+	/**
+	 * Tests whether semantic highlighting is currently enabled.
+	 *
+	 * @param store the preference store to consult
+	 * @return <code>true</code> if semantic highlighting is enabled,
+	 *         <code>false</code> if it is not
+	 */
+	public static boolean isEnabled(IPreferenceStore store, ILanguage language) {
+		if (!store.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)) {
+			return false;
+		}
+		ISemanticHighlighting[] highlightings= getSemanticHighlightings(language);
+		boolean enable= false;
+		for (ISemanticHighlighting highlighting : highlightings) {
+			if (highlighting.isEnabled()) {
+				enable= true;
+				break;
+			}
+		}
+
+		return enable;
+	}
+
+	/**
+	 * Do not instantiate
+	 */
+	private SemanticHighlightings() {
+	}
+
+	public static AbstractConfigurableHighlighting[] getBuiltinSemanticHighlightings() {
 		if (fgSemanticHighlightings == null)
-			fgSemanticHighlightings= new SemanticHighlighting[] {
+			fgSemanticHighlightings= new AbstractConfigurableHighlighting[] {
 				new MacroReferenceHighlighting(),  // before all others!
 				new ProblemHighlighting(),
 				new ExternalSDKHighlighting(),
@@ -2089,91 +2136,11 @@ public class SemanticHighlightings {
 				new NamespaceHighlighting(),
 				new LabelHighlighting(),
 				new EnumeratorHighlighting(),
-			};
+		};
 		return fgSemanticHighlightings;
 	}
 
-	/**
-	 * Initialize default preferences in the given preference store.
-	 * @param store The preference store
-	 */
-	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, true);
-
-		SemanticHighlighting[] semanticHighlightings= getSemanticHighlightings();
-		for (SemanticHighlighting semanticHighlighting : semanticHighlightings) {
-			store.setDefault(SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting), DEBUG || semanticHighlighting.isEnabledByDefault());
-			PreferenceConverter.setDefault(store, SemanticHighlightings.getColorPreferenceKey(semanticHighlighting), semanticHighlighting.getDefaultTextColor());
-			store.setDefault(SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting), semanticHighlighting.isBoldByDefault());
-			store.setDefault(SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting), semanticHighlighting.isItalicByDefault());
-			store.setDefault(SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting), semanticHighlighting.isStrikethroughByDefault());
-			store.setDefault(SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting), DEBUG || semanticHighlighting.isUnderlineByDefault());
-		}
-	}
-
-	/**
-	 * Tests whether <code>event</code> in <code>store</code> affects the
-	 * enablement of semantic highlighting.
-	 *
-	 * @param store the preference store where <code>event</code> was observed
-	 * @param event the property change under examination
-	 * @return <code>true</code> if <code>event</code> changed semantic
-	 *         highlighting enablement, <code>false</code> if it did not
-	 */
-	public static boolean affectsEnablement(IPreferenceStore store, PropertyChangeEvent event) {
-		if (event.getProperty().equals(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)) {
-			return true;
-		}
-		String relevantKey= null;
-		SemanticHighlighting[] highlightings= getSemanticHighlightings();
-		for (SemanticHighlighting highlighting : highlightings) {
-			if (event.getProperty().equals(getEnabledPreferenceKey(highlighting))) {
-				relevantKey= event.getProperty();
-				break;
-			}
-		}
-		if (relevantKey == null)
-			return false;
-
-		for (SemanticHighlighting highlighting : highlightings) {
-			String key= getEnabledPreferenceKey(highlighting);
-			if (key.equals(relevantKey))
-				continue;
-			if (store.getBoolean(key))
-				return false; // another is still enabled or was enabled before
-		}
-
-		// all others are disabled, so toggling relevantKey affects the enablement
-		return true;
-	}
-
-	/**
-	 * Tests whether semantic highlighting is currently enabled.
-	 *
-	 * @param store the preference store to consult
-	 * @return <code>true</code> if semantic highlighting is enabled,
-	 *         <code>false</code> if it is not
-	 */
-	public static boolean isEnabled(IPreferenceStore store) {
-		if (!store.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED)) {
-			return false;
-		}
-		SemanticHighlighting[] highlightings= getSemanticHighlightings();
-		boolean enable= false;
-		for (SemanticHighlighting highlighting : highlightings) {
-			String enabledKey= getEnabledPreferenceKey(highlighting);
-			if (store.getBoolean(enabledKey)) {
-				enable= true;
-				break;
-			}
-		}
-
-		return enable;
-	}
-
-	/**
-	 * Do not instantiate
-	 */
-	private SemanticHighlightings() {
+	public static IHighlightConfiguration[] getConfigurableHighlightings() {
+		return fHRegistry.getConfigurableHighlighters();
 	}
 }

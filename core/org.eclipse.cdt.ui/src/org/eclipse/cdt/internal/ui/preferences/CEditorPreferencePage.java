@@ -57,7 +57,6 @@ public class CEditorPreferencePage extends AbstractPreferencePage {
 
 	protected final String[][] fAppearanceColorListModel = new String[][] {
 			{PreferencesMessages.CEditorPreferencePage_behaviorPage_matchingBracketColor, CEditor.MATCHING_BRACKETS_COLOR, null },
-			{PreferencesMessages.CEditorPreferencePage_behaviorPage_inactiveCodeColor, CEditor.INACTIVE_CODE_COLOR, null },
 			{PreferencesMessages.CEditorPreferencePage_ContentAssistPage_completionProposalBackgroundColor, ContentAssistPreference.PROPOSALS_BACKGROUND, null },
 			{PreferencesMessages.CEditorPreferencePage_ContentAssistPage_completionProposalForegroundColor, ContentAssistPreference.PROPOSALS_FOREGROUND, null },
 			{PreferencesMessages.CEditorPreferencePage_ContentAssistPage_parameterBackgroundColor, ContentAssistPreference.PARAMETERS_BACKGROUND, null },
@@ -82,8 +81,6 @@ public class CEditorPreferencePage extends AbstractPreferencePage {
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUATE_TEMPORARY_PROBLEMS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CEditor.MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CEditor.MATCHING_BRACKETS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CEditor.INACTIVE_CODE_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CEditor.INACTIVE_CODE_ENABLE));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PROPOSALS_BACKGROUND));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PROPOSALS_FOREGROUND));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PARAMETERS_BACKGROUND));
@@ -101,9 +98,6 @@ public class CEditorPreferencePage extends AbstractPreferencePage {
 
 		store.setDefault(CEditor.MATCHING_BRACKETS, true);
 		PreferenceConverter.setDefault(store, CEditor.MATCHING_BRACKETS_COLOR, new RGB(170,170,170));
-
-		store.setDefault(CEditor.INACTIVE_CODE_ENABLE, true);
-		PreferenceConverter.setDefault(store, CEditor.INACTIVE_CODE_COLOR, new RGB(224, 224, 224));
 	}
 
 	/*
@@ -141,9 +135,6 @@ public class CEditorPreferencePage extends AbstractPreferencePage {
 
 		label = PreferencesMessages.CEditorPreferencePage_behaviorPage_matchingBrackets;
 		addCheckBox(behaviorComposite, label, CEditor.MATCHING_BRACKETS, 0);
-
-		label = PreferencesMessages.CEditorPreferencePage_behaviorPage_inactiveCode;
-		addCheckBox(behaviorComposite, label, CEditor.INACTIVE_CODE_ENABLE, 0);
 
 		Label l = new Label(behaviorComposite, SWT.LEFT);
 		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);

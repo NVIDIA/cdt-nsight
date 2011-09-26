@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.eclipse.cdt.ui" xmlns="http://www.w3.org/2001/XMLSchema">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.eclipse.cdt.ui" id="semanticHighlighting" name="C Source Editor Semantic Highlighting"/>
+      </appInfo>
+      <documentation>
+         This extension points allows plugins to extend CDT semantic highlightning support by contributing custom &quot;highlighters&quot;
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
+      <complexType>
+         <choice minOccurs="1" maxOccurs="unbounded">
+            <element ref="backgroundHighlighting"/>
+            <element ref="highlightConfiguration"/>
+            <element ref="highlighting"/>
+         </choice>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="highlighting">
+      <annotation>
+         <documentation>
+            This is a rule that colors tokens
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Class name impelmenting org.eclipse.cdt.ui.text.ISemanticHighlighting. Highlight will also be featured on &quot;Sytax Highlight&quot; preference page if it implements org.eclipse.cdt.ui.text.IHighlightConfiguration
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.cdt.ui.text.ISemanticHighlighting"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="language" type="string">
+            <annotation>
+               <documentation>
+                  This is optional language ID. Rules that specifically target particular language will be processed first when coloring the editor.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="identifier"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="backgroundHighlighting">
+      <annotation>
+         <documentation>
+            These highlighters color editor background
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.cdt.ui.text.IBackgroundHighlight"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="layer" type="string">
+            <annotation>
+               <documentation>
+                  Numeric layer. Highlighters with higher layer values will take precedence. CDT built-in highlighters will be in layers 1000 - 2000 so use values higher then 2000 to put your coloring behind built-in ones or less then 1000 to color in front of them. Order on the same layer is undefined. CDT will assume 1 if this value is not specified or is not a number.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="language" type="string">
+            <annotation>
+               <documentation>
+                  Optional language ID if this highlighting is to be used only with one language.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="identifier"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="highlightConfiguration">
+      <annotation>
+         <documentation>
+            This is a tree node on the Syntax highlight preference page.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.cdt.ui.text.IHighlightConfiguration"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         [Enter the first release in which this extension point appears.]
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         [Enter extension point usage example here.]
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiinfo"/>
+      </appInfo>
+      <documentation>
+         [Enter API information here.]
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         [Enter information about supplied implementation of this extension point.]
+      </documentation>
+   </annotation>
+
+
+</schema>
