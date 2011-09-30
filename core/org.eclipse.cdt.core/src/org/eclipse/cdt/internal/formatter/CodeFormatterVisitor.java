@@ -172,19 +172,19 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 		}
 	}
 
-	private static class ListOptions {
+	protected static class ListOptions {
 		final int fMode;
-		int fSeparatorToken = Token.tCOMMA;
-		boolean fSpaceBeforeSeparator;
-		boolean fSpaceAfterSeparator = true;
-		boolean fSpaceAfterOpeningParen;
-		boolean fSpaceBeforeClosingParen;
-		boolean fSpaceBetweenEmptyParen;
-		boolean fSpaceBeforeOpeningParen;
-		int fContinuationIndentation = -1;
-		int fTieBreakRule = Alignment.R_INNERMOST;
+		public int fSeparatorToken = Token.tCOMMA;
+		public boolean fSpaceBeforeSeparator;
+		public boolean fSpaceAfterSeparator = true;
+		public boolean fSpaceAfterOpeningParen;
+		public boolean fSpaceBeforeClosingParen;
+		public boolean fSpaceBetweenEmptyParen;
+		public boolean fSpaceBeforeOpeningParen;
+		public int fContinuationIndentation = -1;
+		public int fTieBreakRule = Alignment.R_INNERMOST;
 
-		ListOptions(int mode) {
+		public ListOptions(int mode) {
 			this.fMode = mode;
 		}
 	}
@@ -357,7 +357,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 
 	private final Scanner localScanner;
 	final DefaultCodeFormatterOptions preferences;
-	private final Scribe scribe;
+	protected final Scribe scribe;
 
 	private boolean fInsideFor;
 	private boolean fExpectSemicolonAfterDeclaration= true;
@@ -413,7 +413,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 	/**
 	 * @return the status collected during formatting
 	 */
-	IStatus getStatus() {
+	public IStatus getStatus() {
 		return fStatus;
 	}
 
@@ -2062,7 +2062,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 	 * @param tailFormatter formatter for the trailing text that should be kept together with
 	 * 		the last element of the list.
 	 */
-	private void formatList(List<? extends IASTNode> elements, ListOptions options,
+	protected void formatList(List<? extends IASTNode> elements, ListOptions options,
 			boolean encloseInParen, boolean addEllipsis, Runnable tailFormatter) {
 		if (encloseInParen)
 			scribe.printNextToken(Token.tLPAREN, options.fSpaceBeforeOpeningParen);
@@ -2307,7 +2307,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
     	scribe.exitAlignment(alignment, true);
 	}
 
-	private int visit(IASTFunctionCallExpression node) {
+	protected int visit(IASTFunctionCallExpression node) {
 		Runnable tailFormatter = scribe.takeTailFormatter();
 		try {
 			node.getFunctionNameExpression().accept(this);
@@ -2328,7 +2328,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 	 *
 	 * @param args  the argument expressions, may be <code>null</code>
 	 */
-	private void formatFunctionCallArguments(IASTInitializerClause[] args) {
+	protected void formatFunctionCallArguments(IASTInitializerClause[] args) {
 		// check for macro
 		if (peekNextToken() != Token.tLPAREN) {
 			if (args == null || args.length == 0 || enclosedInMacroExpansion(args[0])) {
@@ -3858,7 +3858,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 		return localScanner.getCurrentTokenStartPosition();
 	}
 
-	private void skipNode(IASTNode node) {
+	protected void skipNode(IASTNode node) {
 		final IASTNodeLocation fileLocation= node.getFileLocation();
 		if (fileLocation != null && fileLocation.getNodeLength() > 0) {
 			final int endOffset= fileLocation.getNodeOffset() + fileLocation.getNodeLength();
@@ -3983,7 +3983,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 		return false;
 	}
 
-	private static boolean enclosedInMacroExpansion(IASTNode node) {
+	protected static boolean enclosedInMacroExpansion(IASTNode node) {
 		IASTNodeLocation[] locations= node.getNodeLocations();
 		return locations.length == 1 && locations[0] instanceof IASTMacroExpansionLocation;
 	}
@@ -4240,7 +4240,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 		return token;
 	}
 
-	private int peekNextToken() {
+	protected int peekNextToken() {
 		return peekNextToken(false);
 	}
 
