@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.cdt.core" version="2">
+    <resource path="parser/org/eclipse/cdt/core/dom/rewrite/INodeWriter.java" type="org.eclipse.cdt.core.dom.rewrite.INodeWriter">
+        <filter id="643846161">
+            <message_arguments>
+                <message_argument value="NodeCommentMap"/>
+                <message_argument value="INodeWriter"/>
+                <message_argument value="write(IWritableNode, IScribe, ASTVisitor, NodeCommentMap)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
