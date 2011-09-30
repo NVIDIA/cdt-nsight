@@ -31,6 +31,8 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.gnu.IGNUASTCompoundStatementExpression;
+import org.eclipse.cdt.core.dom.rewrite.INodeWriter;
+import org.eclipse.cdt.core.dom.rewrite.IWritableNode;
 import org.eclipse.cdt.internal.core.dom.rewrite.ASTLiteralNode;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 
@@ -147,15 +149,30 @@ public class ASTWriterVisitor extends ASTVisitor {
 		}
 		writeLeadingComments(name);
 		if (!macroHandler.checkisMacroExpansionNode(name)) {
-			nameWriter.writeName(name);
+			if (!customWrite(name)) {
+				nameWriter.writeName(name);
+			}
 		}
 		return ASTVisitor.PROCESS_SKIP;
+	}
+
+	private boolean customWrite(IASTNode node) {
+		if (node instanceof IWritableNode) {
+			IWritableNode writableNode = (IWritableNode) node;
+			INodeWriter writer = writableNode.getWriter();
+			writer.write(writableNode, scribe, this, commentMap, macroHandler);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
 	public int visit(IASTDeclSpecifier declSpec) {
 		writeLeadingComments(declSpec);
-		declSpecWriter.writeDelcSpec(declSpec);
+		if (!customWrite(declSpec)) {
+			declSpecWriter.writeDelcSpec(declSpec);
+		}
 		return ASTVisitor.PROCESS_SKIP;
 	}
 
@@ -163,12 +180,14 @@ public class ASTWriterVisitor extends ASTVisitor {
 	public int visit(IASTExpression expression) {
 		writeLeadingComments(expression);
 		if (!macroHandler.checkisMacroExpansionNode(expression)) {
-			if (expression instanceof IGNUASTCompoundStatementExpression) {
-				IGNUASTCompoundStatementExpression gnuCompStmtExp =
-						(IGNUASTCompoundStatementExpression) expression;
-				gnuCompStmtExp.getCompoundStatement().accept(this);
-			} else {
-				expWriter.writeExpression(expression);
+			if (!customWrite(expression)) {
+                if (expression instanceof IGNUASTCompoundStatementExpression) {
+                    IGNUASTCompoundStatementExpression gnuCompStmtExp =
+                            (IGNUASTCompoundStatementExpression) expression;
+                    gnuCompStmtExp.getCompoundStatement().accept(this);
+                } else {
+                    expWriter.writeExpression(expression);
+				}
 			}
 		}
 		return ASTVisitor.PROCESS_SKIP;
@@ -178,17 +197,21 @@ public class ASTWriterVisitor extends ASTVisitor {
 	public int visit(IASTStatement statement) {
 		insertBlankLineIfNeeded(statement);
 		writeLeadingComments(statement);
-		try {
-			if (macroHandler.isStatementWithMixedLocation(statement) &&
-					!(statement instanceof IASTCompoundStatement)) {
-				return statementWriter.writeMixedStatement(statement);
-			}
-			if (macroHandler.checkisMacroExpansionNode(statement)) {
-				return ASTVisitor.PROCESS_SKIP;
-			}
-			return statementWriter.writeStatement(statement, true);
-		} finally {
-			setLeadingBlankLineFlags(statement);
+		if (!customWrite(statement)) {
+            try {
+                if (macroHandler.isStatementWithMixedLocation(statement) &&
+                        !(statement instanceof IASTCompoundStatement)) {
+                    return statementWriter.writeMixedStatement(statement);
+                }
+                if (macroHandler.checkisMacroExpansionNode(statement)) {
+                    return ASTVisitor.PROCESS_SKIP;
+                }
+                return statementWriter.writeStatement(statement, true);
+            } finally {
+                setLeadingBlankLineFlags(statement);
+            }
+		} else {
+			return ASTVisitor.PROCESS_SKIP; // Assuming that statement processed its children
 		}
 	}
 
@@ -197,8 +220,10 @@ public class ASTWriterVisitor extends ASTVisitor {
 		insertBlankLineIfNeeded(declaration);
 		writeLeadingComments(declaration);
 		if (!macroHandler.checkisMacroExpansionNode(declaration)) {
-			declarationWriter.writeDeclaration(declaration);
-			setLeadingBlankLineFlags(declaration);
+			if (!customWrite(declaration)) {
+				declarationWriter.writeDeclaration(declaration);
+                setLeadingBlankLineFlags(declaration);
+			}
 		}
 		return ASTVisitor.PROCESS_SKIP;
 	}
@@ -207,7 +232,9 @@ public class ASTWriterVisitor extends ASTVisitor {
 	public int visit(IASTDeclarator declarator) {
 		writeLeadingComments(declarator);
 		if (!macroHandler.checkisMacroExpansionNode(declarator)) {
-			declaratorWriter.writeDeclarator(declarator);
+			if (!customWrite(declarator)) {
+				declaratorWriter.writeDeclarator(declarator);
+			}
 		}
 		return ASTVisitor.PROCESS_SKIP;
 	}
@@ -215,7 +242,9 @@ public class ASTWriterVisitor extends ASTVisitor {
 	@Override
 	public int visit(IASTArrayModifier amod) {
 		if (!macroHandler.checkisMacroExpansionNode(amod)) {
-			declaratorWriter.writeArrayModifier(amod);
+			if (!customWrite(amod)) {
+				declaratorWriter.writeArrayModifier(amod);
+			}
 		}
 		return ASTVisitor.PROCESS_SKIP;
 	}
@@ -224,7 +253,9 @@ public class ASTWriterVisitor extends ASTVisitor {
 	public int visit(IASTInitializer initializer) {
 		writeLeadingComments(initializer);
 		if (!macroHandler.checkisMacroExpansionNode(initializer)) {
-			initializerWriter.writeInitializer(initializer);
+			if (!customWrite(initializer)) {
+				initializerWriter.writeInitializer(initializer);
+			}
 		}
 		return ASTVisitor.PROCESS_SKIP;
 	}
@@ -264,8 +295,10 @@ public class ASTWriterVisitor extends ASTVisitor {
 		insertBlankLineIfNeeded(namespace);
 		writeLeadingComments(namespace);
 		if (!macroHandler.checkisMacroExpansionNode(namespace)) {
-			declarationWriter.writeDeclaration(namespace);
-			setLeadingBlankLineFlags(namespace);
+			if (!customWrite(namespace)) {
+				declarationWriter.writeDeclaration(namespace);
+                setLeadingBlankLineFlags(namespace);
+			}
 		}
 		return ASTVisitor.PROCESS_SKIP;
 	}
@@ -274,7 +307,9 @@ public class ASTWriterVisitor extends ASTVisitor {
 	public int visit(ICPPASTTemplateParameter parameter) {
 		writeLeadingComments(parameter);
 		if (!macroHandler.checkisMacroExpansionNode(parameter)) {
-			tempParameterWriter.writeTemplateParameter(parameter);
+			if (!customWrite(parameter)) {
+				tempParameterWriter.writeTemplateParameter(parameter);
+			}
 		}
 		return ASTVisitor.PROCESS_SKIP;
 	}

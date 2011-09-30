@@ -39,6 +39,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleTypeConstructorExpression;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTypeIdExpression;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.gnu.cpp.IGPPASTBinaryExpression;
+import org.eclipse.cdt.core.dom.rewrite.IScribe;
 import org.eclipse.cdt.core.parser.Keywords;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 
@@ -116,12 +117,12 @@ public class ExpressionWriter extends NodeWriter{
 	private static final String THROW = "throw "; //$NON-NLS-1$
 	private final MacroExpansionHandler macroHandler;
 	
-	public ExpressionWriter(Scribe scribe, ASTWriterVisitor visitor, MacroExpansionHandler macroHandler, NodeCommentMap commentMap) {
+	public ExpressionWriter(IScribe scribe, ASTWriterVisitor visitor, MacroExpansionHandler macroHandler, NodeCommentMap commentMap) {
 		super(scribe, visitor, commentMap);
 		this.macroHandler = macroHandler;
 	}
 	
-	protected void writeExpression(IASTExpression expression) {
+	public void writeExpression(IASTExpression expression) {
 		if (expression instanceof IASTBinaryExpression) {
 			writeBinaryExpression((IASTBinaryExpression) expression);
 		} else if (expression instanceof IASTIdExpression) {

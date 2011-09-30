@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.rewrite.IScribe;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 
 /**
@@ -25,7 +26,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  */
 public class NodeWriter {
-	protected Scribe scribe;
+	protected IScribe scribe;
 	protected ASTWriterVisitor visitor;
 	protected NodeCommentMap commentMap;
 	protected static final String COMMA_SPACE = ", "; //$NON-NLS-1$
@@ -35,7 +36,7 @@ public class NodeWriter {
 	protected static final String COLON_COLON = "::"; //$NON-NLS-1$
 	protected static final String COLON_SPACE = ": "; //$NON-NLS-1$
 
-	public NodeWriter(Scribe scribe, ASTWriterVisitor visitor, NodeCommentMap commentMap) {
+	public NodeWriter(IScribe scribe, ASTWriterVisitor visitor, NodeCommentMap commentMap) {
 		super();
 		this.scribe = scribe;
 		this.visitor = visitor;

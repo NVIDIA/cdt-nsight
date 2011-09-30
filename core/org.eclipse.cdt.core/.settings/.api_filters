@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?><component id="org.eclipse.cdt.core" version="2">
     <resource path="model/org/eclipse/cdt/core/settings/model/ICDescriptionDelta.java" type="org.eclipse.cdt.core.settings.model.ICDescriptionDelta">
         <filter comment="Temporary filter to ignore added API restictions for interfaces that should be internal to begin with" id="403853384">
@@ -147,6 +148,15 @@
             <message_arguments>
                 <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
                 <message_argument value="shouldResourceBeRefreshed(IResource)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="parser/org/eclipse/cdt/core/dom/rewrite/INodeWriter.java" type="org.eclipse.cdt.core.dom.rewrite.INodeWriter">
+        <filter id="643846161">
+            <message_arguments>
+                <message_argument value="NodeCommentMap"/>
+                <message_argument value="INodeWriter"/>
+                <message_argument value="write(IWritableNode, IScribe, ASTVisitor, NodeCommentMap)"/>
             </message_arguments>
         </filter>
     </resource>

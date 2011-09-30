@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.rewrite.astwriter;
 
+import org.eclipse.cdt.core.dom.rewrite.IScribe;
+
 /**
  * This class is responsible for the string concatenation and the management of
  * the indentations.
@@ -19,7 +21,7 @@ package org.eclipse.cdt.internal.core.dom.rewrite.astwriter;
  * @since 5.0
  * @author Emanuel Graf IFS
  */
-public class Scribe {
+public class Scribe implements IScribe {
 	// Indentation is not necessary since the code is going to be formatted anyway.
 	// Preserved because some tests depend on it.
 	private static final int INDENTATION_SIZE = 4;
@@ -154,11 +156,11 @@ public class Scribe {
 		}
 	}
 
-	protected void noNewLines() {
+	public void noNewLines() {
 		skipLineBreaks = true;
 	}
 
-	protected void newLines() {
+	public void newLines() {
 		skipLineBreaks = false;
 	}
 
