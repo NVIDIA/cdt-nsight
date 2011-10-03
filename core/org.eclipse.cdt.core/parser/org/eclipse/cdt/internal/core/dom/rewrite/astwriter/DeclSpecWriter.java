@@ -32,6 +32,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTElaboratedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTSimpleDeclSpecifier;
+import org.eclipse.cdt.core.dom.rewrite.IScribe;
 import org.eclipse.cdt.core.parser.Keywords;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 
@@ -61,12 +62,12 @@ public class DeclSpecWriter extends NodeWriter {
 	private static final String ENUM = "enum "; //$NON-NLS-1$
 	private static final String _BOOL = "_Bool"; //$NON-NLS-1$
 	
-	public DeclSpecWriter(Scribe scribe, ASTWriterVisitor visitor, NodeCommentMap commentMap) {
+	public DeclSpecWriter(IScribe scribe, ASTWriterVisitor visitor, NodeCommentMap commentMap) {
 		super(scribe, visitor, commentMap);
 	}
 
-	protected void writeDelcSpec(IASTDeclSpecifier declSpec) {
-		// Write general DelcSpec Keywords
+	public void writeDelcSpec(IASTDeclSpecifier declSpec) {
+//		Write general DelcSpec Keywords
 		writeDeclSpec(declSpec);
 		if (declSpec instanceof ICPPASTDeclSpecifier) {
 			writeCPPDeclSpec((ICPPASTDeclSpecifier) declSpec);
@@ -319,7 +320,7 @@ public class DeclSpecWriter extends NodeWriter {
 		}
 	}
 
-	private void writeDeclSpec(IASTDeclSpecifier declSpec) {
+	protected void writeDeclSpec(IASTDeclSpecifier declSpec) {
 		if (declSpec.isInline()) {
 			scribe.print(INLINE);
 		}
