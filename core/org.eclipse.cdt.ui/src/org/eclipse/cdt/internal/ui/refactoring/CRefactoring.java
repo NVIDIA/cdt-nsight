@@ -68,14 +68,20 @@ import org.eclipse.cdt.internal.ui.refactoring.utils.SelectionHelper;
  */
 public abstract class CRefactoring extends Refactoring {
 	protected String name = Messages.Refactoring_name; 
-	protected final ICProject project;
-	protected final ITranslationUnit tu;
+	protected ICProject project;
+	protected ITranslationUnit tu;
 	protected Region selectedRegion;
-	protected final RefactoringStatus initStatus;
+	protected RefactoringStatus initStatus;
 	protected CRefactoringContext refactoringContext;
 	private ModificationCollector modificationCollector;
 
+	public CRefactoring() {}
+	
 	public CRefactoring(ICElement element, ISelection selection, ICProject project) {
+		baseInit(element, selection, project);
+	}
+
+	protected final void baseInit(ICElement element, ISelection selection, ICProject project) {
 		this.project = project;
 		this.initStatus= new RefactoringStatus();
 		if (!(element instanceof ISourceReference)) {

@@ -12,11 +12,17 @@
  *******************************************************************************/
 package org.eclipse.cdt.internal.ui.refactoring.extractfunction;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.IShellProvider;
 
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.core.model.ILanguage;
+import org.eclipse.cdt.core.model.LanguageManager;
+import org.eclipse.cdt.ui.CUIPlugin;
 
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringSaveHelper;
@@ -33,9 +39,27 @@ public class ExtractFunctionRefactoringRunner extends RefactoringRunner  {
 
 	@Override
 	public void run() {
-		ExtractFunctionRefactoring refactoring =
-				new ExtractFunctionRefactoring(element, selection, project);
-		ExtractFunctionWizard wizard = new ExtractFunctionWizard(refactoring);
-		run(wizard, refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+		ILanguage language = null;
+		IFile resource = (IFile) element.getAdapter(IFile.class);
+		if (resource != null && resource.getType() == IResource.FILE) {
+			try {
+				language = LanguageManager.getInstance().getLanguageForFile(resource, null);
+			} catch (CoreException e1) {
+				CUIPlugin.log(e1);
+			}
+		}
+
+		ExtractFunctionRefactoring refactoring;
+		try {
+			refactoring = (ExtractFunctionRefactoring) RefactoringsRegistry.getLanguageDelegate(language,
+					RefactoringsRegistry.EXTRACT_FUNCTION);
+			if (refactoring != null) {
+				refactoring.init(element, selection, project);
+				ExtractFunctionWizard wizard = new ExtractFunctionWizard(refactoring);
+				run(wizard, refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+			}
+		} catch (CoreException e) {
+			CUIPlugin.log(e);
+		}
 	}
 }

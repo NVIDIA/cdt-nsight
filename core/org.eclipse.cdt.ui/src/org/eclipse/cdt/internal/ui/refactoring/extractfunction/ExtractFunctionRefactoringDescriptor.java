@@ -20,6 +20,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.core.model.ITranslationUnit;
 
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoringDescriptor;
@@ -43,12 +44,15 @@ public class ExtractFunctionRefactoringDescriptor extends CRefactoringDescriptor
 	public CRefactoring createRefactoring(RefactoringStatus status) throws CoreException {
 		ISelection selection = getSelection();
 		ICProject project = getCProject();
-		ExtractFunctionRefactoring refactoring =
-				new ExtractFunctionRefactoring(getTranslationUnit(), selection, project);
-		ExtractFunctionInformation info = refactoring.getRefactoringInfo();
-		info.setMethodName(arguments.get(NAME));
-		info.setVisibility(VisibilityEnum.getEnumForStringRepresentation(arguments.get(VISIBILITY)));
-		info.setReplaceDuplicates(Boolean.parseBoolean(arguments.get(REPLACE_DUPLICATES)));
+		ITranslationUnit tu = getTranslationUnit();
+		ExtractFunctionRefactoring refactoring = (ExtractFunctionRefactoring) RefactoringsRegistry.getLanguageDelegate(tu.getLanguage(), RefactoringsRegistry.EXTRACT_FUNCTION);
+		if (refactoring != null) {
+			refactoring.init(tu, selection, project);
+			ExtractFunctionInformation info = refactoring.getRefactoringInfo();
+			info.setMethodName(arguments.get(NAME));
+			info.setVisibility(VisibilityEnum.getEnumForStringRepresentation(arguments.get(VISIBILITY)));
+			info.setReplaceDuplicates(Boolean.parseBoolean(arguments.get(REPLACE_DUPLICATES)));
+		}
 		return refactoring;
 	}
 }

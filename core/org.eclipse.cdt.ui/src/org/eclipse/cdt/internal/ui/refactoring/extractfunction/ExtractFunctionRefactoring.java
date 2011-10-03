@@ -130,8 +130,8 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 	static final Integer NULL_INTEGER = Integer.valueOf(0);
 	static final char[] ZERO= "0".toCharArray(); //$NON-NLS-1$
 
-	private NodeContainer container;
-	final ExtractFunctionInformation info;
+	protected NodeContainer container;
+	protected ExtractFunctionInformation info;
 
 	final Map<String, Integer> names;
 	final Container<Integer> namesCounter;
@@ -147,14 +147,22 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 	private IIndex index;
 	private IASTTranslationUnit ast;
 
-	public ExtractFunctionRefactoring(ICElement element, ISelection selection, ICProject project) {
-		super(element, selection, project);
-		info = new ExtractFunctionInformation();
+	public ExtractFunctionRefactoring() {
 		name = Messages.ExtractFunctionRefactoring_ExtractFunction;
 		names = new HashMap<String, Integer>();
 		namesCounter = new Container<Integer>(NULL_INTEGER);
 		trailPos = new Container<Integer>(NULL_INTEGER);
 		returnNumber = new Container<Integer>(NULL_INTEGER);
+	}
+	
+	public ExtractFunctionRefactoring(ICElement element, ISelection selection, ICProject project) {
+		this();
+		init(element, selection, project);
+	}
+	
+	public final void init(ICElement element, ISelection selection, ICProject project) {
+		baseInit(element, selection, project);
+		info = new ExtractFunctionInformation();
 		formattingOptions = new DefaultCodeFormatterOptions(project.getOptions(true));
 	}
 
@@ -197,7 +205,7 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 			if (initStatus.hasFatalError())
 				return initStatus;
 
-			extractor =	FunctionExtractor.createFor(container.getNodesToWrite());
+			extractor =	createFunctionConstructionHelper(container.getNodesToWrite());
 
 			if (extractor.canChooseReturnValue() && info.getMandatoryReturnVariable() == null) {
 				chooseReturnVariable();
@@ -222,6 +230,10 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 		}
 	}
 
+	protected FunctionExtractor createFunctionConstructionHelper(List<IASTNode> nodes) {
+		return FunctionExtractor.createFor(nodes);
+	}
+	
 	private void chooseReturnVariable() {
 		NameInformation candidate = null;
 		for (NameInformation param : info.getParameters()) {
@@ -675,7 +687,7 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 		return new CPPASTName(declaration.toCharArray());
 	}
 
-	private IASTDeclSpecifier getReturnType() {
+	protected IASTDeclSpecifier getReturnType() {
 		IASTNode firstNodeToWrite = container.getNodesToWrite().get(0);
 		NameInformation returnVariable = info.getReturnVariable();
 		return extractor.determineReturnType(firstNodeToWrite,

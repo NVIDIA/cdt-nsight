@@ -69,7 +69,7 @@ public abstract class FunctionExtractor {
 		return false;
 	}
 
-	IASTStandardFunctionDeclarator createFunctionDeclarator(IASTName name,
+	protected IASTStandardFunctionDeclarator createFunctionDeclarator(IASTName name,
 			IASTStandardFunctionDeclarator functionDeclarator, NameInformation returnVariable,
 			List<IASTNode> nodesToWrite, Collection<NameInformation> allUsedNames,
 			INodeFactory nodeFactory) {
