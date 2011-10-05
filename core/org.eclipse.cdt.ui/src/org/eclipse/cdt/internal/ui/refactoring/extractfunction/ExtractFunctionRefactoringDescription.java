@@ -21,6 +21,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.core.model.ILanguage;
+import org.eclipse.cdt.core.model.LanguageManager;
 
 import org.eclipse.cdt.internal.ui.refactoring.CRefactoringDescription;
 import org.eclipse.cdt.internal.ui.refactoring.utils.VisibilityEnum;
@@ -53,7 +55,12 @@ public class ExtractFunctionRefactoringDescription extends CRefactoringDescripti
 		file = getFile();
 		
 		ISelection selection = getSelection();
-		return new ExtractFunctionRefactoring(file, selection, info, proj);
+		ILanguage language = LanguageManager.getInstance().getLanguageForFile(file, null);
+		ExtractFunctionRefactoring refactoring = (ExtractFunctionRefactoring) RefactoringsRegistry.getLanguageDelegate(language, RefactoringsRegistry.EXTRACT_FUNCTION);
+		if (refactoring != null) {
+			refactoring.init(file, selection, info, proj);
+		}
+		return refactoring;
 	}
 
 }

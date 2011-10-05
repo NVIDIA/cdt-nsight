@@ -72,30 +72,10 @@ public abstract class CRefactoring extends Refactoring {
 	protected ICProject project;
 	private IIndex fIndex;
 
+	public CRefactoring() {}
+	
 	public CRefactoring(IFile file, ISelection selection, ICElement element, ICProject proj) {
-		project = proj;
-		if (element instanceof ISourceReference) {
-			ISourceReference sourceRef= (ISourceReference) element;
-			ITranslationUnit tu = sourceRef.getTranslationUnit();
-			IResource res= tu.getResource();
-			if (res instanceof IFile) 
-				this.file= (IFile) res;
-		
-			try {
-				final ISourceRange sourceRange = sourceRef.getSourceRange();
-				this.region = new Region(sourceRange.getIdStartPos(), sourceRange.getIdLength());
-			} catch (CModelException e) {
-				CUIPlugin.log(e);
-			}
-		} else {
-			this.file = file;
-			this.region = SelectionHelper.getRegion(selection);
-		}
-
-		this.initStatus= new RefactoringStatus();
-		if (this.file == null || region == null) {
-			initStatus.addFatalError(Messages.Refactoring_SelectionNotValid);  
-		}
+		baseInit(file, selection, element, proj);
 	}
 
 	private class ProblemFinder extends ASTVisitor {
@@ -161,6 +141,33 @@ public abstract class CRefactoring extends Refactoring {
 				status.addWarning(Messages.Refactoring_CompileErrorInTU); 
 				problemFound = true;
 			}
+		}
+	}
+	
+	// Do not override - called from ctor
+	protected final void baseInit(IFile file, ISelection selection, ICElement element, ICProject proj) {
+		project = proj;
+		if (element instanceof ISourceReference) {
+			ISourceReference sourceRef= (ISourceReference) element;
+			ITranslationUnit tu = sourceRef.getTranslationUnit();
+			IResource res= tu.getResource();
+			if (res instanceof IFile) 
+				this.file= (IFile) res;
+		
+			try {
+				final ISourceRange sourceRange = sourceRef.getSourceRange();
+				this.region = new Region(sourceRange.getIdStartPos(), sourceRange.getIdLength());
+			} catch (CModelException e) {
+				CUIPlugin.log(e);
+			}
+		} else {
+			this.file = file;
+			this.region = SelectionHelper.getRegion(selection);
+		}
+
+		this.initStatus= new RefactoringStatus();
+		if (this.file == null || region == null) {
+			initStatus.addFatalError(Messages.Refactoring_SelectionNotValid);  
 		}
 	}
 	

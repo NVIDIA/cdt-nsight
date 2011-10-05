@@ -58,7 +58,7 @@ public abstract class ExtractedFunctionConstructionHelper {
 		return false;
 	}
 
-	IASTStandardFunctionDeclarator createFunctionDeclarator(IASTName name, IASTStandardFunctionDeclarator functionDeclarator, NameInformation returnVariable, List<IASTNode> nodesToWrite, Collection<NameInformation> allUsedNames, INodeFactory nodeFactory) {
+	protected IASTStandardFunctionDeclarator createFunctionDeclarator(IASTName name, IASTStandardFunctionDeclarator functionDeclarator, NameInformation returnVariable, List<IASTNode> nodesToWrite, Collection<NameInformation> allUsedNames, INodeFactory nodeFactory) {
 		IASTStandardFunctionDeclarator declarator = nodeFactory.newFunctionDeclarator(name);
 	
 		if (functionDeclarator instanceof ICPPASTFunctionDeclarator && declarator instanceof ICPPASTFunctionDeclarator) {

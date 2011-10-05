@@ -12,13 +12,17 @@
 package org.eclipse.cdt.internal.ui.refactoring.extractfunction;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 
 import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.core.model.ILanguage;
+import org.eclipse.cdt.core.model.LanguageManager;
+import org.eclipse.cdt.ui.CUIPlugin;
 
-import org.eclipse.cdt.internal.ui.refactoring.CRefactoring;
 import org.eclipse.cdt.internal.ui.refactoring.RefactoringRunner;
 
 /**
@@ -34,15 +38,29 @@ public class ExtractFunctionRefactoringRunner extends RefactoringRunner  {
 	@Override
 	public void run() {
 		ExtractFunctionInformation info = new ExtractFunctionInformation();
-		
-		CRefactoring refactoring = new ExtractFunctionRefactoring(file,selection,info, project);
-		ExtractFunctionRefactoringWizard wizard = new ExtractFunctionRefactoringWizard(refactoring,info);
-		RefactoringWizardOpenOperation operator = new RefactoringWizardOpenOperation(wizard);
-		
+		ILanguage language = null;
 		try {
-			operator.run(shellProvider.getShell(), refactoring.getName());
+			language = LanguageManager.getInstance().getLanguageForFile(file, null);
+		} catch (CoreException e1) {
+			CUIPlugin.log(e1);
+		}
+
+		try {
+			ExtractFunctionRefactoring refactoring = (ExtractFunctionRefactoring) RefactoringsRegistry.getLanguageDelegate(language,
+					RefactoringsRegistry.EXTRACT_FUNCTION);
+			if (refactoring != null) {
+				refactoring.init(file, selection, info, project);
+				// new ExtractFunctionRefactoring(file,selection,info, project);
+				ExtractFunctionRefactoringWizard wizard = new ExtractFunctionRefactoringWizard(refactoring,
+						info);
+				RefactoringWizardOpenOperation operator = new RefactoringWizardOpenOperation(wizard);
+
+				operator.run(shellProvider.getShell(), refactoring.getName());
+			}
 		} catch (InterruptedException e) {
-			//initial condition checking got canceled by the user.
+			// initial condition checking got canceled by the user.
+		} catch (CoreException e) {
+			CUIPlugin.log(e);
 		}
 	}
 }

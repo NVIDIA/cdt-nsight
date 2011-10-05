@@ -115,8 +115,8 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 	static final Integer NULL_INTEGER = Integer.valueOf(0);
 	static final char[] ZERO= "0".toCharArray(); //$NON-NLS-1$
 
-	NodeContainer container;
-	final ExtractFunctionInformation info;
+	protected NodeContainer container;
+	protected ExtractFunctionInformation info;
 
 	final Map<String, Integer> names;
 	final Container<Integer> namesCounter;
@@ -130,15 +130,24 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 	private ExtractedFunctionConstructionHelper extractedFunctionConstructionHelper;
 	private final INodeFactory factory = CPPNodeFactory.getDefault();
 
-	public ExtractFunctionRefactoring(IFile file, ISelection selection,
-			ExtractFunctionInformation info, ICProject project) {
-		super(file, selection, null, project);
-		this.info = info;
+	public ExtractFunctionRefactoring() {
 		name = Messages.ExtractFunctionRefactoring_ExtractFunction;
 		names = new HashMap<String, Integer>();
 		namesCounter = new Container<Integer>(NULL_INTEGER);
 		trailPos = new Container<Integer>(NULL_INTEGER);
 		returnNumber = new Container<Integer>(NULL_INTEGER);
+	}
+	
+//	public ExtractFunctionRefactoring(IFile file, ISelection selection,
+//			ExtractFunctionInformation info, ICProject project) {
+//		this();
+//		init(file, selection, info, project);
+//	}
+	
+	public final void init(IFile file, ISelection selection,
+			ExtractFunctionInformation info, ICProject project) {
+		baseInit(file, selection, null, project);
+		this.info = info;
 	}
 
 	@Override
@@ -188,8 +197,8 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 					info.setInScopeDeclaredVariable(container.getAllDeclaredInScope().get(0));
 				}
 
-				extractedFunctionConstructionHelper =
-						ExtractedFunctionConstructionHelper.createFor(container.getNodesToWrite());
+				extractedFunctionConstructionHelper = createFunctionConstructionHelper(container
+						.getNodesToWrite());
 
 				boolean isExtractExpression = container.getNodesToWrite().get(0) instanceof IASTExpression;
 				info.setExtractExpression(isExtractExpression);
@@ -217,6 +226,10 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 			Thread.currentThread().interrupt();
 		}
 		return initStatus;
+	}
+
+	protected ExtractedFunctionConstructionHelper createFunctionConstructionHelper(List<IASTNode> nodes) {
+		return ExtractedFunctionConstructionHelper.createFor(nodes);
 	}
 
 	private void markWriteAccess() throws CoreException {
@@ -661,7 +674,7 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 		return new CPPASTName(declaration.toCharArray());
 	}
 
-	private IASTDeclSpecifier getReturnType() {
+	protected IASTDeclSpecifier getReturnType() {
 		IASTNode firstNodeToWrite = container.getNodesToWrite().get(0);
 		NameInformation returnVariable = info.getReturnVariable();
 
