@@ -205,12 +205,12 @@ public class BackgroundHighlightingManager implements ICReconcilingListener, ITe
 		fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 		ILanguage language;
 		try {
-			language = fTranslationUnit.getLanguage();
+			language = fTranslationUnit != null ? fTranslationUnit.getLanguage() : null;
 		} catch (CoreException e) {
 			CUIPlugin.log(e);
 			language = null;
 		}
-		highlightings = getHighlightings(fTranslationUnit != null ? language : null);
+		highlightings = getHighlightings(language);
 		for (IBackgroundHighlight highlight : highlightings) {
 			highlight.install(fDocument, this);
 		}

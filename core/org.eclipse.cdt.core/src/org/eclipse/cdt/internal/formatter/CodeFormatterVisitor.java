@@ -1867,7 +1867,8 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 			options.fSpaceBeforeSeparator= preferences.insert_space_before_comma_in_base_types;
 			formatList(baseSpecifiers, options, false, false, null);
 		}
-
+		scribe.skipToToken(IToken.tLBRACE);
+		
 		// Member declarations
 		formatLeftCurlyBrace(line, preferences.brace_position_for_type_declaration);
 		formatOpeningBrace(preferences.brace_position_for_type_declaration, preferences.insert_space_before_opening_brace_in_type_declaration);
