@@ -53,7 +53,7 @@ public interface ICDTLaunchConfigurationConstants {
 	 * Specifies the default launch delegate for a Local Debug session
 	 * @since 7.0
 	 */
-    public static final String PREFERRED_DEBUG_LOCAL_LAUNCH_DELEGATE = "org.eclipse.cdt.dsf.gdb.launch.localCLaunch"; //$NON-NLS-1$
+    public static final String PREFERRED_DEBUG_LOCAL_LAUNCH_DELEGATE = "com.nvidia.cuda.ide.debug.launchApplicationDelegate"; //$NON-NLS-1$
 
     /**
 	 * Specifies the default launch delegate for a Remote Debug session.
