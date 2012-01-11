@@ -48,17 +48,17 @@ public interface ICDTLaunchConfigurationConstants {
      * @since 6.0
      */
     public static final String ID_LAUNCH_C_POST_MORTEM = "org.eclipse.cdt.launch.postmortemLaunchType"; //$NON-NLS-1$
-    
+	
     /**
 	 * Specifies the default launch delegate for a Local Debug session
 	 * @since 7.0
 	 */
-    public static final String PREFERRED_DEBUG_LOCAL_LAUNCH_DELEGATE = "org.eclipse.cdt.dsf.gdb.launch.localCLaunch"; //$NON-NLS-1$
+    public static final String PREFERRED_DEBUG_LOCAL_LAUNCH_DELEGATE = "com.nvidia.cuda.ide.debug.launchApplicationDelegate"; //$NON-NLS-1$
 
     /**
 	 * Specifies the default launch delegate for a Remote Debug session.
 	 * This default is part of the optional plugin org.eclipse.cdt.launch.remote.  If that plugin is not installed
-	 * then we won't set a default, which is ok since we only have one other delegate 
+	 * then we won't set a default, which is ok since we only have one other delegate
 	 * (which is org.eclipse.cdt.dsf.gdb.launch.remoteCLaunch).
 	 * @since 7.1
 	 */
@@ -69,7 +69,7 @@ public interface ICDTLaunchConfigurationConstants {
 	 * Specifies the default launch delegate for an Attach Debug session
 	 * @since 7.0
 	 */
-    public static final String PREFERRED_DEBUG_ATTACH_LAUNCH_DELEGATE = "org.eclipse.cdt.dsf.gdb.launch.attachCLaunch"; //$NON-NLS-1$
+    public static final String PREFERRED_DEBUG_ATTACH_LAUNCH_DELEGATE = "com.nvidia.cuda.ide.debug.launch.attachCLaunch"; //$NON-NLS-1$
 
     /**
 	 * Specifies the default launch delegate for a Post Mortem Debug session
@@ -82,7 +82,7 @@ public interface ICDTLaunchConfigurationConstants {
 	 * @since 7.0
 	 */
     public static final String PREFERRED_RUN_LAUNCH_DELEGATE = "org.eclipse.cdt.cdi.launch.localCLaunch"; //$NON-NLS-1$
-    
+	
 	/**
 	 * Identifier for the C/C++ program process type, which is annotated on processes created
 	 * by the C/C++ application launch delegate.
@@ -163,7 +163,7 @@ public interface ICDTLaunchConfigurationConstants {
 	/**
 	 * Launch configuration attribute key. The value is a Map specifying the
 	 * environment to use when launching a C/C++ application.
-	 * 
+	 *
 	 * @deprecated - see ILaunchManager.ATTR_ENVIRONMENT_VARIABLES
 	 */
 	@Deprecated
