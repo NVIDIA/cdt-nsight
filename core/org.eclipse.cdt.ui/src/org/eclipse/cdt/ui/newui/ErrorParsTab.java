@@ -124,7 +124,6 @@ public class ErrorParsTab extends AbstractCPropertyTab {
 
 		// SashForm
 		SashForm sashForm = new SashForm(usercomp, SWT.NONE);
-		sashForm.setBackground(sashForm.getDisplay().getSystemColor(SWT.COLOR_GRAY));
 		sashForm.setOrientation(SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 

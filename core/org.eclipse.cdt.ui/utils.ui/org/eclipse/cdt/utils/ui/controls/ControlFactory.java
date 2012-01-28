@@ -55,7 +55,6 @@ public class ControlFactory {
 
 	public static Control setParentColors(Control control) {
 		Composite parent = control.getParent();
-	    control.setBackground(parent.getBackground());
 	    control.setForeground(parent.getForeground());
 	    return control;
 	}
@@ -100,7 +99,6 @@ public class ControlFactory {
 		GridData gd = (GridData) separator.getLayoutData();
 		gd.heightHint = ((SWT.DEFAULT == preferedHeight) ? 2 : preferedHeight);
 		separator.setLayoutData(gd);
-		separator.setBackground(color);
 		return separator;
 	}
 
@@ -277,7 +275,6 @@ public class ControlFactory {
 		button.setText(label);
 		GridData data = new GridData();
 		button.setLayoutData(data);
-	    button.setBackground(group.getBackground());
 	    button.setForeground(group.getForeground());
 		return button;
 	}
@@ -296,7 +293,6 @@ public class ControlFactory {
 		button.setText(label);
 		GridData data = new GridData();
 		button.setLayoutData(data);
-	    button.setBackground(group.getBackground());
 	    button.setForeground(group.getForeground());
 		return button;
 	}
