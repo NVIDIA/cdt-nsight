@@ -142,7 +142,7 @@ public final class SemanticHighlightingRegistry {
 		if (table == null) {
 			readExtensions();
 		}
-		if (table.containsKey(language.getId())) {
+		if (language != null && table.containsKey(language.getId())) {
 			return table.get(language);
 		} else {
 			return table.get(null);
