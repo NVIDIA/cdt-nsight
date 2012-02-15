@@ -217,7 +217,7 @@ public class CModel extends Openable implements ICModel {
 	protected  boolean computeChildren(OpenableInfo info, IResource res) throws CModelException {
 		// determine my children
 		IWorkspaceRoot root = (IWorkspaceRoot) getResource();
-		IProject[] projects = root.getProjects();
+		IProject[] projects = root.getProjects(IWorkspaceRoot.INCLUDE_HIDDEN);
 		for (IProject project : projects) {
 			if (CoreModel.hasCNature(project) || CoreModel.hasCCNature(project)) {
 				ICProject cproject = new CProject(this, project);

@@ -25,6 +25,7 @@ import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ICElementDelta;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ISourceRoot;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -425,7 +426,7 @@ final class DeltaProcessor {
 	public ICElementDelta[] processResourceDelta(IResourceDelta changes) {
 		ICElement root = CModelManager.getDefault().getCModel();			
 		// get the workspace delta, and start processing there.
-		IResourceDelta[] deltas = changes.getAffectedChildren();
+		IResourceDelta[] deltas = getAffectedChildrenIncludingHidden(changes);
 		ICElementDelta[] translatedDeltas = new CElementDelta[deltas.length];
 		//System.out.println("delta.length: " + deltas.length);
 		for (int i = 0; i < deltas.length; i++) {
@@ -438,6 +439,11 @@ final class DeltaProcessor {
 		// release deltas
 		fCurrentDelta= null;
 		return filteredDeltas;
+	}
+
+	private static IResourceDelta[] getAffectedChildrenIncludingHidden(IResourceDelta changes) {
+		return changes.getAffectedChildren(IResourceDelta.ADDED
+				| IResourceDelta.CHANGED | IResourceDelta.REMOVED, IContainer.INCLUDE_HIDDEN);
 	}
 	
 	/**
@@ -467,7 +473,7 @@ final class DeltaProcessor {
 		} catch (CModelException e) {
 		}
 		if (updateChildren){
-			IResourceDelta [] children = delta.getAffectedChildren();
+			IResourceDelta [] children = getAffectedChildrenIncludingHidden(delta);
 			for (IResourceDelta element : children) {
 				traverseDelta(parent, element);
 			}
@@ -545,7 +551,7 @@ final class DeltaProcessor {
 			return false;
 		if (delta.getKind() == IResourceDelta.ADDED)
 			return true;
-		IResourceDelta[] children= delta.getAffectedChildren();
+		IResourceDelta[] children= getAffectedChildrenIncludingHidden(delta);
 		for (IResourceDelta element : children) {
 			if (isFolderAddition(element)) {
 				return true;
