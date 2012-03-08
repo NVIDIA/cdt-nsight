@@ -23,7 +23,7 @@ import org.eclipse.cdt.internal.core.dom.parser.AbstractGNUSourceCodeParser.ITem
  * Governs backtracking through multiple variants due to the ambiguous meaning of '<'.
  * @see NameOrTemplateIDVariants
  */
-final class TemplateIdStrategy implements ITemplateIdStrategy {
+public final class TemplateIdStrategy implements ITemplateIdStrategy {
 	private int fCurrentBranchPoint;
 	private BitSet fSimpleIDs;
 	private IASTName[] fTemplateNames;

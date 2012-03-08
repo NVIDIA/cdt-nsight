@@ -2385,7 +2385,7 @@ public abstract class AbstractGNUSourceCodeParser implements ISourceCodeParser {
     	return result;
     }
 
-	private IASTAttribute singleAttribute() throws EndOfFileException, BacktrackException {
+	protected IASTAttribute singleAttribute() throws EndOfFileException, BacktrackException {
 		// Get an identifier including keywords
 		IToken attributeName = identifierOrKeyword();
 		IASTToken argumentClause = null;
@@ -2400,7 +2400,7 @@ public abstract class AbstractGNUSourceCodeParser implements ISourceCodeParser {
 		return result;
 	}
     
-	private IToken identifierOrKeyword() throws EndOfFileException, BacktrackException {
+	protected IToken identifierOrKeyword() throws EndOfFileException, BacktrackException {
 		IToken t = LA(1);
 		char[] image= t.getCharImage();
 		if (image.length == 0)
