@@ -23,7 +23,7 @@ public class NameOrTemplateIDVariants {
 	/**
 	 * A point where a '<' can be interpreted as less-than or as the angle-bracket of a template-id.
 	 */
-	static class BranchPoint {
+	public static class BranchPoint {
 		private BranchPoint fNext;
 		private Variant fFirstVariant;
 		private final boolean fAllowAssignment;
@@ -76,7 +76,7 @@ public class NameOrTemplateIDVariants {
 	/**
 	 * A variant for a branch-point is a cast-expression that can be used within a binary expression.
 	 */
-	static class Variant {
+	public static class Variant {
 		private BranchPoint fOwner;
 		private Variant fNext;
 		private final IASTExpression fExpression;

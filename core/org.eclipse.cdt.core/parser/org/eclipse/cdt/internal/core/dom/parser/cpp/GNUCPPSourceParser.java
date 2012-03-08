@@ -1419,7 +1419,7 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
      *    typeid ( expression )
      *    typeid ( type-id )
      */
-    private IASTExpression postfixExpression(CastExprCtx ctx, ITemplateIdStrategy strat) throws EndOfFileException, BacktrackException {
+    protected IASTExpression postfixExpression(CastExprCtx ctx, ITemplateIdStrategy strat) throws EndOfFileException, BacktrackException {
         IASTExpression firstExpression = null;
         boolean isTemplate = false;
 
