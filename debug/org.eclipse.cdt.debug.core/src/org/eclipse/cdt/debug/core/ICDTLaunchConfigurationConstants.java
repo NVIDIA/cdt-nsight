@@ -34,7 +34,7 @@ public interface ICDTLaunchConfigurationConstants {
 	 * @since 7.1
 	 */
 	public static final String ID_LAUNCH_C_REMOTE_APP = "org.eclipse.cdt.launch.remoteApplicationLaunchType"; //$NON-NLS-1$
-	
+
 	/**
      * This is the attach launch type id.
      *
@@ -48,7 +48,7 @@ public interface ICDTLaunchConfigurationConstants {
      * @since 6.0
      */
     public static final String ID_LAUNCH_C_POST_MORTEM = "org.eclipse.cdt.launch.postmortemLaunchType"; //$NON-NLS-1$
-    
+
     /**
 	 * Specifies the default launch delegate for a Local Debug session
 	 * @since 7.0
@@ -58,7 +58,7 @@ public interface ICDTLaunchConfigurationConstants {
     /**
 	 * Specifies the default launch delegate for a Remote Debug session.
 	 * This default is part of the optional plugin org.eclipse.cdt.launch.remote.  If that plugin is not installed
-	 * then we won't set a default, which is ok since we only have one other delegate 
+	 * then we won't set a default, which is ok since we only have one other delegate
 	 * (which is org.eclipse.cdt.dsf.gdb.launch.remoteCLaunch).
 	 * @since 7.1
 	 */
@@ -69,7 +69,7 @@ public interface ICDTLaunchConfigurationConstants {
 	 * Specifies the default launch delegate for an Attach Debug session
 	 * @since 7.0
 	 */
-    public static final String PREFERRED_DEBUG_ATTACH_LAUNCH_DELEGATE = "org.eclipse.cdt.dsf.gdb.launch.attachCLaunch"; //$NON-NLS-1$
+    public static final String PREFERRED_DEBUG_ATTACH_LAUNCH_DELEGATE = "com.nvidia.cuda.ide.debug.launch.attachCLaunch"; //$NON-NLS-1$
 
     /**
 	 * Specifies the default launch delegate for a Post Mortem Debug session
@@ -82,14 +82,14 @@ public interface ICDTLaunchConfigurationConstants {
 	 * @since 7.0
 	 */
     public static final String PREFERRED_RUN_LAUNCH_DELEGATE = "org.eclipse.cdt.cdi.launch.localCLaunch"; //$NON-NLS-1$
-    
+
 	/**
 	 * Identifier for the C/C++ program process type, which is annotated on processes created
 	 * by the C/C++ application launch delegate.
-	 * 
+	 *
 	 * (value <code>"C/C++"</code>).
 	 */
-	public static final String ID_PROGRAM_PROCESS_TYPE = "C/C++"; //$NON-NLS-1$ 
+	public static final String ID_PROGRAM_PROCESS_TYPE = "C/C++"; //$NON-NLS-1$
 
 	/**
 	 * Launch configuration attribute key. The value is a name of a C/C++
@@ -99,7 +99,7 @@ public interface ICDTLaunchConfigurationConstants {
 
 	/**
 	 * Launch configuration attribute value constants for build before launch.
-	 * 
+	 *
 	 * @since 7.0
 	 */
 	public static final int BUILD_BEFORE_LAUNCH_DISABLED = 0;
@@ -157,15 +157,17 @@ public interface ICDTLaunchConfigurationConstants {
 	 * is launched.
 	 * @deprecated - see ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES
 	 */
-	public static final String ATTR_PROGRAM_ENVIROMENT_INHERIT = CDT_LAUNCH_ID + ".ENVIRONMENT_INHERIT"; //$NON-NLS-1$
+	@Deprecated
+    public static final String ATTR_PROGRAM_ENVIROMENT_INHERIT = CDT_LAUNCH_ID + ".ENVIRONMENT_INHERIT"; //$NON-NLS-1$
 
 	/**
 	 * Launch configuration attribute key. The value is a Map specifying the
 	 * environment to use when launching a C/C++ application.
-	 * 
+	 *
 	 * @deprecated - see ILaunchManager.ATTR_ENVIRONMENT_VARIABLES
 	 */
-	public static final String ATTR_PROGRAM_ENVIROMENT_MAP = CDT_LAUNCH_ID + ".ENVIRONMENT_MAP"; //$NON-NLS-1$
+	@Deprecated
+    public static final String ATTR_PROGRAM_ENVIROMENT_MAP = CDT_LAUNCH_ID + ".ENVIRONMENT_MAP"; //$NON-NLS-1$
 
 	/**
 	 * Launch configuration attribute key. The value is the platform string of
@@ -200,13 +202,13 @@ public interface ICDTLaunchConfigurationConstants {
 	public static final String ATTR_DEBUGGER_STOP_AT_MAIN = CDT_LAUNCH_ID + ".DEBUGGER_STOP_AT_MAIN"; //$NON-NLS-1$
 
 	/**
-	 * Launch configuration attribute key. The value is a String specifying 
+	 * Launch configuration attribute key. The value is a String specifying
 	 * the symbol to use for the main breakpoint.
 	 */
 	public static final String ATTR_DEBUGGER_STOP_AT_MAIN_SYMBOL = CDT_LAUNCH_ID + ".DEBUGGER_STOP_AT_MAIN_SYMBOL"; //$NON-NLS-1$
 
 	/**
-	 * Launch configuration attribute key. The value is a String specifying 
+	 * Launch configuration attribute key. The value is a String specifying
 	 * the register groups memento.
 	 */
 	public static final String ATTR_DEBUGGER_REGISTER_GROUPS = CDT_LAUNCH_ID + ".DEBUGGER_REGISTER_GROUPS"; //$NON-NLS-1$
@@ -254,14 +256,15 @@ public interface ICDTLaunchConfigurationConstants {
 	 * use.  For now only "mi", "mi1", "m2", "mi3" are supported.
 	 * @deprecated
 	 */
-	public static final String ATTR_DEBUGGER_PROTOCOL = CDT_LAUNCH_ID + ".protocol"; //$NON-NLS-1$
+	@Deprecated
+    public static final String ATTR_DEBUGGER_PROTOCOL = CDT_LAUNCH_ID + ".protocol"; //$NON-NLS-1$
 
 	/**
 	 * Launch configuration attribute key. The value is a global variables'
 	 * memento.
 	 */
 	public static final String ATTR_DEBUGGER_GLOBAL_VARIABLES = CDT_LAUNCH_ID + ".GLOBAL_VARIABLES"; //$NON-NLS-1$
-	
+
 	/**
 	 * Launch configuration attribute key. The value is a format list'
 	 * memento.
