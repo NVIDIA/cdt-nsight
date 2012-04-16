@@ -162,7 +162,6 @@ public class ChangeBuildConfigActionBase {
 			fProject = project;
 		}
 		
-		@Override
 		public boolean isEmpty() {
 			return fProject == null;
 		}
