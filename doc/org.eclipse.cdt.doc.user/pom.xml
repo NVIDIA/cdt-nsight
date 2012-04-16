@@ -19,7 +19,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-source-plugin</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tycho.version}</version>
 				<executions>
 					<execution>
 						<id>plugin-source</id>
@@ -32,9 +32,9 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
+				<groupId>com.google.code.tycho-eclipserun-plugin</groupId>
 				<artifactId>tycho-eclipserun-plugin</artifactId>
-				<version>${tycho-extras-version}</version>
+				<version>${tycho.version}</version>
 				<configuration>
 					<appArgLine>-application org.eclipse.ant.core.antRunner -buildfile customBuildCallbacks.xml build.index</appArgLine>
 					<dependencies>
