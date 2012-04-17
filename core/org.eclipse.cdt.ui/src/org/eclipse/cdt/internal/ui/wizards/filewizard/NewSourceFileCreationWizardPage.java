@@ -32,6 +32,7 @@ import org.eclipse.cdt.core.CConventions;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.ITranslationUnit;
+import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.cdt.ui.CodeGeneration;
 
 import org.eclipse.cdt.internal.core.model.CProject;
@@ -45,7 +46,7 @@ import org.eclipse.cdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.cdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class NewSourceFileCreationWizardPage extends AbstractFileCreationWizardPage {
-	private final String KEY_LAST_USED_TEMPLATE = "LastUsedSourceTemplate"; //$NON-NLS-1$
+	private final String KEY_LAST_USED_TEMPLATE = "lastUsedSourceTemplate"; //$NON-NLS-1$
 
 	private ITranslationUnit fNewFileTU = null;
 	private StringDialogField fNewFileDialogField;
@@ -199,7 +200,7 @@ public class NewSourceFileCreationWizardPage extends AbstractFileCreationWizardP
 	 */
 	@Override
 	public String getDefaultTemplateName() {
-		String name = getDialogSettings().get(KEY_LAST_USED_TEMPLATE);
+		String name = CUIPlugin.getDefault().getPreferenceStore().getString(KEY_LAST_USED_TEMPLATE);
 		if (name == null) {
 			IProject project = getCurrentProject();
 			if (project != null) {
@@ -220,6 +221,6 @@ public class NewSourceFileCreationWizardPage extends AbstractFileCreationWizardP
 	 */
 	@Override
 	public void saveLastUsedTemplateName(String name) {
-		getDialogSettings().put(KEY_LAST_USED_TEMPLATE, name);
+		CUIPlugin.getDefault().getPreferenceStore().setValue(KEY_LAST_USED_TEMPLATE, name);
 	}
 }
