@@ -77,6 +77,7 @@ public abstract class ASTTranslationUnit extends ASTNode implements IASTTranslat
 	private SizeofCalculator fSizeofCalculator;
 	/** The semaphore controlling exclusive access to the AST. */
 	private final Semaphore fSemaphore= new Semaphore(1);
+	private boolean fBasedOnIncompleteIndex;
 
 	@Override
 	public final IASTTranslationUnit getTranslationUnit() {
@@ -364,9 +365,14 @@ public abstract class ASTTranslationUnit extends ASTNode implements IASTTranslat
 		fForContentAssist= forContentAssist;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.cdt.internal.core.parser.scanner.ISkippedIndexedFilesListener#skippedFile(org.eclipse.cdt.internal.core.parser.scanner.IncludeFileContent)
-	 */
+	public boolean isBasedOnIncompleteIndex() {
+		return fBasedOnIncompleteIndex;
+	}
+
+	public void setBasedOnIncompleteIndex(boolean basedOnIncompleteIndex) {
+		fBasedOnIncompleteIndex = basedOnIncompleteIndex;
+	}
+
 	public void skippedFile(int offset, InternalFileContent fileContent) {
 		if (fIndexFileSet != null) {
 			List<IIndexFile> files= fileContent.getFilesIncluded();
