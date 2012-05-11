@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 Alena Laskavaia 
+ * Copyright (c) 2009, 2011 Alena Laskavaia 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,14 +70,10 @@ public abstract class AbstractIndexAstChecker extends AbstractCheckerWithProblem
 		}
 
 		try {
-			// Run the checker only if the index is fully initialized. Otherwise it may produce
-			// false positives.
-			if (modelCache.getIndex().isFullyInitialized()) {
-				IASTTranslationUnit ast = modelCache.getAST();
-				if (ast != null) {
-					synchronized (ast) {
-						processAst(ast);
-					}
+			IASTTranslationUnit ast = modelCache.getAST();
+			if (ast != null) {
+				synchronized (ast) {
+					processAst(ast);
 				}
 			}
 		} catch (CoreException e) {
@@ -87,18 +83,15 @@ public abstract class AbstractIndexAstChecker extends AbstractCheckerWithProblem
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see IRunnableInEditorChecker#processModel(Object, ICheckerInvocationContext)
 	 */
 	public synchronized void processModel(Object model, ICheckerInvocationContext context) {
 		if (model instanceof IASTTranslationUnit) {
-			IASTTranslationUnit ast = (IASTTranslationUnit) model;
-			// Run the checker only if the index was fully initialized when the file was parsed.
-			// Otherwise the checker may produce false positives.
-			if (ast.isBasedOnIncompleteIndex())
-				return;
-
 			setContext(context);
+			IASTTranslationUnit ast = (IASTTranslationUnit) model;
 			synchronized (context) {
 				modelCache = context.get(CxxModelsCache.class);
 				if (modelCache == null) {

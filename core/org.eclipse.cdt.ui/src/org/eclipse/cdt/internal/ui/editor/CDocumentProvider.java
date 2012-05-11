@@ -69,7 +69,6 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.spelling.SpellingAnnotation;
 
-import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.ICModelMarker;
 import org.eclipse.cdt.core.model.ICProject;
@@ -469,22 +468,14 @@ public class CDocumentProvider extends TextFileDocumentProvider {
 		public void acceptProblem(IProblem problem) {
 			if (isActive()) {
 				ProblemRequestorState state= fProblemRequestorState.get();
-				if (state != null && isReliable(problem)) {
+				if (state != null)
 					state.fReportedProblems.add(problem);
-				}
 			}
 		}
-
-		/**
-		 * A problem is not considered reliable if it belongs to an unreliable AST.
+		
+		/*
+		 * @see IProblemRequestor#endReporting()
 		 */
-		private static boolean isReliable(IProblem problem) {
-			if (problem instanceof IASTNode) {
-				return !((IASTNode) problem).getTranslationUnit().isBasedOnIncompleteIndex();
-			}
-			return true;
-		}
-
 		public void endReporting() {
 			ProblemRequestorState state= fProblemRequestorState.get();
 			if (state != null && !state.fInsideReportingSequence)

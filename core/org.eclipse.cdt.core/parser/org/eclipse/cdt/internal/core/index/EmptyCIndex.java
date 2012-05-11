@@ -12,6 +12,7 @@
  *     Sergey Prigogin (Google)
  *     Jens Elmenthaler - http://bugs.eclipse.org/173458 (camel case completion)
  *******************************************************************************/
+
 package org.eclipse.cdt.internal.core.index;
 
 import java.util.regex.Pattern;
@@ -159,9 +160,5 @@ final public class EmptyCIndex implements IIndex {
 
 	public IScope[] getInlineNamespaces() {
 		return new IScope[0];
-	}
-
-	public boolean isFullyInitialized() {
-		return true;
 	}
 }

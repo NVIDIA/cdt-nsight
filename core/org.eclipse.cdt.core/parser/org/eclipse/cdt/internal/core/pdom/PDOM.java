@@ -1577,8 +1577,4 @@ public class PDOM extends PlatformObject implements IPDOM {
 		}
 		return linkage.getInlineNamespaces();
 	}
-
-	public boolean isFullyInitialized() {
-		return true;
-	}
 }
