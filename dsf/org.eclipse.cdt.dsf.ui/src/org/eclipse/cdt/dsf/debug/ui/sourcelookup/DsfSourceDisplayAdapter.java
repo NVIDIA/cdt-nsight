@@ -31,6 +31,7 @@ import org.eclipse.cdt.dsf.concurrent.Query;
 import org.eclipse.cdt.dsf.concurrent.ThreadSafe;
 import org.eclipse.cdt.dsf.datamodel.DMContexts;
 import org.eclipse.cdt.dsf.datamodel.IDMContext;
+import org.eclipse.cdt.dsf.datamodel.IDMEvent;
 import org.eclipse.cdt.dsf.debug.service.IRunControl;
 import org.eclipse.cdt.dsf.debug.service.IRunControl.IExecutionDMContext;
 import org.eclipse.cdt.dsf.debug.service.IRunControl.StateChangeReason;
@@ -575,12 +576,12 @@ public class DsfSourceDisplayAdapter implements ISourceDisplay, ISteppingControl
 
     private DsfSession fSession;
     private DsfExecutor fExecutor;
-    private DsfServicesTracker fServicesTracker;
+    protected DsfServicesTracker fServicesTracker;
     private FrameData fPrevFrameData;
     private SourceLookupResult fPrevResult;
     private ISourceLookupDirector fSourceLookup;
     private DsfSourceLookupParticipant fSourceLookupParticipant;
-    private InstructionPointerManager fIPManager;
+    protected InstructionPointerManager fIPManager;
     
     private LookupJob fRunningLookupJob;
     private DisplayJob fRunningDisplayJob;
@@ -891,20 +892,29 @@ public class DsfSourceDisplayAdapter implements ISourceDisplay, ISteppingControl
 	        Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-			        Object context = DebugUITools.getDebugContext();
-			        if (context instanceof IDMVMContext) {
-				        final IDMContext dmc = ((IDMVMContext)context).getDMContext();
-				        if (dmc instanceof IFrameDMContext && DMContexts.isAncestorOf(dmc, e.getDMContext())) {
-				        	IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-							doDisplaySource((IFrameDMContext) dmc, page, false, true);
-							return;
-				        }
+				    final IFrameDMContext frame = getCurrentFrame(e);
+			        if (frame!= null) {
+			            IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			            doDisplaySource(frame, page, false, true);
+			        } else {
+			            doneStepping(e.getDMContext());
 			        }
-		    		doneStepping(e.getDMContext());
-				}});
+	        }});
     	} else {
     		doneStepping(e.getDMContext());
     	}
+    }
+
+    protected IFrameDMContext getCurrentFrame(final IDMEvent<?> e) {
+        IFrameDMContext frame = null;
+        Object context = DebugUITools.getDebugContext();
+        if (context instanceof IDMVMContext) {
+            final IDMContext dmc = ((IDMVMContext) context).getDMContext();
+            if (dmc instanceof IFrameDMContext && DMContexts.isAncestorOf(dmc, e.getDMContext())) {
+                frame = (IFrameDMContext) dmc;
+            }
+        }
+        return frame;
     }
 
 	private void updateStepTiming() {
