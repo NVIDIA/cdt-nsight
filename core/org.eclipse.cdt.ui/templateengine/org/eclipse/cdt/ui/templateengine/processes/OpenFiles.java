@@ -19,9 +19,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 /**
  * This process opens files in the editor
@@ -44,8 +46,9 @@ public class OpenFiles extends ProcessRunner {
 			IFile iFile = projectHandle.getFile(fileTargetPath);
 			if (iFile.exists()) {
 				try {
-					IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(),
-							iFile);
+					IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+					IDE.openEditor(window.getActivePage(), iFile);
+					BasicNewResourceWizard.selectAndReveal(iFile, window);
 				} catch (PartInitException e) {
 					throw new ProcessFailureException(Messages.OpenFiles_CannotOpen_error + fileTargetPath);
 				}
