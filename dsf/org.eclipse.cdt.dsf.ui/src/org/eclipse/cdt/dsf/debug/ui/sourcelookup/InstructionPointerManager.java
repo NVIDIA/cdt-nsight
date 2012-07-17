@@ -40,7 +40,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * This class tracks instruction pointer contexts for a single DSF session.
  */
 @ThreadSafe
-class InstructionPointerManager {
+public class InstructionPointerManager {
 
 	/**
 	 * Current instruction pointer annotation type.

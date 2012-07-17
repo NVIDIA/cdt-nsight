@@ -571,12 +571,12 @@ public class DsfSourceDisplayAdapter implements ISourceDisplay, ISteppingControl
 
     private DsfSession fSession;
     private DsfExecutor fExecutor;
-    private DsfServicesTracker fServicesTracker;
+    protected DsfServicesTracker fServicesTracker;
     private FrameData fPrevFrameData;
     private SourceLookupResult fPrevResult;
     private ISourceLookupDirector fSourceLookup;
     private DsfSourceLookupParticipant fSourceLookupParticipant;
-    private InstructionPointerManager fIPManager;
+    protected InstructionPointerManager fIPManager;
     
     private LookupJob fRunningLookupJob;
     private DisplayJob fRunningDisplayJob;

@@ -157,8 +157,7 @@ public class DisassemblyBackendDsf extends AbstractDisassemblyBackend implements
 	 */
 	public SetDebugContextResult setDebugContext(IAdaptable context) {
 		assert supportsDebugContext(context) : "caller should not have invoked us"; //$NON-NLS-1$
-		IDMVMContext vmContext = (IDMVMContext) context.getAdapter(IDMVMContext.class);
-		IDMContext dmContext = vmContext.getDMContext();
+		IDMContext dmContext = (IDMContext) context.getAdapter(IDMContext.class);
 		
 		SetDebugContextResult result = new SetDebugContextResult();
 		
@@ -178,44 +177,15 @@ public class DisassemblyBackendDsf extends AbstractDisassemblyBackend implements
 					fTargetContext= executionContext;
 					fTargetFrameContext= frame;
 				}
+			} else {
+			    IFrameDMContext topFrame = getTopFrame(dmContext);
+                if (topFrame != null) {
+                    return setDebugContext(topFrame);
+                }
 			}
 			if (fTargetContext != null) {
-				
-				// remove ourselves as a listener with the previous session (context)
-		        if (fDsfSessionId != null) {
-		    		final DsfSession prevSession = DsfSession.getSession(fDsfSessionId);
-		        	if (prevSession != null) {
-		        		try {
-		        			prevSession.getExecutor().execute(new DsfRunnable() {
-		        				public void run() {
-		        					prevSession.removeServiceEventListener(DisassemblyBackendDsf.this);
-		        				}
-		        			});
-		        		} catch (RejectedExecutionException e) {
-		                    // Session is shut down.
-		        		}
-					}
-		        }
-
-	        	result.sessionId = fDsfSessionId = dsfSessionId;
-				if (fServicesTracker != null) {
-					fServicesTracker.dispose();
-				}
-		        fServicesTracker = new DsfServicesTracker(DsfUIPlugin.getBundleContext(), fDsfSessionId);
-		        
-				// add ourselves as a listener with the new session (context)
-	    		final DsfSession newSession = DsfSession.getSession(dsfSessionId);
-	        	if (newSession != null) {
-	        		try {
-	        			newSession.getExecutor().execute(new DsfRunnable() {
-	        				public void run() {
-	        					newSession.addServiceEventListener(DisassemblyBackendDsf.this, null);
-	        				}
-	        			});
-	        		} catch (RejectedExecutionException e) {
-	                    // Session is shut down.
-	        		}
-				}
+				updateSession(dsfSessionId);
+				result.sessionId = dsfSessionId;
 			}
 		} else if (dmContext instanceof IFrameDMContext) {
 			result.sessionId = fDsfSessionId;
@@ -236,14 +206,87 @@ public class DisassemblyBackendDsf extends AbstractDisassemblyBackend implements
 				fTargetFrameContext = null;
 				result.contextChanged = true;
 			}
-		} else {			
-			fTargetContext = null;
-			fTargetFrameContext = null;
-			result.contextChanged = true;
+		} else {
+            IFrameDMContext topFrame = getTopFrame(dmContext);
+            if (topFrame != null) {
+                return setDebugContext(topFrame);
+            } else {
+                fTargetContext = null;
+                fTargetFrameContext = null;
+                result.contextChanged = true;
+            }
 		}
 		
 		return result;
 	}
+
+    private void updateSession(String dsfSessionId) {
+        // remove ourselves as a listener with the previous session (context)
+        if (fDsfSessionId != null) {
+        	final DsfSession prevSession = DsfSession.getSession(fDsfSessionId);
+        	if (prevSession != null) {
+        		try {
+        			prevSession.getExecutor().execute(new DsfRunnable() {
+        				public void run() {
+        					prevSession.removeServiceEventListener(DisassemblyBackendDsf.this);
+        				}
+        			});
+        		} catch (RejectedExecutionException e) {
+                    // Session is shut down.
+        		}
+        	}
+        }
+
+        fDsfSessionId = dsfSessionId;
+        if (fServicesTracker != null) {
+        	fServicesTracker.dispose();
+        }
+        fServicesTracker = new DsfServicesTracker(DsfUIPlugin.getBundleContext(), fDsfSessionId);
+        
+        // add ourselves as a listener with the new session (context)
+        final DsfSession newSession = DsfSession.getSession(dsfSessionId);
+        if (newSession != null) {
+        	try {
+        		newSession.getExecutor().execute(new DsfRunnable() {
+        			public void run() {
+        				newSession.addServiceEventListener(DisassemblyBackendDsf.this, null);
+        			}
+        		});
+        	} catch (RejectedExecutionException e) {
+                // Session is shut down.
+        	}
+        }
+    }
+
+    private IFrameDMContext getTopFrame(IDMContext dmContext) {
+        String sessionId = dmContext.getSessionId();
+        if (sessionId != null && !sessionId.equals(fDsfSessionId)) {
+            updateSession(sessionId);
+        }
+        final IExecutionDMContext executionDMContext = DMContexts.getAncestorOfType(dmContext,
+                IExecutionDMContext.class);
+        if (fServicesTracker != null) {
+            final IStack service = fServicesTracker.getService(IStack.class);
+            if (executionDMContext != null && service != null) {
+                Query<IFrameDMContext> query = new Query<IFrameDMContext>() {
+                    @Override
+                    protected void execute(DataRequestMonitor<IFrameDMContext> rm) {
+                        service.getTopFrame(executionDMContext, rm);
+                    }
+                };
+                DsfSession.getSession(fDsfSessionId).getExecutor().execute(query);
+                try {
+                    return query.get();
+                } catch (InterruptedException e) {
+                    DsfUIPlugin.log(e);
+                } catch (ExecutionException e) {
+                    // Ignore it - MI stack will always complain when we select process,
+                    // we don't need to log that
+                }
+            }
+        }
+        return null;
+    }
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.cdt.debug.internal.ui.disassembly.dsf.IDisassemblyBackend#clearDebugContext()
