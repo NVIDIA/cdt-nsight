@@ -31,6 +31,7 @@ import org.eclipse.cdt.dsf.concurrent.Query;
 import org.eclipse.cdt.dsf.concurrent.ThreadSafe;
 import org.eclipse.cdt.dsf.datamodel.DMContexts;
 import org.eclipse.cdt.dsf.datamodel.IDMContext;
+import org.eclipse.cdt.dsf.datamodel.IDMEvent;
 import org.eclipse.cdt.dsf.debug.service.IRunControl;
 import org.eclipse.cdt.dsf.debug.service.IRunControl.IExecutionDMContext;
 import org.eclipse.cdt.dsf.debug.service.IRunControl.StateChangeReason;
@@ -880,20 +881,29 @@ public class DsfSourceDisplayAdapter implements ISourceDisplay, ISteppingControl
 	        // trigger source display immediately (should be optional?)
 	        Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
-			        Object context = DebugUITools.getDebugContext();
-			        if (context instanceof IDMVMContext) {
-				        final IDMContext dmc = ((IDMVMContext)context).getDMContext();
-				        if (dmc instanceof IFrameDMContext && DMContexts.isAncestorOf(dmc, e.getDMContext())) {
-				        	IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-							doDisplaySource((IFrameDMContext) dmc, page, false, true);
-							return;
-				        }
+				    final IFrameDMContext frame = getCurrentFrame(e);
+			        if (frame!= null) {
+			            IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			            doDisplaySource(frame, page, false, true);
+			        } else {
+			            doneStepping(e.getDMContext());
 			        }
-		    		doneStepping(e.getDMContext());
-				}});
+	        }});
     	} else {
     		doneStepping(e.getDMContext());
     	}
+    }
+
+    protected IFrameDMContext getCurrentFrame(final IDMEvent<?> e) {
+        IFrameDMContext frame = null;
+        Object context = DebugUITools.getDebugContext();
+        if (context instanceof IDMVMContext) {
+            final IDMContext dmc = ((IDMVMContext) context).getDMContext();
+            if (dmc instanceof IFrameDMContext && DMContexts.isAncestorOf(dmc, e.getDMContext())) {
+                frame = (IFrameDMContext) dmc;
+            }
+        }
+        return frame;
     }
 
 	private void updateStepTiming() {
