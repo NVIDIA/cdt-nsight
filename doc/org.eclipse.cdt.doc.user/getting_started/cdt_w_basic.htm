@@ -15,60 +15,40 @@ function newWin(url) {
 <body>
 <h1 role="main">Tutorial: Creating a simple application</h1>
 
-<p>In this tutorial, you will use the CDT to create a simple 'Hello World' application.
-This tutorial describes the process of creating a new C++ project where the build is
-automatically managed by the CDT, and running the program.</p>
+<p>In this tutorial, you will use Nsight to create a simple CUDA application.
+This tutorial describes the process of creating a new CUDA C/C++ project where the build is
+automatically managed by Nsight, and running the program.</p>
 
-<p><strong>NOTE</strong>: In earlier versions of the CDT, there were two separate project types:
-Managed make (automatically generated a makefile)
-and Standard make (required the user's makefile to build).
-Now with CDT, you just select a project type, and that determines what build system to use.</p>
-
-<p>To create a simple "Hello World" application using  CDT, perform the following general steps:</p>
+<p>To create a simple CUDA application using Nsight, perform the following general steps:</p>
 <ol>
-    <li><a href="#cdt_create">Creating a project</a></li>
-    <li><a href="#cdt_build">Reviewing the code and building the project</a></li>
-    <li><a href="#cdt_running">Running the application</a></li>
+    <li><a href="#cdt_create">Create a new project</a></li>
+    <li><a href="#cdt_build">Review the code and build the project</a></li>
+    <li><a href="#cdt_running">Run the application</a></li>
 </ol>
 <hr>
-<h2> Step 1: <a name="cdt_create"></a>Creating a project</h2>
+<h2> Step 1: <a name="cdt_create"></a>Create a new project</h2>
 <ol>
-	<li>Select <strong>File &gt; New &gt; Project</strong>.<br>
-	    <br>
-	    
-	    <img src="../images/cdt_w_basic02.png" alt="Select File &gt; New &gt; Project menu option" width="591" height="183">
-	    <p><br>
-    </p>
+	<li>Select <strong>File &gt; New &gt; Project</strong>.
 	</li>
 
-	<li>Select the type of project to create. For this tutorial, expand the <strong>C++</strong> folder and select <strong>C++ Project</strong> and click <strong>Next</strong>.<br>
+	<li>Select the type of project to create. For this tutorial, expand the <strong>C/C++</strong> folder and select <strong>CUDA C/C++ Project</strong> and click <strong>Next</strong>.<br>
 	    <br>
-	    <img src="../images/cdt_w_basic03a.png" alt="Select project type" width="525" height="500"><br>    
+	    <img src="../images/cdt_w_basic03a.png" alt="Select project type"><br>    
 	    <br>
 	</li>
 	<li>
-	    <p>The <strong>C++ Project</strong> wizard opens.<br>
+	    <p>The <strong>CUDA C/C++ Project</strong> wizard opens.<br>
 	        </p>
-	    <p><img src="../images/cdt_w_basic04.png" alt="C++ project wizard" width="525" height="576"><br>
-        <br>By default, the CDT filters the <strong>Toolchain</strong> and <strong>Project types</strong> that it displays in those lists based on the language support for the C++ Project wizard you selected for this tutorial.</p>
+	    <p><img src="../images/cdt_w_basic04.png" alt="C++ project wizard"><br>
     <br>
     
 	
     <ol style="list-style-type: lower-alpha;">
-        <li>In the <strong>Project name</strong> field, type a name for the project, such as <strong>HelloWorld</strong>.
+        <li>In the <strong>Project name</strong> field, type a name for the project, such as <strong>bitreverse</strong>.
             <p><br>
                 </p>
         </li>
-        <li>From the <strong>Project type</strong> list, expand <strong>Executable</strong> and select <strong>Hello World C++ Project</strong>. This project type provides a simple Hello World application in C++, and the makefile is automatically created by the CDT.
-            <p><br>
-                </p>
-        </li>
-        <li>Select a required toolchain from the <strong>Toolchain</strong> list.
-            <p><br>
-                </p>
-            <p>A toolchain is a set of tools (such as a compiler, linker, and assembler) intended to build your project.
-                Additional tools, such as a debugger, can be associated with a toolchain.
-                There can be several toolchains available, depending on the compilers installed on your system.</p>
+        <li>From the <strong>Project type</strong> list, expand <strong>Executable</strong> and select <strong>CUDA Runtime Project</strong>. This project type provides a simple application in CUDA C, and the makefile is automatically created by Nsight.
             <p><br>
                 </p>
         </li>
@@ -79,15 +59,19 @@ Now with CDT, you just select a project type, and that determines what build sys
 
 
 
-    <li>Specify the <strong>Basic Properties</strong> for the new project, such as your author, copyright, and source information, then click <strong>Next</strong>.<br>
-        <br>
-        <img src="../images/cdt_w_basic06a.png" alt="Basic properties of a project" width="525" height="576"><br>
-        <br>
-        </li>
+    <li><p>Specify the <strong>Basic Settings</strong> for the new project, such as your target hardware, device code linking type and source folder location, then click <strong>Next</strong>.</p>
+        <img src="../images/cdt_w_basic06a.png" alt="Basic properties of a project"><br>
+			<p>
+				<strong>NOTE:</strong> Nsight, Eclipse Edition will detect CUDA
+				hardware installed on the local system and will pick defaults that
+				enable all the features of available GPUs. It will set defaults
+				compatible with any CUDA hardware if hardware detection fails. Note
+				that some CUDA functions and APIs may become unavailable.
+			</p></li>
     <li>
-    <p>The <strong>Select Configurations</strong> page displays a list of configurations based on the project type and toolchain(s)  selected earlier. <br>
+    <p>The <strong>Select Configurations</strong> page displays a list of configurations based on the project type selected earlier. <br>
             <br>
-        <img src="../images/cdt_w_basic07.png" alt="Select configurations page" width="525" height="576"><br>
+        <img src="../images/cdt_w_basic07.png" alt="Select configurations page"><br>
                 <br>
                     <strong>OPTIONAL</strong>: If you want to change the default project settings, click <strong>Advanced Setting</strong> to open the <a href="../reference/cdt_u_prop_all.htm">Project Properties</a> dialog for your new project allowing you change any of the project specific settings,
         such as includes paths, compiler options, and libraries.<br>
@@ -96,23 +80,21 @@ Now with CDT, you just select a project type, and that determines what build sys
     <li><p>Click <strong>Finish</strong>.<br>
 </p></li>
     </ol>
-<p><strong>NOTE</strong> If the <strong>C++ perspective</strong> is not currently set as the default, you are prompted to determined if you would like to this project to be associated with the C/C++ perspective. Click <strong>Yes</strong>.<br>
-</p>
-<p>A project is created with the default settings and a full set of configurations based on the project type and toolchain you selected.
+<p>A project is created with the default settings and a full set of configurations based on the project type you selected.
         You should now see the new project in <a href="../reference/cdt_u_project_explorer_view.htm">Project Explorer</a> view.</p>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="../images/cdt_w_basic12.png" alt="New project displayed in the Project Explorer view" width="423" height="283"></p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="../images/cdt_w_basic12.png" alt="New project displayed in the Project Explorer view"></p>
 <br>
 <hr>
 <br>
-<h2>Step 2: <a name="cdt_build" id="cdt_build"></a>Reviewing the code and building the project</h2>
+<h2>Step 2: <a name="cdt_build" id="cdt_build"></a>Review the code and build the project</h2>
 <ol>
-	<li>From the  <strong>Project Explorer</strong> view, double-click the .cpp file  created for your project, for example, <span class="typewriter">HelloWorld.cpp</span>. You'll find it within the project  "<span class="typewriter">src</span>" folder.<br>
+	<li>From the  <strong>Project Explorer</strong> view, double-click the .cu file  created for your project, for example, <span class="typewriter">bitreverse.cu</span>. You'll find it within the project  "<span class="typewriter">src</span>" folder.<br>
     <br>
-    <p>This file opens in a default editor. It contains C++ template code for the Hello World example project you selected earlier. In addition, the <a href="../reference/cdt_u_outline_view.htm">Outline</a> view has also been populated
+    <p>This file opens in a default editor. It contains CUDA C template code for the bitreverse example project you selected earlier. In addition, the <a href="../reference/cdt_u_outline_view.htm">Outline</a> view has also been populated
         with objects created from your code.<br>
         <br>
-        <img src="../images/cdt_w_basic13.png" alt="C Editor with Outline view" width="731" height="333"><br>
+        <img src="../images/cdt_w_basic13.png" alt="C Editor with Outline view"><br>
         <br>
         <strong>NOTE:</strong> You can specify a different editor, and add or modify existing code templates in <strong>Window &gt; Preferences</strong>.<br>
         <br>
@@ -126,13 +108,11 @@ Now with CDT, you just select a project type, and that determines what build sys
     <li>Build your project by pressing <strong>CTRL+B</strong>, or select the project in the <strong>Project Explorer</strong> view and select <strong>File &gt; Build Project</strong>.
         </p>
         <p><br>
-            <strong>NOTE:</strong> If a build generates any errors or warnings, you can see those in the <a href="../reference/cdt_u_problems_view.htm">Problems</a> view. If you encounter difficulty, see the topics <a href="../concepts/cdt_c_build_over.htm">Building C/C++ projects</a> and <a href="../concepts/cdt_c_before_you_begin.htm">Before you begin</a><br>
+            <strong>NOTE:</strong> If a build generates any errors or warnings, you can see those in the <a href="../reference/cdt_u_problems_view.htm">Problems</a> view. If you encounter difficulty, see the topics <a href="../concepts/cdt_c_build_over.htm">Building projects</a><br>
             .</p>
     </li>
-<li>Read through the build messages in the <a href="../reference/cdt_u_console_view.htm">Console</a> view.
+<li><p>Read through the build messages in the <a href="../reference/cdt_u_console_view.htm">Console</a> view.
 The project should build successfully.</p>
-<br>
-<br>
 <p>You will also see the <strong>Outline</strong> view has also been populated
 with objects created from your code. If you select an item from the <strong>Outline</strong> view, the
 corresponding text in the editor is highlighted.</p></li>
@@ -140,7 +120,7 @@ corresponding text in the editor is highlighted.</p></li>
 
 <hr>
 <br>
-<h2>Step 3: <a name="cdt_running" id="cdt_running"></a>Running the application</h2>
+<h2>Step 3: <a name="cdt_running" id="cdt_running"></a>Run the application</h2>
 
 <p>To run your application:</p>
 <ol>
@@ -149,17 +129,19 @@ corresponding text in the editor is highlighted.</p></li>
     <li>Click <strong>New</strong>.<br>
     
 
-	<p>A new Run Configuration is created. Its name and path to the executable are provided by the project ('Hello World' in our case). 
+	<p>A new Run Configuration is created. Its name and path to the executable are provided by the project ('bitreverse' in our case). 
 	</li>
 	<li>Click <strong>Run</strong>.<p><br></p>
 
-<p>Now, you should see the Hello World application running in the <strong>Console</strong> view.  
+<p>Now, you should see the bitreverse application running in the <strong>Console</strong> view.  
 The <strong>Console</strong> also shows which application is running in a title bar.</p><br></li>
 
 	<li>You can click the other views to see the information that they contain.</li>
 </ol> 
 
 
+<hr>
+<p>See <a href="../tasks/cuda_proj_new_cuda_sample.htm">Creating a new project from CUDA sample</a> to learn how to import CUDA sample as a Nsight, Eclipse Edition project.</p>
 <hr>
 <img src="../images/ng00_07.gif" ALT="QNX Software Systems Copyright Statement" >
 </body>

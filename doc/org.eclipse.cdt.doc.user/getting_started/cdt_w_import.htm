@@ -15,13 +15,13 @@ function newWin(url) {
 <body>
 <h1 role="main">Tutorial: Importing an existing project</h1>
 
-<p>The following tutorial takes you though the process of importing a 'legacy' application using the CDT.</p>
+<p>The following tutorial takes you though the process of importing a 'legacy' application into Nsight workspace.</p>
 
 
 <p>Step 1: You want to create a single project that will reflect all of the components for the existing source tree.<br></p>
 <ol>
 	<li>Select <strong>File &gt; New &gt; Project</strong>.</li>
-	<li>For this tutorial, expand <strong>C/C++</strong> and select <strong>C++ project</strong>.
+	<li>For this tutorial, expand <strong>C/C++</strong> and select <strong>CUDA C/C++ project</strong>.
 	<p><br>
 	The <strong>New Project</strong> wizard displays. 
 	<a href="javascript:void(0)" onClick="newWin('../images/cdt_w_import02.png')">Click
@@ -32,8 +32,8 @@ function newWin(url) {
 	resources reside in the file system, in a location other than your workspace. <br>
 	We assume this directory location already exists, and contains e.g. source files and makefile. If it does not exist, it
 	will be created.
-	<p>In this example, we will use an existing <code>hello.cpp</code> and its 
-	existing <code>hello.mak</code>  makefile, located in the directory <code>c:\brandon</code>.
+	<p>In this example, we will use an existing <code>hello.cu</code> and its 
+	existing <code>hello.mak</code>  makefile, located in the directory <code>/home/brandon/project</code>.
 	<p>&nbsp;
 		<a href="javascript:void(0)" onClick="newWin('../images/cdt_w_importBrandon01.png')">Click
 	here to see an illustration (displayed in a separate window)</a>.</p>
@@ -42,18 +42,18 @@ function newWin(url) {
 	<li>In the <strong>Location</strong> field, specify the path to the existing files for your project.</li>
 	<li>From the <strong>Project types</strong> list, expand <strong>Makefile Project</strong> and select <strong>Empty Project.</strong>.
 	<ul>
-		<li>To have sample source and a makefile created in your existing directory, select <strong>Hello World C++ Project</strong></li>
+		<li>To have sample source and a makefile created in your existing directory, select <strong>CUDA Runtime Project</strong></li>
 	</ul></li>
-	<li>Make sure a toolchain is selected.</li>
 
 	<li>Click <strong>Next</strong>.
-	<p>&nbsp;</p></li>
+	</li>
 
-	<li>(Optional) On the <strong>Select Configurations</strong> page, select only the configurations you want created. Configurations
-	display for each toolchain selected on the previous page of the wizard.</li>
+	<li>On the <strong>Basic Settings</strong> page, specify CUDA device compatibility settings. 
+
+	<li>(Optional) On the <strong>Select Configurations</strong> page, select only the configurations you want created.</li>
 	<li>Click <strong>Finish</strong> to close the dialog box.
 	<p>You will see the new project in the Project Explorer view. In addition, new 'dot' files have been created in
-	your legacy project's root directory, these are CDT project files.</p>
+	your legacy project's root directory, these are project files.</p>
 	<ul>
 		<li>(Optional) To see these "hidden" files, open the view menu on the Project explorer view, and select
 		"Customize View." <br>

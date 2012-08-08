@@ -27,16 +27,14 @@
 Normally a toolchain defines a set of Error Parsers to deal with output of each tool. It is possible
 to redefine that set on a per-project basis in project properties:
 </p>
-<p>
   <ol>
-    <li>In the C/C++ Projects view, right-click the project, and select <strong>Properties</strong>.</li>
-    <li>Expand <strong>C/C++ Build</strong>.</li>
+    <li>In the Project Explorer view, right-click the project, and select <strong>Properties</strong>.</li>
+    <li>Expand <strong>Build</strong>.</li>
     <li>Select <strong>Settings</strong>.</li>
     <li>Click the <strong>Error Parsers</strong> tab.</li>
     <li>In the <strong>Error parsers</strong> list, select error parsers.</li>
     <li>Click <strong>OK</strong>.</li>
   </ol>
-</p>
 <p>Note that the order of error parsers is significant. Normally an error parser will <em>consume</em>
 the line where it spotted an error/warning and the others down the line won't get a chance to parse it.
 </p>
@@ -44,7 +42,7 @@ the line where it spotted an error/warning and the others down the line won't ge
 <p>CDT provides one special kind of error parser, <strong>CDT pushd/popd CWD Locator</strong>.
 This parser does not create problem markers but it is looking for output of <strong>pushd</strong>
 and <strong>popd</strong> commands which are commonly used in makefiles to print the Current Working Directory (CWD).
-CDT can use this information to associate the file names appearing in the output relative to the CWD.
+Nsight can use this information to associate the file names appearing in the output relative to the CWD.
 Note that that kind of parser needs to be the first to be able to provide the CWD to the other parsers.
 </p>
 
@@ -71,7 +69,7 @@ Note that that kind of parser needs to be the first to be able to provide the CW
 </p>
 
 <p><img src="../images/ngconcepts.gif" ALT="Related concepts" width="143" height="21">
-<br><a href="../concepts/cdt_c_projects.htm">CDT Projects</a>
+<br><a href="../concepts/cdt_c_projects.htm">Projects</a>
 <br><a href="../concepts/cdt_c_proj_file_views.htm">Project file views</a>
 </p>
 

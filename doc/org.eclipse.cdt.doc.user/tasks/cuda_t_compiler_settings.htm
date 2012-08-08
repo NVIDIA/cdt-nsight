@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Language" content="en-us" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Customizing CUDA build</title>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+<style type="text/css">
+.screenshot {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+</style>
+</head>
+<body>
+	<h1 role="main">Customizing CUDA build</h1>
+
+	<p>
+		CUDA-specific build settings are set on the <em>Build</em> &gt; <em>CUDA</em>
+		project property page.<img
+			src="../images/cuda/cuda-project-properties.png"
+			alt="CUDA project properties page" class="screenshot" />
+	</p>
+	<p>
+		At the top of this property page there is a drop-down list of the
+		build configurations for the selected project. Select <em>[All
+			Configuration]</em> to edit all build configurations at once.
+	</p>
+
+	<a id="device-linker"></a>
+	<h2>Setting device linker mode</h2>
+	<p>
+		<strong>Note:</strong> Consult NVCC manual for details on whole and
+		separate compilation
+	</p>
+	<p>Nsight, Eclipse Edition supports both separate and whole device
+		code compilation. Separate compilation enables device code to refer to
+		functions defined in other source files or precompiled device code
+		libraries. Code built using separate compilation may only target GPUs
+		with compute capability 2.0 or higher. PTX can not be generated when
+		separate compilation is used.</p>
+	<p>Device linker mode is a project-wide setting. Use radio buttons
+		under build configuration selection combobox to toggle device linker
+		mode for your project. By default, Nsight uses whole program
+		compilation for new projects.</p>
+
+	<a id="compute-capability"></a>
+	<h2>Configuring target compute capabilities</h2>
+	<p>
+		A GPU’s compute capability indicates the features available on that
+		device. Higher compute capability devices provide all the features of
+		the lower ones in addition to new features. Consult <a
+			href="PLUGINS_ROOT/com.nvidia.cuda.help/cuda-c-programming-guide.html#compute-capabilities">CUDA
+			C Programming Guide</a> for a list of features available in different
+		compute capabilities.
+	</p>
+	<p>
+		GPU code can be compiled into <em>PTX</em> or <em>SASS</em> form. SASS
+		stands for Shader ASSembly and is a low-level binary code directly
+		executed on the GPU. SASS code is not compatible between major compute
+		capability versions. PTX is an assembly-like language that is compiled
+		into device-dependent SASS by a CUDA driver when kernel is loaded for
+		the first time. PTX is forward compatible and is guaranteed to run on
+		future CUDA devices.
+	</p>
+	<p>
+		Nsight projects can be configured to target one or more compute
+		capabilities and to emit both PTX and SASS code. This can be done by
+		checking appropriate checkboxes on the <em>CUDA</em> project property
+		page. Some checkboxes are disabled when <em>separate compilation</em>
+		is enabled as separate compilation can only emit SASS code for compute
+		capability 2.0 or higher.
+	</p>
+	<p>
+		<strong>Note:</strong> Device code is recompiled for every targetted
+		compute capability and code format, increasing application executable
+		size and time needed to rebuild the project.
+	</p>
+	<p>Nsight detects compute capability of the devices installed
+		locally and will validate project settings against those devices. It
+		also provides sensible defaults when creating a new project.</p>
+
+	<a id="source-editor"></a>
+	<h2>Configuring source editor compute capability</h2>
+	<p>Nsight source editor can be configured to develop code for
+		specific compute capabilities. This will adjust code assist proposal
+		lists to show functions available for the given compute capabilities
+		and will highlight inactive code based on precompiler macro values for
+		the given architecture. The following image shows an example of the
+		source editor when the compute capability is set to 2.0. In this case
+		the source editor detects that the ‘idata’ variable is not defined.</p>
+	<img alt="Source editor with SM 2.0"
+		src="../images/cuda/cuda-editor-cc.png" class="screenshot"
+		border="1pt" />
+	<p>
+		By default, Nsight editor will "target" lowest compute capability
+		supported by the project. This setting can be changed by selecting a
+		different value in the <em>Source editor compute capabilty</em>
+		drop-down list on the <em>CUDA</em> project property page.
+	</p>
+
+	<a id="device-lib"></a>
+	<h2>Using static device code libraries</h2>
+	<p>CUDA Toolkit 5.0 introduces separate compilation where device
+		linker can link together device functions from different source files.
+		This enables using precompiled static libraries of the device code.
+		Nsight provides support both for writing device code libraries and to
+		link with existing device code libraries.</p>
+	<h3>Creating a static device code library</h3>
+	<ol>
+		<li>Open <em>CUDA C/C++ Project</em> new project wizard and
+			select <em>Empty Project</em> under <em>Static Library</em> project
+			type.
+		</li>
+		<li>Enter a project name</li>
+		<li>On the next project page, enable <em>Separate
+				compilation</em> device linker mode. Verify target compute capabilities.
+		</li>
+		<li>Complete the wizard to create a new project</li>
+	</ol>
+	<p>Static library projects can export both device and host
+		functions.</p>
+	<h3>Linking with static device code libraries</h3>
+	<p>Separate compilation must be enabled for the project to link
+		with static device code libraries.</p>
+	<p>Nsight supports linking with both static library projects and
+		externally provided static device code libraries. To link with static
+		library project:</p>
+	<ol>
+		<li>Open project properties for the project you want to link with
+			static library</li>
+		<li>Open <em>General</em> &gt; <em>Paths and Symbols</em> page
+		</li>
+		<li>Focus on <em>References</em> tab
+		</li>
+		<li>For every static library project you want to link with, check
+			the build configuration you want Nsight to use to build static
+			library before linking</li>
+	</ol>
+	<p>Nsight will incrementally rebuild all static library projects
+		before building the main project.</p>
+	<p>To link with static libraries built outside of Nsight:</p>
+	<ol>
+		<li>Open project properties for the project you want to link with
+			static library</li>
+		<li>Open <em>General</em> &gt; <em>Paths and Symbols</em> page
+		</li>
+		<li>Focus on <em>Libraries</em> tab
+		</li>
+		<li>Specify names of the libraries you want to link with. Library
+			names exclude "lib" prefix and file extension</li>
+		<li>Specify library path on the <em>Library Paths</em> tab if
+			libraries location is not a part of the default library search path.
+		</li>
+	</ol>
+	<p>
+		<img src="../images/ngconcepts.gif" alt="Related concepts" width="143"
+			height="21"><br> <a href="../concepts/cdt_c_projects.htm">Projects</a><br>
+		<a href="../concepts/cdt_c_proj_file_views.htm">Project file views</a>
+	</p>
+	<p>
+		<img src="../images/ngtasks.gif" alt="Related tasks" width="143"
+			height="21"> <br> <a href="cdt_t_proj_build_set.htm">Defining
+			project build settings</a><br /> <a href="cdt_o_proj_files.htm">Working
+			with project files</a>
+	</p>
+</body>
+</html>

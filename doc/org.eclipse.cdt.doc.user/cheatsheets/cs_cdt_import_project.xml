@@ -1,36 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cheatsheet title="Importing C/C++ Projects">
+<cheatsheet title="Importing Existing Projects">
    <intro>
       <description>
-         This guide walks you though the process of importing a C/C++ project into CDT.
+         This guide walks you though the process of importing an existing project into Nsight, Eclipse Edition.
       </description>
    </intro>
-   <item title="C/C++ workbench setup" dialog="false" skip="false" href="/org.eclipse.cdt.doc.user/concepts/cdt_c_perspectives.htm">
+   <item title="Creating a project" dialog="true" skip="false" href="/org.eclipse.cdt.doc.user/reference/cdt_u_new_proj_wiz.htm">
       <description>
-         Start by setting up the CDT development environment.
+         Create a CUDA C/C++ project using new project wizard.
       </description>
-      <subitem label="Open C/C++ perspective." skip="true">
-         <command serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.eclipse.cdt.ui.CPerspective)" confirm="false">
-         </command>
+      <subitem label="Click File &gt; New &gt; CUDA C/C++ Project to launch the new project wizard." skip="true">
+         <command
+               required="false"
+               serialization="org.eclipse.ui.newWizard(newWizardId=com.nvidia.cuda.ide.newcuproject)"/>
       </subitem>
-   </item>
-   <item title="Creating a C/C++ project" dialog="true" skip="false" href="/org.eclipse.cdt.doc.user/reference/cdt_u_new_proj_wiz.htm">
-      <description>
-         Create a C++ or C project by choosing one of the following wizards.
-      </description>
-      <subitem label="Click File &gt; New &gt; C++ Project to launch the new C++ project wizard." skip="true">
-         <command serialization="org.eclipse.ui.newWizard(newWizardId=org.eclipse.cdt.ui.wizards.NewCWizard1)" confirm="false">
-         </command>
+      <subitem label="Choose Executable &gt; CUDA Runtime Project from the Project types list." skip="false">
       </subitem>
-      <subitem label="Click File &gt; New &gt; C Project to launch the new C project wizard." skip="true">
-         <command serialization="org.eclipse.ui.newWizard(newWizardId=org.eclipse.cdt.ui.wizards.NewCWizard2)" confirm="false">
-         </command>
+      <subitem label="Type a project name and set its location then click Next." skip="false">
       </subitem>
-      <subitem label="Choose Executable &gt; Hello World C/C++ Example from the Project types list." skip="false">
-      </subitem>
-      <subitem label="Type a project name, set its location, and select a Toolchain, then click Next." skip="false">
-      </subitem>
-      <subitem label="Enter Basic Project information, then click Next." skip="true">
+      <subitem label="Enter Basic Project information, then click Next." skip="false">
       </subitem>
       <subitem label="Select platforms and configurations to show in the Run/Debug menus, click Finish." skip="true">
       </subitem>

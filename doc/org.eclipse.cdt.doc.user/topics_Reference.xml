@@ -26,6 +26,7 @@
 	</topic>
 	
 	<topic label="Debug views" href="reference/cdt_o_dbg_view.htm">
+		<topic label="CUDA view" href="reference/cuda_u_cudaview.htm"/>
 		<topic label="Registers view" href="reference/cdt_u_registersview.htm"/>
 		<topic label="Memory view" href="reference/cdt_u_memoryview.htm"/>
 		<topic label="Traditional Memory Rendering preferences" href="reference/cdt_u_mem_view_pref.htm"/>

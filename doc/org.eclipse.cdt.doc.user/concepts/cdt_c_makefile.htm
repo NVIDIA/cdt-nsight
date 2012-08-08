@@ -11,7 +11,7 @@
 <body>
 <h1 role="main">Makefile</h1>
 <p>A makefile is a text file that is referenced by the make command that describes the building of targets, and contains information such as source-level dependencies and build-order dependencies.  </p>
-<p>The CDT can generate a makefile for you, such projects are called Managed Make projects.  Some projects, known as Standard Make projects, allow you to define your own makefile.</p>
+<p>Nsight can generate a makefile for you, such projects are called Managed Make projects.  Some projects, known as Standard Make projects, allow you to define your own makefile.</p>
 
 <h2>Sample Makefile</h2>
 <pre>
@@ -109,7 +109,7 @@ Error launching builder (make -k clean all )
 </pre>
 
 <p>Most probably, the build command (by default "make") is not on your path. You can put it on your path and restart Eclipse.<br>
-You can also change the build command to something that is on your path. If you are using MinGW tools to compile, you should replace the build command with "mingw32-make".</p>
+You can also change the build command to something that is on your path.</p>
 
 <p><strong>Q2. My Console view says <span class="typewriter"><Q>No rule to make target 'X'</Q></span>.</strong></p>
 <pre>
@@ -161,17 +161,6 @@ Messages from the standard error stream (the lines saying Error 255) and standar
 This is helpful for build large projects.</p>
 <p>You can remove the -k flag by turning on Project Properties > C/C++ Make Project > Make Builder > Stop on first build error</p>
 
-<p><strong>Q6. My Console view looks like:</strong></p>
-<pre>
-mingw32-make clean all 
-process_begin: CreateProcess((null), rm -f Test1.o Test2.o Main.o test_me.exe, ...) failed.
-make (e=2): The system cannot find the file specified.
-
-mingw32-make: *** [clean] Error 2
-rm -f Test1.o Test2.o Main.o test_me.exe
-</pre>
-
-<p>This means that mingw32-make was unable to find the utility "rm".  Unfortunately, MinGW does not come with "rm".  To correct this, replace the clean rule in your Makefile with:</p>
 <p><pre>
 clean : 
 	-del $(REBUILDABLES)

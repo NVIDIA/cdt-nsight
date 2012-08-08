@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Defining debug settings</title>
+<title>Configuring debugger behaviour</title>
 <link rel="stylesheet" type="text/css" href="../help.css">
 <script language="JavaScript">
 function changeSize(theImage,wd,ht) {
@@ -18,25 +18,37 @@ function changeSize(theImage,wd,ht) {
 
 <body>
 
-<h1 role="main">Defining debug settings</h1>
+<h1 role="main">Configuring debugger behaviour</h1>
 
 <p>Select a debugger to use when debugging an application.</p>
 
 <p>To select a debugger:</p>
 
 <ol>
-  <li>In  the C/C++ Projects view, select a project.</li>
-  <li>Click <strong>Run &gt; Run</strong> or <strong>Run &gt; Debug</strong>.</li>
-  <li>In the <strong>Configurations</strong> box, expand <strong>C/C++ Local</strong>.</li>
-  <li>Select a run or debug configuration.</li>
+  <li>In the Project Explorer view, select a project.</li>
+  <li>Click <strong>Run &gt; Debug Configurations...</strong>.</li>
+  <li>In the <strong>Configurations</strong> box, expand <strong>C/C++ Application</strong>.</li>
+  <li>Select a debug configuration.</li>
   <li>Click the <strong>Debugger</strong> tab..<br>
   	  <img src="../images/run_debugger.png" alt="Run Debugger window">
   </li>
-  <li>Select a debugger from the <strong>Debugger</strong> list.</li>
   <li>To let your program run until you interrupt it manually, or until it 
-      hits a breakpoint, clear the <strong>Stop at main() on startup</strong> check box .</li>  
-  <li>Specify debug options in the <strong>Debugger Options</strong> box.</li>
-  <li>Click <strong>Run</strong> or do the following, as required:<ul><li>To specify the 
+      hits a breakpoint, clear the <strong>Stop at main() on startup</strong> check box .</li>
+		<li>Some important settings include:
+			<ul>
+				<li><strong>Enabled CUDA devices</strong> - this setting
+					controls what locally installed CUDA devices will be available to
+					CUDA application. Note that GPUs used to render OS UI will be
+					excluded by the debugger automatically.</li>
+				<li><strong>Break on CUDA API call failure</strong> - will
+					automatically stop the application when CUDA API call fails, even
+					if the return value is not checked by the application</li>
+				<li><strong>Enable CUDA memcheck</strong> - runs the debugger
+					with enabled <em>cuda-memcheck</em> integration. Enabling memcheck
+					increases precision of the device exceptions attribution and allows
+					detecting some subtle memory access problems.</li>
+			</ul></li>
+		<li>Click <strong>Debug</strong> or do the following, as required:<ul><li>To specify the 
     execution arguments that an application uses and the working directory for a run 
     configuration, see <a href="cdt_t_run_arg.htm">Specifying execution arguments</a>.</li><li>To set the environment variables 
     and the values to use when an application runs, see <a href="cdt_t_run_env.htm">
@@ -51,7 +63,7 @@ function changeSize(theImage,wd,ht) {
 
 <p><img src="../images/ngconcepts.gif" ALT="Related concepts" width="143" height="21">
 <br>
-<a href="../concepts/cdt_c_projects.htm">CDT Projects</a><br>
+<a href="../concepts/cdt_c_projects.htm">Projects</a><br>
 <a href="../concepts/cdt_c_proj_file_views.htm">Project file views</a><br>
 <a href="../concepts/cdt_c_over_dbg.htm">Debug overview</a><br>
 <a href="../concepts/cdt_c_dbg_info.htm">Debug information</a></p>

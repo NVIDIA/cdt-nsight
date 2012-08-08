@@ -21,18 +21,18 @@ examining the contents of variables.</p>
       <br>
       <p>The <strong>Debug</strong> <strong>Configurations</strong> dialog opens.<br>
               <br>
-                <img src="../images/cdt_w_debug_configurations_01.png" alt="Debug Configurations dialog" width="873" height="662"><br>
+                <img src="../images/cdt_w_debug_configurations_01.png" alt="Debug Configurations dialog"><br>
       <br>
   </li>
   <li>Double-click <strong>C/C++  Application</strong> to create a new launch configuration.<br>
           <br>
-            <img src="../images/cdt_w_debug_configurations_02.png" alt="C/C++ Application debug configuration" width="763" height="601"><br>
+            <img src="../images/cdt_w_debug_configurations_02.png" alt="C/C++ Application debug configuration"><br>
       <br>
       <p>If a project is selected in the <a href="../reference/cdt_u_project_explorer_view.htm">Project Explorer</a> view the following data is automatically entered, take a moment to verify its accuracy or change as needed.      <br>
           <br>
       </p>
       <ol style="list-style-type: lower-alpha;">
-          <li>In the <strong>Name</strong> edit box, type the project name, like <strong>Hello World</strong>.<br>
+          <li>In the <strong>Name</strong> edit box, type the project name, like <strong>bitreverse</strong>.<br>
               <br>
               You can now select this debug launch configuration by name the next time 
               that you debug this project.<br>
@@ -44,19 +44,14 @@ examining the contents of variables.</p>
               <br>
           </li>
           <li>
-                <p>In the <strong>Project</strong> edit box, type or choose your project, e.g. <strong>HelloWorld</strong>.<br>
-                </p>
-              <p>&nbsp;</p>
-              <p><strong>NOTE</strong> If you see the error "<span class="typewriter">[Debugger]: No debugger available</span>", select the <strong>Debugger</strong> tab
-                      and choose a valid debugger for your platform (e.g. <span class="typewriter">gdb/mi</span>). <br>
-                    <br>
+                <p>In the <strong>Project</strong> edit box, type or choose your project, e.g. <strong>bitreverse</strong>.<br>
                 </p>
           </li>
       </ol>
     </li>
   <li>Click <strong>Debug</strong>.<br><br>
   <p>You may be prompted to switch to the <strong>Debug</strong> perspective.  Click <strong>Yes</strong></p><br>
-  <p>The <strong>Debug</strong> perspective appears with the <span class="typewriter">helloworld.exe</span> application window open. 
+  <p>The <strong>Debug</strong> perspective appears with the <span class="typewriter">bitreverse</span> application window open. 
   The C/C++ editor repositions in the perspective.</p>
 
 <br>
@@ -66,15 +61,11 @@ examining the contents of variables.</p>
       <br>
 </li>
 
-    <li>In the left margin of the <span class="typewriter">main.cpp</span> window, double-click to set a 
-        breakpoint on:<br>
-        <br>
-        &nbsp;<span class="typewriter">cout &lt;&lt; &quot;You just entered&quot;
-        </span><br>
-        <br>
-        You'll see a blue circle (<img src="../images/icon_breakpoint_obj.gif" alt="Breakpoint" width="16" height="16">) there indicating the breakpoint is set.</br>
-        <br>
-        <br>
+    <li><p>In the left margin of the <span class="typewriter">main.cpp</span> window, double-click to set a 
+        breakpoint on line 37:</p>
+        <pre>__global__ void bitreverse(void *data) {
+        </pre>
+        <p>You'll see a blue circle (<img src="../images/icon_breakpoint_obj.gif" alt="Breakpoint" width="16" height="16">) there indicating the breakpoint is set.</p>
     </li>
     <li>Click <strong>Run  &gt; Resume</strong>.
         <br>
@@ -83,29 +74,13 @@ examining the contents of variables.</p>
         .<br>
         <br>
     </li>
-    <li>When prompted, in the <strong>Console</strong> view, type a value other than 'm', and press Enter.<br>
-        <br>
-        The breakpoint will be hit.<br>
-        <br>
+    <li><p>
+        The breakpoint will be hit.</p>
     </li>
-    <li>In the <strong>Variables</strong> view, verify that the variable is not 'm'.<br>
-        <br>
-    </li>
-    <li>Click <strong>Run  &gt; Resume</strong>.<br>
-        <br>
-    </li>
-    <li>When prompted, again type a value other than 'm' in the <a href="../reference/cdt_u_console_view.htm">Console</a> view, and press Enter.
-    <p>The breakpoint will be hit.</p></li>
-    <li>In the <strong>Variables</strong> view, verify that the variable is not 'm'.<br>
-        <br>
-    </li>
-    <li>In the <strong>Variables</strong> view, right-click the input variable, and select <strong>Change Value...</strong> 
-        and type <strong>'m'</strong> <em>between the single quotes</em> and hit <strong>OK</strong>.<br>
-        <br>
+    <li>You can now explore your application state.
     </li>
     <li>Click <strong>Run  &gt; Resume</strong>.
-    <p>The output in the <span class="typewriter">helloworld.exe</span> application window is: &nbsp;&quot;<span class="typewriter">You just entered m, you need to enter m to exit.</span>&quot;
-    </p></li>
+	</li>
     <li>The application terminates and the debug session ends. The <strong>Debug</strong>  perspective remains open.</li>
 </ol>
 <p>To learn more about   debugging, see   the related debug conceptual topics.</p>

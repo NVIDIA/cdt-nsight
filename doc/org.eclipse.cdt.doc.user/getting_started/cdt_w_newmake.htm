@@ -17,42 +17,35 @@ function newWin(url) {
 
 <h1 role="main">Creating a makefile</h1>
 
-<p>For the purpose of this tutorial, you were instructed to create a C++ Project which requires you to create a makefile.</p>
+<p>For the purpose of this tutorial, you were instructed to create a project which requires you to create a makefile.</p>
 
 <p>To create a makefile:</p>
 <ol>
-  <li>In the <strong>Project Explorer</strong> view, right-click the <strong>HelloWorld</strong> project 
+  <li>In the <strong>Project Explorer</strong> view, right-click the <strong>bitreverse</strong> project 
   folder and select <strong>New &gt; File</strong>.</li>
   <li>In the <strong>File name</strong> box, type <strong>makefile</strong>.</li>
   <li>Click <strong>Finish</strong>.</li>
   <li>Type the gnu make instructions below in the editor. Lines are 
   indented with tab characters, not with spaces.
-
 <blockquote>
-  <p>
-  <br>
-  all: hello.exe<br>
-  <br>
-  clean:<br>
-&nbsp;&nbsp;&nbsp; rm main.o hello.exe<br>
-  <br>
-  hello.exe: main.o<br>
-&nbsp;&nbsp;&nbsp; g++ -g -o hello main.o<br>
-  <br>
-  main.o:<br>
-&nbsp;&nbsp;&nbsp; g++ -c -g main.cpp<br>
-&nbsp;</p>
+<pre>all: bitreverse
+
+clean:
+	rm bitreverse.o bitreverse
+
+bitreverse: main.o
+	nvcc -o bitreverse $&lt;
+
+main.o: main.cu
+	nvcc --compile -g -G -O0 -o main.o $&lt;</pre>
 </blockquote>
 </li>
   <li>Click <strong>File &gt; 
   Save</strong>.</li></ol>
 
-<p>Your new makefile, along with your main.cpp file are 
-displayed in the Project Explorer view. Your project now 
-contains main.cpp and makefile. You can now build your HelloWorld project.</p>
-
-
-<p>NEW <a href="javascript:void(0)" onClick="newWin('../images/cdt_w_newmake02.png')">Click here to see an illustration</a>.</p>
+<p>Your new makefile, along with your main.cu file are 
+displayed in the <em>Project Explorer</em> view. Your project now 
+contains main.cu and makefile. You can now build your <strong>bitreverse</strong> project.</p>
 
 <p>
 <a href="cdt_w_build.htm" style="text-decoration: none">
@@ -63,18 +56,18 @@ contains main.cpp and makefile. You can now build your HelloWorld project.</p>
 <p>
 
 <a href="cdt_w_newcpp.htm">
-<img src="../images/ngback.gif" width="16" height="16" alt="Back icon"></a> <strong><a href="cdt_w_newcpp.htm">Back: Creating your C++ file</a></strong> </p>
+<img src="../images/ngback.gif" width="16" height="16" alt="Back icon"></a> <strong><a href="cdt_w_newcpp.htm">Back: Creating your source file</a></strong> </p>
 <p><img src="../images/ngconcepts.gif" ALT="Related concepts" width="143" height="21">
 <br>
 <a href="../concepts/cdt_c_projects.htm">Project</a><br>
 <a href="../concepts/cdt_o_code_entry.htm">Code entry</a></p>
 <p><img src="../images/ngtasks.gif" ALT="Related tasks" width="143" height="21">
 <br>
-<a href="../tasks/cdt_o_proj_files.htm">Working with C/C++ project files</a><br>
+<a href="../tasks/cdt_o_proj_files.htm">Working with project files</a><br>
 <a href="../tasks/cdt_o_write_code.htm">Writing code</a></p>
 <p><img src="../images/ngref.gif" ALT="Related reference" width="143" height="21">
 <br>
-<a href="../reference/cdt_o_proj_prop_pages.htm">C/C++ Projects view</a></p>
+<a href="../reference/cdt_o_proj_prop_pages.htm">Project Explorer view</a></p>
 
 <p>
 <img src="../images/ng00_04a.gif" ALT="IBM Copyright Statement" >

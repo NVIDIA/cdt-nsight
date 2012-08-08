@@ -2,9 +2,8 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 <!-- Defines topics that will be inserted under the C/C++ Development User Guide menu-->
 
-<toc id="cdt" label="C/C++ Development User Guide" topic="concepts/cdt_o_home.htm">
+<toc id="cdt" label="Nsight, Eclipse Edition User Guide" topic="concepts/cdt_o_home.htm">
 
-	<topic label="Before you begin"  href="concepts/cdt_c_before_you_begin.htm"/>
 
 	<topic label="Getting Started" href="getting_started/cdt_o_tutorial.htm">
 		<link toc="topics_Getting_Started.xml" />
@@ -28,8 +27,6 @@
 	
     <anchor id="cdt_Appendum_Anchor"/>
     
-	<topic label="What's new in CDT"  href="concepts/cdt_c_whatsnew.htm"/>
-	
 	<topic label="Legal" href="notices.html"/>
 	
 </toc>
