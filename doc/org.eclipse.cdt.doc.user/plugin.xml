@@ -132,12 +132,5 @@
             content="$nl$/intro/cdtTutorial.xml">
       </configExtension>
    </extension>
-   <extension
-         point="org.eclipse.ui.intro.configExtension">
-      <configExtension
-            configId="org.eclipse.ui.intro.universalConfig"
-            content="$nl$/intro/cdtWhatsnew.xml">
-      </configExtension>
-   </extension>
 
 </plugin>

@@ -26,15 +26,21 @@ for each target that you are debugging</li>
   <li>Each thread in your program represented as a node in the tree</li>
   <li>The process for each program that you are running</li>
 </ul>
-<p>The <strong>Debug</strong> perspective also drives the <strong>C/C++ Editor</strong>. As you step 
-through your program, the <strong>C/C++ Editor</strong> highlights the location of the 
+<p>The <strong>Debug</strong> perspective also drives the <strong>Source Editor</strong>. As you step 
+through your program, the <strong>Source Editor</strong> highlights the location of the 
 execution pointer. </p>
+
+<h2>CUDA</h2>
+
+<p>This view displays current state of your CUDA-compatible devices. You can see hierarchy from either 
+application point of view or a hardware point of view. This view allows you filtering CUDA elements and
+to pin individual threads for tracking their state.</p>
 
 <h2>Variables</h2>
 
 <p>You can view information about the variables in a selected stack frame in the 
 Variables view. When execution stops, the changed values are 
-by default highlighted in red. Like the other debug-related views, the Variables view does 
+by default highlighted with yellow background. Like the other debug-related views, the Variables view does 
 not refresh as you run your executable. A refresh occurs when execution stops.</p>
 
 <h2>Expressions</h2>
@@ -57,7 +63,7 @@ stops.</p>
 
 <h2>Disassembly</h2>
 
-<p>You can view disassembled code mixed with source information.</p>
+<p>You can view disassembled code.</p>
 
 <h2>Modules</h2>
 
@@ -70,7 +76,7 @@ in the current debug session.</p>
 debugger handles each one.</p>
 <p><img src="../images/ngconcepts.gif" ALT="Related concepts" width="143" height="21">
 <br>
-<a href="cdt_c_over_cdt.htm">Overview of the CDT</a><br>
+<a href="cdt_c_over_cdt.htm">Nsight overview</a><br>
 <a href="cdt_c_over_dbg.htm">Debug overview</a></p>
 <p><img src="../images/ngtasks.gif" ALT="Related tasks" width="143" height="21">
 <br>

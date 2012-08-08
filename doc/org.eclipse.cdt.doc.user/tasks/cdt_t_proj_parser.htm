@@ -9,14 +9,14 @@
 <body>
 <h1 role="main">Selecting a binary parser</h1>
 <p>Selecting the correct binary parser is important to ensure the
-accuracy of the C/C++ Projects view and to successfully run and debug
-your programs. Windows users should select the PE Windows Parser. UNIX
-and Linux users should select the Elf Parser. When you select the
+accuracy of the Project Explorer view and to successfully run and debug
+your programs. Linux users should select the CUDA Elf Parser.
+Mac OS X users should select CUDA Mach-O Parser. When you select the
 correct parser for your development environment and build your project,
-you can view the components of the .o file in the C/C++ Projects view
-and view the contents of the .o file in the C/C++ editor. You can also
+you can view the components of the .o file in the Project Explorer view
+and view the contents of the .o file in the source editor. You can also
 easily browse for the executable when defining run/debug configurations.</p>
-<p>If you use CDT-generated makefile to build your project, appropriate
+<p>If you use Nsight-generated makefile to build your project, appropriate
 binary parsers are set according to selected toolchain during creation.</p>
 <p>If you use your own makefile to build, default settings 
 for binary parser are got from Preferences during project creation.</p>
@@ -29,17 +29,17 @@ for binary parser are got from Preferences during project creation.</p>
  alt="Select Binary Parser window"></li>
   <li>In the <strong>Binary Parser</strong> list, click:
   <ul>
-    <li><strong>Elf Parser</strong>, if you are a Solaris, UNIX, or Linux user.</li>
-    <li><strong>PE Windows Parser</strong>, if you are a Windows user.</li>
-    <li><strong>Cygwin PE Parser</strong>, if you are using Cygwin.</li>
+    <li><strong>CUDA Elf Parser</strong>, if you are a Linux user.</li>
+    <li><strong>CUDA Mach-O Parser</strong>, if you are a Mac OS X user.</li>
+    <li><strong>CUDA Cubin Parser</strong>, if you are building Driver API applications.</li>
   </ul>
   </li>
   <li>Click <strong>OK</strong>.</li>
 </ol>
 <p>To change binary parsers for existing project:</p>
 <ol>
-  <li>In the C/C++ Projects view, right-click the project, and select <strong>Properties</strong>.</li>
-  <li>Select <strong>C/C++ Build &gt; Settings</strong> from the list.</li>
+  <li>In the Project Explorer view, right-click the project, and select <strong>Properties</strong>.</li>
+  <li>Select <strong>Build &gt; Settings</strong> from the list.</li>
   <li>Click the <strong>Binary Parser</strong> tab.<br>
 <img src="../images/task_binary_parser.png"
  alt="Select Binary Parser window">
@@ -48,11 +48,11 @@ for binary parser are got from Preferences during project creation.</p>
 <br>
 <p><img src="../images/ngconcepts.gif" alt="Related concepts"
  width="143" height="21"><br>
-<a href="../concepts/cdt_c_projects.htm">CDT Projects</a><br>
+<a href="../concepts/cdt_c_projects.htm">Projects</a><br>
 <a href="../concepts/cdt_c_proj_file_views.htm">Project file views</a></p>
 <p><img src="../images/ngtasks.gif" alt="Related tasks"
  width="143" height="21"><br>
-<a href="cdt_o_proj_files.htm">Working with C/C++ project files</a></p>
+<a href="cdt_o_proj_files.htm">Working with project files</a></p>
 <p><img src="../images/ngref.gif" alt="Related reference"
  width="143" height="21">
 <br>

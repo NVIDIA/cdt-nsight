@@ -5,26 +5,23 @@
      <toc label="Tasks">
 		<topic label="Creating a project" href="tasks/cdt_t_proj_new.htm"/>
 		<topic label="Creating a project via a project template" href="tasks/cdt_t_proj_new_with_template.htm"/>
-		<topic label="Work with C or C++ project files" href="tasks/cdt_o_proj_files.htm">
-			<topic label="Display file members in the C/C++ Projects view" href="tasks/cdt_t_show_proj_files.htm"/>
+		<topic label="Working with project files" href="tasks/cdt_o_proj_files.htm">
+			<topic label="Displaying file structure in the Project Explorer view" href="tasks/cdt_t_show_proj_files.htm"/>
 			<topic label="Converting a C or C++ nature for a project" href="tasks/cdt_t_conv_proj.htm"/>
-			<topic label="Create a C/C++ file" href="tasks/cdt_t_new_cpp.htm"/>
-			<topic label="Create a makefile" href="tasks/cdt_t_new_make.htm"/>
-			<topic label="Hide files of a given type" href="tasks/cdt_t_prvw_hide_files.htm"/>
-			<topic label="Converting CDT 1.x Projects" href="tasks/cdt_t_convert_cdt_proj.htm"/>
-			<topic label="Converting CDT 2.x Managed Make Projects" href="tasks/cdt_t_convert_mbs20_proj.htm"/>
-			<topic label="Adding Convert to a C/C++ Make Project to the New menu" href="tasks/cdt_t_add_custom_persp.htm"/>
+			<topic label="Creating a source file" href="tasks/cdt_t_new_cpp.htm"/>
+			<topic label="Creating a makefile" href="tasks/cdt_t_new_make.htm"/>
+			<topic label="Setting discovery options" href="tasks/cdt_t_discovery.htm"/>
 		</topic>
-		<topic label="Write code" href="tasks/cdt_o_write_code.htm">
-			<topic label="Customize the C/C++ editor" href="tasks/cdt_t_cust_cpp_editor.htm"/>
-			<topic label="Comment out code" href="tasks/cdt_t_comment_out.htm"/>
+		<topic label="Writing code" href="tasks/cdt_o_write_code.htm">
+			<topic label="Customizing the source editor" href="tasks/cdt_t_cust_cpp_editor.htm"/>
+			<topic label="Commenting out code" href="tasks/cdt_t_comment_out.htm"/>
 			<topic label="Working with Content Assist" href="tasks/cdt_o_con_assist.htm">
 				<topic label="Using Content Assist" href="tasks/cdt_t_contentassist.htm"/>
 				<topic label="Creating and editing templates" href="tasks/cdt_t_add_codetemp.htm"/>
 				<topic label="Importing and exporting templates" href="tasks/cdt_t_imp_code_temp.htm"/>
 			</topic>
-			<topic label="Shift lines of code to the left or right" href="tasks/cdt_t_shift_code.htm"/>
-			<topic label="Navigate to C/C++ declarations by name" href="tasks/cdt_t_open_declarations.htm"/>
+			<topic label="Shifting lines of code to the left or right" href="tasks/cdt_t_shift_code.htm"/>
+			<topic label="Navigating to declarations by name" href="tasks/cdt_t_open_declarations.htm"/>
 			<topic href="tasks/cdt_t_refactoring.htm" label="Refactoring">
       <topic href="tasks/cdt_t_rename.htm" label="Rename">
       </topic>
@@ -69,12 +66,11 @@
 				<topic label="Debugging a program" href="tasks/cdt_t_debug_prog.htm"/>
 				<topic label="Debugging an existing executable" href="tasks/cdt_t_debug_exes.htm"/>
 				
-				<topic label="Using breakpoints, watchpoints, and breakpoint actions" href="tasks/cdt_o_brkpnts_watch.htm">
+				<topic label="Using breakpoints and breakpoint actions" href="tasks/cdt_o_brkpnts_watch.htm">
 					<topic label="Adding breakpoints" href="tasks/cdt_t_add_brkpnts.htm"/>
-					<topic label="Adding watchpoints" href="tasks/cdt_t_add_watch.htm"/>
 					<topic label="Adding breakpoint actions" href="tasks/cdt_t_add_brk_action.htm"/>
-					<topic label="Removing breakpoints and watchpoints" href="tasks/cdt_t_rem_wtch_brk.htm"/>
-					<topic label="Enabling or disable breakpoints and watchpoints" href="tasks/cdt_t_endis_able_brk_wtch.htm"/>
+					<topic label="Removing breakpoints" href="tasks/cdt_t_rem_wtch_brk.htm"/>
+					<topic label="Enabling or disable breakpoints" href="tasks/cdt_t_endis_able_brk_wtch.htm"/>
 					<topic label="Attaching or removing breakpoint actions" href="tasks/cdt_t_addrmv_brk_action.htm"/>
 				</topic>
 				
@@ -87,7 +83,7 @@
 			</topic>
 		</topic>
 		
-		<topic label="Searching the CDT" href="tasks/cdt_t_search.htm">
+		<topic label="Searching for C/C++ elements" href="tasks/cdt_t_search.htm">
 			<topic label="Selection Searching for C/C++ elements" href="tasks/cdt_t_sel_search.htm"/>
 			<topic label="Setting Source Folders" href="tasks/cdt_t_set_src_fold.htm"/>
 		</topic>
