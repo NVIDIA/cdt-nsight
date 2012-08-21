@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CUDA view</title>
+<link rel="stylesheet" type="text/css" href="../help.css">
+<script language="JavaScript"
+	src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+<style type="text/css">
+img.screenshot {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+</style>
+</head>
+<body>
+
+	<h1 role="main">CUDA view</h1>
+	<p>
+		The <img src="../images/command_link.png" alt=""> <a
+			class="command-link"
+			href='javascript:executeCommand("org.eclipse.ui.views.showView(org.eclipse.ui.views.showView.viewId=com.nvidia.cuda.ide.debug.cudastate)")'>CUDA</a>
+		view of the Debug perspective displays information about CUDA kernels,
+		blocks and threads currently running on the GPUs. This view is updated
+		automatically when program stops.
+	</p>
+	<h2>CUDA View Modes</h2>
+	<p>CUDA view has two primary modes that can be toggled with buttons
+		on the view toolbar:</p>
+	<ol>
+		<li><em>Kernels mode</em> - tree with CUDA kernels, blocks and
+			threads. This mode shows threads from every kernel are currently
+			running on the device and their current state. <img
+			class="screenshot" src="../images/cuda/view-cuda-kernels.png"
+			alt="CUDA View in kernels mode" /></li>
+		<li><em>GPUs mode</em> - tree shows state of GPUs, streaming
+			multiprocessors (SM), warps and lanes. This mode makes is designed to
+			provide information what is executing on the hardware. <img
+			class="screenshot" src="../images/cuda/view-cuda-gpus.png"
+			alt="CUDA View in GPUs mode" /></li>
+	</ol>
+	<p>
+		<strong>Note:</strong> This view is empty if no CUDA context was
+		created by the application being debugged. Most CUDA runtime calls
+		will result in context creation.
+	</p>
+
+	<h2>Filtering CUDA View Contents</h2>
+	<p>Contents of this view can be filtered by entering the filter
+		condition to the field above the table. Following filter terms are
+		recognized:</p>
+	<ul>
+		<li><em>kernel &lt;num&gt;</em> - will only show elements that
+			belong to a given kernel.</li>
+		<li><em>block &lt;blockIdx&gt;</em> - will only show elements
+			that belong to a given block.</li>
+		<li><em>thread &lt;threadIdx&gt;</em> - will only show threads
+			with given threadIdx. This term is the default so filter string
+			"4,2,1" will show threads with given ID from all blocks.</li>
+		<li><em>device &lt;num&gt;</em> - will only show elements running
+			on specific device.</li>
+		<li><em>sm &lt;num&gt;</em> - will only show elements running on
+			specific SM.</li>
+		<li><em>warp &lt;num&gt;</em> - will only show warps with given
+			number.</li>
+		<li><em>lane &lt;num&gt;</em> - will only show lanes with given
+			number.</li>
+	</ul>
+	<p>Thread and block idx can be specified in following forms:</p>
+	<ul>
+		<li><em>7</em> matches all threads or blocks that have 7 as <em>x</em>
+			coordinate - e.g. (7,0,0), (7,1,0), (7,2,0), (7,1,1)</li>
+		<li><em>4,2</em> matches all threads or blocks that have 4 as <em>x</em>
+			coordinate and 2 as <em>y</em> coordinate - e.g. (4,2,0), (4,2,1),
+			(4,2,2), (4,2,3)</li>
+		<li><em>1,2,3</em> matches threads from all blocks (or blocks
+			from all kernels) with this coordinate.</li>
+	</ul>
+	<p>Wildcard character (*) can be used for any dimension, e.g.
+		string "*,2,1" matches (0,2,1), (1,2,1), (2,2,1), etc. Block and
+		thread Idx can be enclosed into parentheses for readability.</p>
+	<p>Terms can be combined in a filter condition in any combination
+		and all terms are supported in all modes. Some example filter strings
+		are:</p>
+	<ul>
+		<li><em>kernel 1 block 2 thread 3</em> - will show all threads
+			that have 3 for <em>x</em> coordinate for all blocks with 2 as <em>x</em>
+			coordinate from kernel 1. In GPU mode, this will show corresponding
+			devices/sms/warps/lanes.</li>
+		<li><em>block *,2 lane 0</em> - will show threads that are
+			running on first lanes of warps and belonging to blocks from all
+			kernels with blockIdx matching the mask.</li>
+		<li><em>block (2,1,1) 1 2 3</em> - shows threads that have 1, 2
+			or 3 as <em>x</em> coordinate and belong to block 2,1,1 from any
+			kernel.</li>
+	</ul>
+
+	<h2>CUDA view toolbar actions</h2>
+	<table border="1" cellpadding="5" cellspacing="0"
+		style="border-collapse: collapse" bordercolor="#999999" width="100%">
+		<thead>
+			<tr>
+				<th style="width: 64pt" valign="top" id="icon" align="left">
+					Icons</th>
+				<th style="width: 12em" valign="top" id="session" align="left">Name</th>
+				<th valign="top" id="description" align="left">Description</th>
+			</tr>
+		</thead>
+		<tr>
+			<td valign="top" headers="icon"><div style="text-align: center;">
+					<img src="../images/cuda/kernel.png" alt="Kernel mode icon">
+				</div></td>
+			<td valign="top" headers="name"><div style="text-align: left">
+					Kernel mode</div></td>
+			<td valign="top" headers="description">Switches the view into
+				kernel mode displaying kernels, blocks and device threads.</td>
+		</tr>
+		<tr>
+			<td valign="top" headers="icon"><div style="text-align: center;">
+					<img src="../images/cuda/device.png" alt="GPU mode icon">
+				</div></td>
+			<td valign="top" headers="name"><div style="text-align: left">
+					GPU mode</div></td>
+			<td valign="top" headers="description"><div
+					style="text-align: left">Enables GPU mode displaying devices,
+					sms, warps and lanes.</div></td>
+		</tr>
+		<tr>
+			<td valign="top" headers="icon"><div style="text-align: center;">
+					<img src="../images/cuda/pin.png" alt="Pin thread icon">
+				</div></td>
+			<td valign="top" headers="name"><div style="text-align: left">
+					Pin thread/lane</div></td>
+			<td valign="top" headers="description"><div
+					style="text-align: left">
+					Adds selected thread or lane to pinned threads list. See <a
+						href="../tasks/cuda_t_navigating_cuda_application.html">Navigating
+						CUDA application state</a> for more details.
+				</div></td>
+		</tr>
+		<tr>
+			<td valign="top" headers="icon"><div style="text-align: center;">
+					<img src="../images/cuda/selection_sync.gif"
+						alt="Link selection icon">
+				</div></td>
+			<td valign="top" headers="name"><div style="text-align: left">
+					Link selection with the <em>Debug</em> view
+				</div></td>
+			<td valign="top" headers="description"><div
+					style="text-align: left">
+					When selection linking is enabled any selection changes made to
+					this view are reflected in the <em>Debug</em> view. This in turn
+					may update <em>Variables </em>, <em>Expressions</em> and <em>Registers</em>
+					view. Selection changes in <em>Debug</em> view will also be
+					reflected in this view.
+				</div></td>
+		</tr>
+		<tr>
+			<td valign="top" headers="icon"><div style="text-align: center;">
+					<img src="../images/icon_collapse_all.png" alt="Collapse All icon">
+				</div></td>
+			<td valign="top" headers="name"><div>Collapse All</div></td>
+			<td valign="top" headers="description"><div
+					style="text-align: left">Collapses all the the currently
+					expanded elements.</div></td>
+		</tr>
+		<tr>
+			<td valign="top" headers="icon"><div style="text-align: center;">
+					<img src="../images/icon_menu_white.png" alt="Menu Layout icon"
+						width="24" height="19">
+				</div></td>
+			<td valign="top" headers="name">View menu</td>
+			<td valign="top" headers="description">
+				<div>Opens a view menu with following options:</div>
+				<div style="margin-left: 2em;">
+					<em>Open New View</em> - opens a new <em>CUDA</em> view copy
+				</div>
+				<div style="margin-left: 2em;">
+					<em>Coalesce Inactive Elements</em> - will only show one tree node
+					for a continuous range of inactive elements. This setting is
+					enabled by default.
+				</div>
+			</td>
+		</tr>
+	</table>
+	<p>
+		<img src="../images/ngconcepts.gif" ALT="Related concepts" width="143"
+			height="21"> <br> <a href="../concepts/cdt_c_dbg_info.htm">Debug
+			information</a>
+	</p>
+	<p>
+		<img src="../images/ngtasks.gif" ALT="Related tasks" width="143"
+			height="21"> <br> <a
+			href="../tasks/cuda_t_navigating_cuda_application.html">Navigating
+			CUDA application state</a>
+	</p>
+	<p>
+		<img src="../images/ngref.gif" ALT="Related reference" width="143"
+			height="21"><br /> <a href="../reference/cdt_u_dbg_view.htm">Debug
+			view</a><br /> <a href="cdt_o_views.htm">C/C++ Views</a>
+	</p>
+	<hr>
+	<img src="../images/ng00_04a.gif" ALT="IBM Copyright Statement">
+
+</body>
+
+</html>

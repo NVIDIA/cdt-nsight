@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Language" content="en-us" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Breaking on CUDA kernel launches</title>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+<style type="text/css">
+.screenshot {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+</style>
+</head>
+<body>
+	<h1 role="main">Breaking on CUDA kernel launches</h1>
+	<p>
+		Nsight visual debugger is designed for seamless debugging of both CPU
+		(<em>host</em>) and GPU (<em>device</em>) code. All debugger features
+		are enabled for both GPU and CPU code. Both line number breakpoints
+		(see <a href="cdt_t_add_brkpnts.htm">Adding breakpoints</a>) and
+		function name breakpoints will cause the debugger to stop at a given
+		source line regardless of whether this code is executed on GPU or CPU
+		code.
+	</p>
+	<p>
+		Nsight also provides a way to set a special breakpoint that will cause
+		the debugger to suspend whenever new code begins executing on the GPU.
+		This breakpoint can be set from the <em>Breakpoints</em> view toolbar.
+	</p>
+	<p>
+		<img class="screenshot" src="../images/cuda/kernel_breakpoint.png" />
+	</p>
+	<p>This breakpoint setting affects all debugging sessions and is
+		remembered between Nsight restarts.</p>
+	<p>
+		<img src="../images/ngconcepts.gif" ALT="Related concepts" width="143"
+			height="21"> <br> <a href="../concepts/cdt_c_over_cdt.htm">C/C++
+			Development perspective</a><br>
+	</p>
+	<p>
+		<img src="../images/ngtasks.gif" ALT="Related tasks" width="143"
+			height="21"> <br> <a href="cdt_o_brkpnts_watch.htm">Using
+			breakpoints</a>
+	</p>
+	<p>
+		<img src="../images/ngref.gif" ALT="Related reference" width="143"
+			height="21"> <br> <a
+			href="../reference/cdt_o_run_dbg_pages.htm">Run and Debug dialog
+			box</a>
+	</p>
+</body>
+</html>

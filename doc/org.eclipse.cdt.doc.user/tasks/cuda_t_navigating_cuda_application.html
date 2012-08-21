@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Language" content="en-us" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Navigating CUDA application state</title>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+<style type="text/css">
+.screenshot {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+</style>
+</head>
+<body>
+	<h1 role="main">Navigating CUDA application state</h1>
+	<p>CUDA applications rely on launching a large number of concurrent
+		threads for performance. This is drastically different from
+		traditional approach to software design where threads are considered
+		"expensive" resource that should be used sparingly. Nsight visual
+		debugger design goal is to make debugging GPU application with
+		thousands of threads similar to debugging traditional applications.</p>
+
+	<p>
+		CUDA kernels, blocks and threads are shown in the <em>Debug</em> view
+		alongside host processes and threads. See <a
+			href="../reference/cdt_o_dbg_view.htm">Debug view</a> for details.
+	</p>
+	<img src="../images/cuda/debug-view-no-pinned-threads.png"
+		class="screenshot" alt="Debug view with no pinned threads" />
+
+	<h2>Debugger focus</h2>
+	<p>
+		Nsight will focus on a first device thread that received the event
+		(e.g. hit the breakpoint, threw device exception) when application is
+		suspended in the device code. This thread will be shown in the <em>Debug</em>
+		view and will become an input for <em>Variables</em>, <em>Expressions</em>
+		and <em>Registers</em> views. This thread is considered a <em>debugger
+			focus</em> and will be the subject for any subsequent debugger action,
+		such as stepping or changing variable value, unless the user explicitly
+		selects a different thread. <img
+			alt="Debugger suspended in the GPU code"
+			src="../images/cuda/cuda-debugger-device.png" class="screenshot" />
+	</p>
+	<p>Focus thread that is not pinned appears under the kernel tree
+		node and has a blue gears icon. Source editor will switch to show the
+		source line where the debugger stopped.</p>
+	<p>
+		To focus a debugger on the different thread select corresponding node
+		in under <em>All CUDA Threads</em> node in the <em>Debug</em> view.
+		Source editor and context-dependent views will be updated to reflect
+		values from the selected thread. Resuming application execution will
+		replace focus thread with the one selected manually.
+	</p>
+	<p>
+		CUDA view can also be used to select a different debugger focus
+		thread. See <a href="../reference/cuda_u_cudaview.htm">CUDA view</a>
+		help topic.
+	</p>
+
+	<h2>Pinned threads</h2>
+	<p>
+		CUDA is a parallel runtime, where many threads perform the same work.
+		To make it easier to explore values across several threads, Nsight
+		allows <em>pinning</em> of the device threads that need to be tracked
+		through the application execution. All pinned threads appear under
+		kernel node in the <em>Debug</em> view and will be remembered between
+		application restarts. <img
+			src="../images/cuda/debug-view-pinned-threads.png" class="screenshot"
+			alt="Debug view with pinned threads" />
+	</p>
+	<p>
+		Pinning threads will switch <em>Variables</em>, <em>Expressions</em>
+		and <em>Registers</em> views into multi-column mode showing values for
+		every pinned thread. <img src="../images/cuda/expressions-columns.png"
+			class="screenshot" alt="Expressions view in multi-column mode" />
+	</p>
+	<p>
+		To remove a thread from the pinned threads list, select it in <em>Debug</em>
+		or <em>CUDA</em> view and click <em>Unpin</em> button on the view
+		toolbar.
+	</p>
+	<p>
+		<img src="../images/ngconcepts.gif" ALT="Related concepts" width="143"
+			height="21"> <br> <a href="../concepts/cdt_c_over_cdt.htm">C/C++
+			Development perspective</a><br>
+	</p>
+	<p>
+		<img src="../images/ngtasks.gif" ALT="Related tasks" width="143"
+			height="21"> <br> <a href="cdt_t_controldebug.htm">Controlling
+			debug execution</a><br><a href="cdt_t_variables.htm">Working
+			with variables</a><br>
+
+	</p>
+	<p>
+		<img src="../images/ngref.gif" ALT="Related reference" width="143"
+			height="21" /> <br /> <a href="../reference/cuda_u_cudaview.htm">CUDA
+			view</a><br /> <a href="../reference/cdt_u_dbg_view.htm">Debug view</a>
+	</p>
+</body>
+</html>

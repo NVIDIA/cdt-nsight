@@ -2,7 +2,7 @@
 <cheatsheet title="Importing Existing Projects">
    <intro>
       <description>
-         This guide walks you though the process of importing an existing project into Nsight Eclipse Edition.
+         This guide walks you though the process of importing an existing project into Nsight, Eclipse Edition.
       </description>
    </intro>
    <item title="Creating a project" dialog="true" skip="false" href="/org.eclipse.cdt.doc.user/reference/cdt_u_new_proj_wiz.htm">

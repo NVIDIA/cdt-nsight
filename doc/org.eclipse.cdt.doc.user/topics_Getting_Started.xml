@@ -9,6 +9,6 @@
           <topic href="getting_started/cdt_w_newmake.htm" label="Creating a makefile"/>
           <topic label="Building a project" href="getting_started/cdt_w_build.htm"/>
           <topic label="Debugging projects" href="getting_started/cdt_w_debug.htm"/>
-          <topic label="Importing existing source files into Nsight Eclipse Edition" href="getting_started/cdt_w_existing_code.htm"/>
+          <topic label="Importing existing source files into Nsight, Eclipse Edition" href="getting_started/cdt_w_existing_code.htm"/>
           <!--topic label="Updating the CDT" href="getting_started/cdt_w_install_cdt.htm"/-->
 </toc>

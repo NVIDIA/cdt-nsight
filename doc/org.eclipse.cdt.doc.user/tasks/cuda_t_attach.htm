@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="LASTUPDATED" content="06/17/05 11:09:43">
+<title>Attaching the debugger to a running application</title>
+<link rel="stylesheet" type="text/css" href="../help.css">
+<style>
+ul,li {
+	padding: 3px 0px
+}
+
+li img {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+</style>
+</head>
+
+<body>
+
+	<h1 role="main">Attaching the debugger to a running application</h1>
+
+	<p>Nsight debugger can attach to an application that is already
+		running on the same system. This application can be built and run
+		outside of the Nsight and its source files are not required to be
+		visible in Nsight workbench.</p>
+	<p>To attach to a running application:</p>
+	<ol>
+		<li>From the <strong>Run</strong> menu select <strong>Attach</strong>.
+			Note that this menu item may not be present on perspectives other
+			then <em>C/C++</em>, <em>Debug</em> or <em>Profile</em> <img
+			src="../images/cuda/cuda-attach-1.png" /></li>
+		<li>A dialog will open where you can lookup the application you
+			want to attach to. You can use filter field to find the application
+			by its name. <img src="../images/cuda/cuda-attach-2.png" />Select
+			the application and click <strong>OK</strong>
+		</li>
+		<li>Debugger will attach to the selected application and will
+			suspend its execution. <img src="../images/cuda/cuda-attach-3.png" />
+		</li>
+	</ol>
+
+	<p>Application source file will be opened in editor area and
+		current line will be highlighted. You can now use debugger controls to
+		explore application state and resume its execution.</p>
+	<p>Debug session will end when either an application was ran to a
+		completion, application was terminated using debugger controls or the
+		debugger was disconnected from the application.</p>
+
+	<p>
+		<img src="../images/ngconcepts.gif" alt="Related concepts" width="143"
+			height="21"> <br> <a href="../concepts/cdt_c_over_dbg.htm">Debug
+			overview</a><br> <a href="../concepts/cdt_c_dbg_info.htm">Debug
+			information</a>
+	</p>
+	<p>
+		<img src="../images/ngtasks.gif" alt="Related tasks" width="143"
+			height="21"> <br> <a href="cdt_o_debug.htm">Debugging</a>
+	</p>
+	<p>
+		<img src="../images/ngref.gif" alt="Related reference" width="143"
+			height="21"> <br> <a
+			href="../reference/cdt_o_run_dbg_pages.htm">Run and Debug dialog
+			box</a>
+	</p>
+	<hr>
+	<img src="../images/nokiaCopyright.png" alt="Nokia Copyright Statement">
+</body>
+</html>

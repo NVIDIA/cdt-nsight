@@ -3,7 +3,7 @@
 <cheatsheet title="Creating CUDA C/C++ projects">
    <intro href="/org.eclipse.cdt.doc.user/concepts/cdt_c_projects.htm">
       <description>
-         This guide will walk you though the process of creating a simple  CUDA C/C++ application using Nsight Eclipse Edition.
+         This guide will walk you though the process of creating a simple  CUDA C/C++ application using Nsight, Eclipse Edition.
       </description>
    </intro>
    <item title="Creating a project" dialog="true" skip="false" href="/org.eclipse.cdt.doc.user/reference/cdt_u_new_proj_wiz.htm">

@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Creating a new project from a CUDA sample</title>
+<link rel="stylesheet" type="text/css" href="../help.css">
+<style type="text/css">
+li img {
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+}
+</style>
+</head>
+
+<body>
+
+	<h1 role="main">Creating a new project from a CUDA sample</h1>
+
+	<p>CUDA samples showcase applying CUDA technology in miscellaneous
+		scenarios and display approaches to improving CUDA application
+		performance. Nsight, Eclipse Edition provides a way to create new
+		projects using CUDA samples as a starting point.</p>
+	<p>
+		CUDA samples must be installed to be usable by Nsight. Visit <a
+			href="http://www.nvidia.com/object/cuda_get.html" target="_blank">http://www.nvidia.com/object/cuda_get.html</a>
+		to download CUDA samples package.
+	</p>
+
+	<ol>
+
+		<li>Click <strong>File &gt; New &gt; CUDA C/C++ Project</strong>.
+			<img src="../images/file_menu.png"
+			alt="File &gt;New &gt; C++ Project">
+		</li>
+
+		<li>The wizard will open as shown below. On the first wizard page
+			select <em>Import CUDA Sample</em> under <em>Executable</em> and
+			enter a new project name. <img
+			src="../images/cuda/cuda-new-sample-1.png" alt="New Project Wizard">
+		</li>
+		<li>Press <strong>Next</strong> to open a list of project
+			samples. <img src="../images/cuda/cuda-new-sample-2.png"
+			alt="New Project Wizard"> If the list is empty, check path to
+			samples at the top of this wizard page.
+		</li>
+
+		<li>Click <strong>Next</strong>.
+		</li>
+		<li>Use this wizard page to customize project build options. Note
+			that some controls may be greyed out if project sample does not
+			support those project settings (e.g. some projects require hardware
+			features only available on devices with certain compute capability).</li>
+		<li>To create your project, click <strong>Finish</strong>.
+		<li>In the Project Explorer you will see that the new project has
+			been created.</li>
+	</ol>
+	<p>Nsight copies the source files from sample install location into
+		a new project folder. Changes made to the project sources will not be
+		propagated back to the sample install location. Any number of projects
+		created from the same CUDA sample can be present in the Nsight
+		workspace at any time.</p>
+	<p>All Nsight, Eclipse Edition features, such as visual debugging
+		and profiling can be used to familiarize the user with the CUDA sample
+		code</p>
+
+	<p>
+		<img src="../images/ngconcepts.gif" ALT="Related concepts" width="143"
+			height="21"> <br> <a href="../concepts/cdt_c_projects.htm">Projects</a>
+		<br> <a href="../concepts/cdt_c_proj_file_views.htm">Project
+			file views</a>
+	</p>
+
+	<p>
+		<img src="../images/ngtasks.gif" ALT="Related tasks" width="143"
+			height="21"> <br> <a href="cdt_o_proj_files.htm">Working
+			with project files</a> <br> <a href="cdt_t_proj_new.htm">Creating
+			a new project</a> <br> <a href="cdt_t_proj_new_with_template.htm">Creating
+			a new project via project template</a>
+	</p>
+
+	<p>
+		<img src="../images/ngref.gif" ALT="Related reference" width="143"
+			height="21"> <br> <a
+			href="../reference/cdt_u_properties.htm">Project properties</a> <br>
+		<a href="../reference/cdt_o_views.htm">Views</a>
+	</p>
+
+	<img src="../images/ng00_04a.gif" ALT="IBM Copyright Statement">
+</body>
+
+</html>
