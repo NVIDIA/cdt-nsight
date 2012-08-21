@@ -21,6 +21,8 @@
 		<module>debug/org.eclipse.cdt.debug.core</module>
 		<module>doc/org.eclipse.cdt.doc.user</module>
 		<module>dsf/org.eclipse.cdt.dsf.ui</module>
+		<module>dsf-gdb/org.eclipse.cdt.dsf.gdb</module>
+		<module>dsf-gdb/org.eclipse.cdt.gnu.dsf-feature</module>
 		<module>releng/org.eclipse.cdt.platform-feature</module>
 		<module>releng/org.eclipse.cdt-feature</module>
 	</modules>

@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.cdt.gnu.dsf"
       label="%featureName"
-      version="4.0.1.qualifier"
+      version="4.0.1.nvidia-qualifier"
       provider-name="%providerName">
 
    <description>
