@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?><component id="org.eclipse.cdt.core" version="2">
     <resource path="model/org/eclipse/cdt/core/settings/model/ICDescriptionDelta.java" type="org.eclipse.cdt.core.settings.model.ICDescriptionDelta">
         <filter comment="Temporary filter to ignore added API restictions for interfaces that should be internal to begin with" id="403853384">
