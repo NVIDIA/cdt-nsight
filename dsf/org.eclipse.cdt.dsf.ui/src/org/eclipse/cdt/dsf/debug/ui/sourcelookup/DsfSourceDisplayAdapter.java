@@ -222,6 +222,10 @@ public class DsfSourceDisplayAdapter implements ISourceDisplay, ISteppingControl
 	            } else if (sourceElement instanceof IFile) {
 	                editorId = getEditorIdForFilename(((IFile)sourceElement).getName());
 	                editorInput = new FileEditorInput((IFile)sourceElement);
+	            } else if (sourceElement instanceof IFileStore) {
+                    IFileStore fileStore = (IFileStore) sourceElement;
+                    editorInput = new FileStoreEditorInput(fileStore);
+                    editorId = getEditorIdForFilename(fileStore.getName());
 	            } else if (sourceElement instanceof ITranslationUnit) {
 	            	try {
 	                	URI uriLocation = ((ITranslationUnit)sourceElement).getLocationURI();
