@@ -7,11 +7,11 @@
 	<parent>
 		<groupId>org.eclipse.cdt</groupId>
 		<artifactId>cdt-parent</artifactId>
-		<version>8.1.0.nvidia-SNAPSHOT</version>
+		<version>8.1.1.nvidia-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
-	<version>4.1.0.nvidia-SNAPSHOT</version>
+	<version>4.1.1.nvidia-SNAPSHOT</version>
 	<artifactId>org.eclipse.cdt.dsf.gdb</artifactId>
 	<packaging>eclipse-plugin</packaging>
 </project>

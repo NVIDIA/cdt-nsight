@@ -1,12 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 Wind River Systems, Inc. and others.
+ * Copyright (c) 2008, 2012 Wind River Systems, Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Markus Schorn - initial API and implementation
+ *     Markus Schorn - initial API and implementation
+ *     Thomas Corbat (IFS)
  *******************************************************************************/ 
 package org.eclipse.cdt.internal.core.pdom.dom.cpp;
 
@@ -32,7 +33,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPTemplateTemplateParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPTemplateTypeParameter;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTName;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPTemplateArgument;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPTemplateTypeArgument;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPDeferredClassInstance;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPUnknownBinding;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPUnknownType;
@@ -50,7 +51,6 @@ import org.eclipse.core.runtime.CoreException;
 public class PDOMCPPTemplateTemplateParameter extends PDOMCPPBinding 
 		implements ICPPTemplateTemplateParameter, ICPPUnknownBinding, ICPPUnknownType, IIndexType, 
 		IPDOMCPPTemplateParameter, IPDOMCPPTemplateParameterOwner {
-
 	private static final int PACK_BIT = 1 << 31;
 
 	private static final int DEFAULT_TYPE = PDOMCPPBinding.RECORD_SIZE;	
@@ -169,7 +169,7 @@ public class PDOMCPPTemplateTemplateParameter extends PDOMCPPBinding
 		if (d == null)
 			return null;
 		
-		return new CPPTemplateArgument(d);
+		return new CPPTemplateTypeArgument(d);
 	}
 	
 	@Override
@@ -337,6 +337,11 @@ public class PDOMCPPTemplateTemplateParameter extends PDOMCPPBinding
 
 	@Override
 	public boolean isAnonymous() {
+		return false;
+	}
+
+	@Override
+	public boolean isFinal() {
 		return false;
 	}
 

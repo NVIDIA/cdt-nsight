@@ -6,16 +6,20 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Markus Schorn - initial API and implementation
+ *     Markus Schorn - initial API and implementation
  *******************************************************************************/ 
 package org.eclipse.cdt.internal.core.dom.parser.cpp.semantics;
 
 import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.CPPTemplates.TypeSelection.PARAMETERS;
 import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.CPPTemplates.TypeSelection.RETURN_TYPE;
-import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil.*;
+import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil.CVTYPE;
+import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil.REF;
+import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil.TDEF;
+import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil.getNestedType;
 
 import org.eclipse.cdt.core.dom.ast.DOMException;
 import org.eclipse.cdt.core.dom.ast.IASTExpression.ValueCategory;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IFunction;
@@ -36,18 +40,21 @@ class FunctionCost {
 	private final ICPPFunction fFunction;
 	private final Cost[] fCosts;
 	private final ValueCategory[] fValueCategories;
+	private final IASTNode fPoint;
 	private boolean fIsDirectCopyCtor;
 	
-	public FunctionCost(ICPPFunction fn, int paramCount) {
+	public FunctionCost(ICPPFunction fn, int paramCount, IASTNode point) {
 		fFunction= fn;
 		fCosts= new Cost[paramCount];
 		fValueCategories= new ValueCategory[paramCount];
+		fPoint = point;
 	}
 	
-	public FunctionCost(ICPPFunction fn, Cost cost) {
+	public FunctionCost(ICPPFunction fn, Cost cost, IASTNode point) {
 		fFunction= fn;
 		fCosts= new Cost[] {cost};
 		fValueCategories= null; // no udc will be performed
+		fPoint = point;
 	}
 
 	public int getLength() {
@@ -85,7 +92,7 @@ class FunctionCost {
 		return false;
 	}
 	
-	public boolean performUDC() throws DOMException {
+	public boolean performUDC(IASTNode point) throws DOMException {
 		for (int i = 0; i < fCosts.length; i++) {
 			Cost cost = fCosts[i];
 			Cost udcCost= null;
@@ -94,20 +101,20 @@ class FunctionCost {
 				continue;
 			case COPY_INIT_OF_CLASS:
 				udcCost = Conversions.copyInitializationOfClass(fValueCategories[i], cost.source,
-						(ICPPClassType) cost.target, false);
+						(ICPPClassType) cost.target, false, point);
 				break;
 			case INIT_BY_CONVERSION:
 				IType uqSource= getNestedType(cost.source, TDEF | REF | CVTYPE);
 				udcCost = Conversions.initializationByConversion(fValueCategories[i], cost.source,
-						(ICPPClassType) uqSource, cost.target, false);
+						(ICPPClassType) uqSource, cost.target, false, point);
 				break;
 			case LIST_INIT_OF_CLASS:
-				udcCost = Conversions.listInitializationOfClass((InitializerListType) cost.source, 
-						(ICPPClassType) cost.target, false, false); 
+				udcCost = Conversions.listInitializationOfClass(((InitializerListType) cost.source).getEvaluation(), 
+						(ICPPClassType) cost.target, false, false, point); 
 				break;
 			case DIRECT_LIST_INIT_OF_CLASS:
-				udcCost = Conversions.listInitializationOfClass((InitializerListType) cost.source, 
-						(ICPPClassType) cost.target, true, false); 
+				udcCost = Conversions.listInitializationOfClass(((InitializerListType) cost.source).getEvaluation(), 
+						(ICPPClassType) cost.target, true, false, point); 
 				break;
 			default:
 				return false;
@@ -164,7 +171,7 @@ class FunctionCost {
 				haveBetter = true;
 			} else if (isTemplate && otherIsTemplate) {
 				TypeSelection ts= SemanticUtil.isConversionOperator(f1) ? RETURN_TYPE : PARAMETERS;
- 				int order = CPPTemplates.orderFunctionTemplates(otherAsTemplate, asTemplate, ts);
+ 				int order = CPPTemplates.orderFunctionTemplates(otherAsTemplate, asTemplate, ts, fPoint);
 				if (order < 0) {
 					haveBetter= true;	 				
 				} else if (order > 0) {
@@ -210,10 +217,10 @@ class FunctionCost {
 		if (!parameterTypesMatch(ft1, ft2))
 			return 0;
 		
-		int diff= SemanticUtil.calculateInheritanceDepth(o2, o1);
+		int diff= SemanticUtil.calculateInheritanceDepth(o2, o1, fPoint);
 		if (diff >= 0)
 			return diff;
-		return -SemanticUtil.calculateInheritanceDepth(o1, o2);
+		return -SemanticUtil.calculateInheritanceDepth(o1, o2, fPoint);
 	}
 
 	private boolean parameterTypesMatch(final ICPPFunctionType ft1, final ICPPFunctionType ft2) {

@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.cdt</groupId>
 	<artifactId>cdt-parent</artifactId>
-	<version>8.1.0.nvidia-SNAPSHOT</version>
+	<version>8.1.1.nvidia-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>CDT Parent</name>
 	<parent>

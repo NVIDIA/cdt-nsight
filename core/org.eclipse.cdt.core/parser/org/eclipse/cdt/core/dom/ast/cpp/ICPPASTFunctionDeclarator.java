@@ -1,13 +1,15 @@
 /*******************************************************************************
- *  Copyright (c) 2004, 2011 IBM Corporation and others.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  * 
- *  Contributors:
- *      IBM - Initial API and implementation
- *      Markus Schorn (Wind River Systems)
+ * Contributors:
+ *     IBM - Initial API and implementation
+ *     Markus Schorn (Wind River Systems)
+ *     Sergey Prigogin (Google)
+ *     Thomas Corbat (IFS)
  *******************************************************************************/
 package org.eclipse.cdt.core.dom.ast.cpp;
 
@@ -30,7 +32,7 @@ public interface ICPPASTFunctionDeclarator extends IASTStandardFunctionDeclarato
 
 	public static final ASTNodeProperty EXCEPTION_TYPEID = new ASTNodeProperty(
 			"ICPPASTFunctionDeclarator.EXCEPTION_TYPEID [IASTTypeId]"); //$NON-NLS-1$
-	/** @since 5.2*/
+	/** @since 5.2 */
 	public static final ASTNodeProperty TRAILING_RETURN_TYPE = new ASTNodeProperty(
 			"ICPPASTFunctionDeclarator.TRAILING_RETURN_TYPE [IASTTypeId]"); //$NON-NLS-1$
 	
@@ -40,7 +42,7 @@ public interface ICPPASTFunctionDeclarator extends IASTStandardFunctionDeclarato
 	public boolean isConst();
 
 	/**
-	 * Set the method to be const or not.
+	 * Sets the method to be const or not.
 	 */
 	public void setConst(boolean value);
 
@@ -50,7 +52,7 @@ public interface ICPPASTFunctionDeclarator extends IASTStandardFunctionDeclarato
 	public boolean isVolatile();
 
 	/**
-	 * Set the method to be volatile or not.
+	 * Sets the method to be volatile or not.
 	 */
 	public void setVolatile(boolean value);
 
@@ -72,7 +74,7 @@ public interface ICPPASTFunctionDeclarator extends IASTStandardFunctionDeclarato
 	public boolean isPureVirtual();
 
 	/**
-	 * Set this method to be pure virtual.
+	 * Sets this method to be pure virtual.
 	 */
 	public void setPureVirtual(boolean isPureVirtual);
 
@@ -102,6 +104,22 @@ public interface ICPPASTFunctionDeclarator extends IASTStandardFunctionDeclarato
 	public void setEmptyExceptionSpecification();
 
 	/**
+	 * Returns the noexcept expression, {@link
+	 * org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTFunctionDeclarator#NOEXCEPT_DEFAULT}
+	 * if the noexcept specification does not contain an expression, or {@code null} the noexcept
+	 * specification is not present.
+	 * See C++11 5.4.1.
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public ICPPASTExpression getNoexceptExpression();
+
+	/**
+	 * Sets the noexcept expression. 
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public void setNoexceptExpression(ICPPASTExpression expression);
+
+	/**
 	 * Returns the trailing return type as in <code> auto f() -> int </code>, or <code>null</code>.
 	 * @since 5.2
 	 */
@@ -114,8 +132,8 @@ public interface ICPPASTFunctionDeclarator extends IASTStandardFunctionDeclarato
 	public void setTrailingReturnType(IASTTypeId typeId);
 
 	/**
-	 * Get function scope this node represents. Returns <code>null</code>, if this declarator does not
-	 * declare a function-prototype or function-definition.
+	 * Get function scope this node represents. Returns <code>null</code>, if this declarator
+	 * does not declare a function-prototype or function-definition.
 	 */
 	@Override
 	public ICPPFunctionScope getFunctionScope();
@@ -145,4 +163,28 @@ public interface ICPPASTFunctionDeclarator extends IASTStandardFunctionDeclarato
 	 */
 	@Override
 	public ICPPASTFunctionDeclarator copy(CopyStyle style);
+
+	/**
+	 * Returns whether this function is declared override.
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public boolean isOverride();
+
+	/**
+	 * Sets whether this function is declared override.
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public void setOverride(boolean isOverride);
+
+	/**
+	 * Returns whether this function is declared final.
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public boolean isFinal();
+
+	/**
+	 * Sets whether this function is declared final.
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public void setFinal(boolean isFinal);
 }

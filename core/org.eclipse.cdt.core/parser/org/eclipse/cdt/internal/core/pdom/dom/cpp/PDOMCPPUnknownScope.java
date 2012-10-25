@@ -6,8 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Markus Schorn - initial API and implementation
- *    Sergey Prigogin (Google)
+ *     Markus Schorn - initial API and implementation
+ *     Sergey Prigogin (Google)
  *******************************************************************************/ 
 package org.eclipse.cdt.internal.core.pdom.dom.cpp;
 
@@ -41,7 +41,7 @@ public class PDOMCPPUnknownScope extends CPPUnknownScope implements IIndexScope 
 	
 	@Override
 	// Needs to be thread-safe.
-	protected synchronized IBinding getOrCreateBinding(IASTName name, int idx) {
+	protected synchronized IBinding getOrCreateBinding(char[] name, int idx) {
 		return super.getOrCreateBinding(name, idx);
 	}
 }

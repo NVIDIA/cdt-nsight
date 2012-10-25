@@ -13,6 +13,7 @@ package org.eclipse.cdt.internal.core.dom.parser;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorMacroDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IArrayType;
@@ -22,6 +23,7 @@ import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.ICompositeType;
 import org.eclipse.cdt.core.dom.ast.IEnumeration;
 import org.eclipse.cdt.core.dom.ast.IField;
+import org.eclipse.cdt.core.dom.ast.IFunctionType;
 import org.eclipse.cdt.core.dom.ast.IPointerType;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.IValue;
@@ -31,6 +33,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPEnumeration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPMethod;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPPointerToMemberType;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPReferenceType;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.ClassTypeHelper;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil;
 
 /**
@@ -47,6 +50,8 @@ public class SizeofCalculator {
 			this.alignment = alignment;
 		}
 	}
+
+	private static final SizeofCalculator defaultInstance = new SizeofCalculator();
 
 	private static final SizeAndAlignment SIZE_1 = new SizeAndAlignment(1, 1);
 
@@ -67,7 +72,33 @@ public class SizeofCalculator {
 	public final SizeAndAlignment sizeof_long_double;
 	public final SizeAndAlignment sizeof_complex_long_double;
 
+	private final IASTTranslationUnit ast;
+
+	/**
+	 * Calculates size and alignment for the given type.
+	 *
+	 * @param type the type to get size and alignment for.
+	 * @param point a node belonging to the AST of the translation unit defining context for
+	 *     the size calculation.
+	 * @return size and alignment, or <code>null</code> if could not be calculated.
+	 */
+	public static SizeAndAlignment getSizeAndAlignment(IType type, IASTNode point) {
+		SizeofCalculator calc = point == null ?
+				getDefault() : ((ASTTranslationUnit) point.getTranslationUnit()).getSizeofCalculator();
+		return calc.sizeAndAlignment(type);
+	}
+
+	/**
+	 * Returns the default instance of sizeof calculator. The default instance is not aware
+	 * of the parser configuration and can only calculate sizes that are the same across all
+	 * C/C++ implementations.
+	 */
+	public static SizeofCalculator getDefault() {
+		return defaultInstance;
+	}
+
 	public SizeofCalculator(IASTTranslationUnit ast) {
+		this.ast = ast;
 		int maxAlignment = 32;
 		Map<String, String> sizeofMacros = new HashMap<String, String>();
 		for (IASTPreprocessorMacroDefinition macro : ast.getBuiltinMacroDefinitions()) {
@@ -102,6 +133,26 @@ public class SizeofCalculator {
 		sizeof_complex_long_double = getSizeOfPair(sizeof_long_double);
 	}
 
+	private SizeofCalculator() {
+		size_2 = new SizeAndAlignment(2, 2);
+		size_4 = new SizeAndAlignment(4, 4);
+		size_8 = new SizeAndAlignment(8, 8);
+		sizeof_pointer = null;
+		sizeof_int = null;
+		sizeof_long = null;
+		sizeof_long_long = null;
+		sizeof_short = null;
+		sizeof_bool = null;
+		sizeof_wchar_t = null;
+		sizeof_float = null;
+		sizeof_complex_float = null;
+		sizeof_double = null;
+		sizeof_complex_double = null;
+		sizeof_long_double = null;
+		sizeof_complex_long_double = null;
+		ast = null;
+	}
+
 	/**
 	 * Calculates size and alignment for the given type.
 	 * @param type the type to get size and alignment for.
@@ -109,7 +160,9 @@ public class SizeofCalculator {
 	 */
 	public SizeAndAlignment sizeAndAlignment(IType type) {
 		type = SemanticUtil.getNestedType(type, SemanticUtil.CVTYPE | SemanticUtil.TDEF);
-
+		if (type instanceof IFunctionType) {
+			return sizeAndAlignment(((IFunctionType) type).getReturnType());
+		}
 		if (type instanceof IBasicType) {
 			return sizeAndAlignment((IBasicType) type);
 		}
@@ -213,7 +266,7 @@ public class SizeofCalculator {
 		IField[] fields;
 		if (type instanceof ICPPClassType) {
 			ICPPClassType classType = (ICPPClassType) type;
-			for (ICPPBase base : classType.getBases()) {
+			for (ICPPBase base : ClassTypeHelper.getBases(classType, ast)) {
 				if (base.isVirtual())
 					return null;  // Don't know how to calculate size when there are virtual bases.
 				IBinding baseClass = base.getBaseClass();
@@ -225,14 +278,14 @@ public class SizeofCalculator {
 				size += info.alignment - (size - 1) % info.alignment - 1 + info.size;
 				if (maxAlignment < info.alignment)
 					maxAlignment = info.alignment;
-				for (ICPPMethod method : classType.getDeclaredMethods()) {
+				for (ICPPMethod method : ClassTypeHelper.getDeclaredMethods(classType, ast)) {
 					if (method.isVirtual()) {
 						// Don't know how to calculate size when there are virtual functions.
 						return null;
 					}
 				}
 			}
-			fields = classType.getDeclaredFields();
+			fields = ClassTypeHelper.getDeclaredFields(classType, ast);
 		} else {
 			fields = type.getFields();
 		}

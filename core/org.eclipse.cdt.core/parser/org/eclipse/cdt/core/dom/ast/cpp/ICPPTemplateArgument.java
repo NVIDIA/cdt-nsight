@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Markus Schorn - initial API and implementation
+ *     Markus Schorn - initial API and implementation
  *******************************************************************************/ 
 package org.eclipse.cdt.core.dom.ast.cpp;
 
@@ -23,7 +23,7 @@ import org.eclipse.cdt.core.dom.ast.IValue;
  */
 public interface ICPPTemplateArgument {
 	ICPPTemplateArgument[] EMPTY_ARGUMENTS = {};
-	
+
 	/**
 	 * Returns whether this is an integral value, suitable for a template non-type parameter. 
 	 */

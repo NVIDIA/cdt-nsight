@@ -1,161 +1,113 @@
-<?xml version="1.0" encoding="UTF-8"?><component id="org.eclipse.cdt.core" version="2">
-    <resource path="model/org/eclipse/cdt/core/settings/model/ICDescriptionDelta.java" type="org.eclipse.cdt.core.settings.model.ICDescriptionDelta">
-        <filter comment="Temporary filter to ignore added API restictions for interfaces that should be internal to begin with" id="403853384">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.cdt.core" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter id="924844039">
             <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.settings.model.ICDescriptionDelta"/>
+                <message_argument value="5.4.1"/>
+                <message_argument value="5.4.0"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="model/org/eclipse/cdt/core/settings/model/ICSettingEntry.java" type="org.eclipse.cdt.core.settings.model.ICSettingEntry">
-        <filter comment="Temporary filter to ignore added API restictions for interfaces that should be internal to begin with" id="403853384">
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/IASTTypeIdExpression.java" type="org.eclipse.cdt.core.dom.ast.IASTTypeIdExpression">
+        <filter id="1209008130">
             <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.settings.model.ICSettingEntry"/>
+                <message_argument value="op_is_literal_type"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="op_is_literal_type"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="op_is_standard_layout"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="op_is_trivial"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="parser/org/eclipse/cdt/core/dom/ast/IASTCopyLocation.java" type="org.eclipse.cdt.core.dom.ast.IASTCopyLocation">
-        <filter id="403853384">
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/IASTUnaryExpression.java" type="org.eclipse.cdt.core.dom.ast.IASTUnaryExpression">
+        <filter id="1211105284">
             <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.dom.ast.IASTCopyLocation"/>
-            </message_arguments>
-        </filter>
-        <filter id="406052990">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.dom.ast.IASTCopyLocation"/>
-                <message_argument value="getOriginalNode()"/>
+                <message_argument value="op_noexcept"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="parser/org/eclipse/cdt/core/parser/util/ArrayUtil.java" type="org.eclipse.cdt.core.parser.util.ArrayUtil">
-        <filter id="420679712">
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/IScope.java" type="org.eclipse.cdt.core.dom.ast.IScope$ScopeLookupData">
+        <filter id="1211105284">
             <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.parser.util.ArrayUtil.addAll(Class&lt;?&gt;, Object[], Object[])"/>
-                <message_argument value="T"/>
-            </message_arguments>
-        </filter>
-        <filter id="420679712">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.parser.util.ArrayUtil.append(Class&lt;?&gt;, Object[], Object)"/>
-                <message_argument value="T"/>
-            </message_arguments>
-        </filter>
-        <filter id="420679712">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.parser.util.ArrayUtil.prepend(Class&lt;?&gt;, Object[], Object)"/>
-                <message_argument value="T"/>
-            </message_arguments>
-        </filter>
-        <filter id="420679712">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.parser.util.ArrayUtil.removeNulls(Class&lt;?&gt;, Object[])"/>
-                <message_argument value="T"/>
-            </message_arguments>
-        </filter>
-        <filter id="420679712">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.parser.util.ArrayUtil.trim(Class&lt;?&gt;, Object[])"/>
-                <message_argument value="T"/>
-            </message_arguments>
-        </filter>
-        <filter id="420679712">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.parser.util.ArrayUtil.trim(Class&lt;?&gt;, Object[], boolean)"/>
-                <message_argument value="T"/>
+                <message_argument value="ScopeLookupData"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="src/org/eclipse/cdt/core/resources/RefreshScopeManager.java" type="org.eclipse.cdt.core.resources.RefreshScopeManager">
-        <filter id="338792546">
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/cpp/ICPPASTExpression.java" type="org.eclipse.cdt.core.dom.ast.cpp.ICPPASTExpression">
+        <filter id="1110441988">
             <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="addExclusion(IResource, RefreshExclusion)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="addResourceToRefresh(IProject, IResource)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="clearAllExclusions()"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="clearAllResourcesToRefresh()"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="clearExclusions(IResource)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="clearExclusionsForProject(IProject)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="deleteResourceToRefresh(IProject, IResource)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="getExclusions(IResource)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="getRefreshSchedulingRule(IProject)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="getResourcesToRefresh(IProject)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="removeExclusion(IResource, RefreshExclusion)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="setExclusions(IResource, List&lt;RefreshExclusion&gt;)"/>
-            </message_arguments>
-        </filter>
-        <filter id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="setResourcesToRefresh(IProject, List&lt;IResource&gt;)"/>
-            </message_arguments>
-        </filter>
-        <filter comment="routines no longer needed for RefreshScopeManager" id="338792546">
-            <message_arguments>
-                <message_argument value="org.eclipse.cdt.core.resources.RefreshScopeManager"/>
-                <message_argument value="shouldResourceBeRefreshed(IResource)"/>
+                <message_argument value="org.eclipse.cdt.core.dom.ast.cpp.ICPPASTExpression"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="parser/org/eclipse/cdt/core/dom/rewrite/INodeWriter.java" type="org.eclipse.cdt.core.dom.rewrite.INodeWriter">
-        <filter id="643846161">
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/cpp/ICPPASTInitializerClause.java" type="org.eclipse.cdt.core.dom.ast.cpp.ICPPASTInitializerClause">
+        <filter id="1110441988">
             <message_arguments>
-                <message_argument value="NodeCommentMap"/>
-                <message_argument value="INodeWriter"/>
-                <message_argument value="write(IWritableNode, IScribe, ASTVisitor, NodeCommentMap)"/>
+                <message_argument value="org.eclipse.cdt.core.dom.ast.cpp.ICPPASTInitializerClause"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/cpp/ICPPMethodSpecialization.java" type="org.eclipse.cdt.core.dom.ast.cpp.ICPPMethodSpecialization">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.eclipse.cdt.core.dom.ast.cpp.ICPPMethodSpecialization"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="parser/org/eclipse/cdt/core/parser/GCCKeywords.java" type="org.eclipse.cdt.core.parser.GCCKeywords">
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="cp__is_literal_type"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="cp__is_standard_layout"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="cp__is_trivial"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="parser/org/eclipse/cdt/core/parser/IGCCToken.java" type="org.eclipse.cdt.core.parser.IGCCToken">
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="tTT_is_literal_type"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="tTT_is_standard_layout"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="tTT_is_trivial"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="parser/org/eclipse/cdt/core/parser/Keywords.java" type="org.eclipse.cdt.core.parser.Keywords">
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="cFINAL"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="cOVERRIDE"/>
             </message_arguments>
         </filter>
     </resource>

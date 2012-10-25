@@ -6,13 +6,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    IBM - Initial API and implementation
- *    Markus Schorn (Wind River Systems)
+ *     IBM - Initial API and implementation
+ *     Markus Schorn (Wind River Systems)
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
 import org.eclipse.cdt.core.dom.ILinkage;
 import org.eclipse.cdt.core.dom.ast.IASTName;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTypeId;
 import org.eclipse.cdt.core.dom.ast.IBasicType;
 import org.eclipse.cdt.core.dom.ast.IBasicType.Kind;
@@ -39,8 +40,8 @@ import org.eclipse.cdt.internal.core.parser.scanner.InternalFileContent;
  * C++-specific implementation of a translation-unit.
  */
 public class CPPASTTranslationUnit extends ASTTranslationUnit implements ICPPASTTranslationUnit, IASTAmbiguityParent {
-    private CPPNamespaceScope fScope = null;
-    private ICPPNamespace fBinding = null;
+    private CPPNamespaceScope fScope;
+    private ICPPNamespace fBinding;
 	private final CPPScopeMapper fScopeMapper= new CPPScopeMapper(this);
 	
 	public CPPASTTranslationUnit() {
@@ -175,8 +176,8 @@ public class CPPASTTranslationUnit extends ASTTranslationUnit implements ICPPAST
 	}
 
 	// bug 262719: class types from the index have to be mapped back to the AST.
-	public ICPPClassType mapToAST(ICPPClassType binding) {
-		return fScopeMapper.mapToAST(binding);
+	public ICPPClassType mapToAST(ICPPClassType binding, IASTNode point) {
+		return fScopeMapper.mapToAST(binding, point);
 	}
 
 	/**

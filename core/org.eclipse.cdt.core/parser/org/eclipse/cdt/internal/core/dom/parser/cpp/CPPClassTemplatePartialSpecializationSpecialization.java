@@ -1,4 +1,4 @@
-/*******************************************************************************
+                                                   /*******************************************************************************
  * Copyright (c) 2009, 2011 Wind River Systems, Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Markus Schorn - initial API and implementation
+ *     Markus Schorn - initial API and implementation
  *******************************************************************************/ 
 package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
@@ -15,7 +15,6 @@ import org.eclipse.cdt.core.dom.ast.DOMException;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.ITypedef;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassSpecialization;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassTemplate;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassTemplatePartialSpecialization;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassTemplatePartialSpecializationSpecialization;
@@ -31,14 +30,16 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.CPPTemplates;
  */
 public class CPPClassTemplatePartialSpecializationSpecialization extends CPPClassSpecialization
 		implements ICPPClassTemplatePartialSpecializationSpecialization, ICPPInternalClassTemplate {
-
-	private ObjectMap instances = null;
+	private ObjectMap instances;
 	private ICPPDeferredClassInstance fDeferredInstance;
-	private ICPPClassTemplate fClassTemplate;
+	private final ICPPClassTemplate fClassTemplate;
+	private final ICPPTemplateArgument[] fArguments;
 
-	public CPPClassTemplatePartialSpecializationSpecialization(ICPPClassTemplatePartialSpecialization orig, ICPPClassTemplate template, ICPPTemplateParameterMap argumentMap) throws DOMException {
+	public CPPClassTemplatePartialSpecializationSpecialization(ICPPClassTemplatePartialSpecialization orig, ICPPTemplateParameterMap argumentMap, ICPPClassTemplate template,
+			ICPPTemplateArgument[] args) throws DOMException {
 		super(orig, template.getOwner(), argumentMap);
 		fClassTemplate= template;
+		fArguments= args;
 	}
 
 	@Override
@@ -68,7 +69,7 @@ public class CPPClassTemplatePartialSpecializationSpecialization extends CPPClas
 	public synchronized ICPPTemplateInstance[] getAllInstances() {
 		if (instances != null) {
 			ICPPTemplateInstance[] result= new ICPPTemplateInstance[instances.size()];
-			for (int i=0; i < instances.size(); i++) {
+			for (int i= 0; i < instances.size(); i++) {
 				result[i]= (ICPPTemplateInstance) instances.getAt(i);
 			}
 			return result;
@@ -96,17 +97,7 @@ public class CPPClassTemplatePartialSpecializationSpecialization extends CPPClas
 
 	@Override
 	public ICPPTemplateArgument[] getTemplateArguments() {
-		ICPPTemplateArgument[] args = ((ICPPClassTemplatePartialSpecialization) getSpecializedBinding()).getTemplateArguments();
-		try {
-			final IBinding owner = getOwner();
-			if (owner instanceof ICPPClassSpecialization) {
-				return CPPTemplates.instantiateArguments(args, getTemplateParameterMap(), -1,
-						(ICPPClassSpecialization) owner);
-			}
-			return CPPTemplates.instantiateArguments(args, getTemplateParameterMap(), -1, null);
-		} catch (DOMException e) {
-			return args;
-		}
+		return fArguments;
 	}
 	
 	@Override
@@ -150,7 +141,7 @@ public class CPPClassTemplatePartialSpecializationSpecialization extends CPPClas
 	
 	@Override
 	public ICPPTemplateArgument getDefaultArgFromIndex(int paramPos) throws DOMException {
-		// no default arguments for partial specializations
+		// No default arguments for partial specializations
 		return null;
 	}
 }

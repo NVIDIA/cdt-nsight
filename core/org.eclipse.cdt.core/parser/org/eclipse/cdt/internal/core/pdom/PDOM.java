@@ -216,13 +216,15 @@ public class PDOM extends PlatformObject implements IPDOM {
 	 *  122.0 - Compacting strings
 	 *  123.0 - Combined file size and encoding hash code.
 	 *  124.0 - GCC attributes and NO_RETURN flag for functions.
-	 *  125.0 - Indexes for unresolved includes and files indexed with I/O errors.
+	 *  #125.0# - Indexes for unresolved includes and files indexed with I/O errors. <<CDT 8.1>>
+	 *  126.0 - Dependent expressions, bug 299911.
+	 *  127.0 - Explicit virtual overrides, bug 380623.
 	 *  // Nsight
-	 *  126.0 - added support for "extended bits" in declarations
+	 *  550.0 - added support for "extended bits" in declarations
 	 */
-	private static final int MIN_SUPPORTED_VERSION= version(126, 0);
-	private static final int MAX_SUPPORTED_VERSION= version(126, Short.MAX_VALUE);
-	private static final int DEFAULT_VERSION = version(126, 0);
+	private static final int MIN_SUPPORTED_VERSION= version(550, 0);
+	private static final int MAX_SUPPORTED_VERSION= version(550, Short.MAX_VALUE);
+	private static final int DEFAULT_VERSION = version(550, 0);
 
 	private static int version(int major, int minor) {
 		return (major << 16) + minor;
@@ -322,11 +324,11 @@ public class PDOM extends PlatformObject implements IPDOM {
 	private BTree fileIndex;
 	private BTree indexOfDefectiveFiles;
 	private BTree indexOfFiledWithUnresolvedIncludes;
-	private Map<Integer, PDOMLinkage> fLinkageIDCache = new HashMap<Integer, PDOMLinkage>();
+	private final Map<Integer, PDOMLinkage> fLinkageIDCache = new HashMap<Integer, PDOMLinkage>();
 	private File fPath;
-	private IIndexLocationConverter locationConverter;
-	private Map<String, IPDOMLinkageFactory> fPDOMLinkageFactoryCache;
-	private HashMap<Object, Object> fResultCache= new HashMap<Object, Object>();
+	private final IIndexLocationConverter locationConverter;
+	private final Map<String, IPDOMLinkageFactory> fPDOMLinkageFactoryCache;
+	private final HashMap<Object, Object> fResultCache= new HashMap<Object, Object>();
 	private List<IListener> listeners;
 	protected ChangeEvent fEvent= new ChangeEvent();
 
@@ -608,10 +610,10 @@ public class PDOM extends PlatformObject implements IPDOM {
 
 		private final ArrayList<PDOMNamedNode> currentPath= new ArrayList<PDOMNamedNode>();
 		private final ArrayList<BitSet> matchStack= new ArrayList<BitSet>();
-		private List<PDOMNamedNode> bindings = new ArrayList<PDOMNamedNode>();
-		private boolean isFullyQualified;
+		private final List<PDOMNamedNode> bindings = new ArrayList<PDOMNamedNode>();
+		private final boolean isFullyQualified;
 		private BitSet matchesUpToLevel;
-		private IndexFilter filter;
+		private final IndexFilter filter;
 
 		public BindingFinder(Pattern[] pattern, boolean isFullyQualified, IndexFilter filter, IProgressMonitor monitor) {
 			this.pattern = pattern;
@@ -895,7 +897,7 @@ public class PDOM extends PlatformObject implements IPDOM {
 
 	// Read-write lock rules. Readers don't conflict with other readers,
 	// Writers conflict with readers, and everyone conflicts with writers.
-	private Object mutex = new Object();
+	private final Object mutex = new Object();
 	private int lockCount;
 	private int waitingReaders;
 	private long lastWriteAccess= 0;

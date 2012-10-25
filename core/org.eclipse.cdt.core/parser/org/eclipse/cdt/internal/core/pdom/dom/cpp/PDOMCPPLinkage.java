@@ -14,7 +14,6 @@
 package org.eclipse.cdt.internal.core.pdom.dom.cpp;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -68,8 +67,10 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPUsingDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPUsingDirective;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPVariable;
 import org.eclipse.cdt.core.index.IIndexBinding;
+import org.eclipse.cdt.core.parser.util.ArrayUtil;
 import org.eclipse.cdt.internal.core.Util;
 import org.eclipse.cdt.internal.core.dom.parser.ASTInternal;
+import org.eclipse.cdt.internal.core.dom.parser.ISerializableEvaluation;
 import org.eclipse.cdt.internal.core.dom.parser.ITypeMarshalBuffer;
 import org.eclipse.cdt.internal.core.dom.parser.ProblemType;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPArrayType;
@@ -81,11 +82,28 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPPointerToMemberType;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPPointerType;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPQualifierType;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPReferenceType;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.ClassTypeHelper;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPDeferredClassInstance;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPUnknownBinding;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPUnknownClassInstance;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPUnknownClassType;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.CPPVisitor;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalBinary;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalBinaryTypeId;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalBinding;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalComma;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalCompound;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalConditional;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalFixed;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalFunctionCall;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalFunctionSet;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalID;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalInitList;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalMemberAccess;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalTypeId;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalUnary;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.EvalUnaryTypeID;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.TypeOfDependentExpression;
 import org.eclipse.cdt.internal.core.index.IIndexCPPBindingConstants;
 import org.eclipse.cdt.internal.core.index.composite.CompositeIndexBinding;
 import org.eclipse.cdt.internal.core.pdom.PDOM;
@@ -110,15 +128,15 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 	public final static int CACHE_BASES= 1;
 	public final static int CACHE_INSTANCES= 2;
 	public final static int CACHE_INSTANCE_SCOPE= 3;
-	
+
 	private final static int FIRST_NAMESPACE_CHILD_OFFSET= PDOMLinkage.RECORD_SIZE;
-	
+
 	@SuppressWarnings("hiding")
 	private final static int RECORD_SIZE= FIRST_NAMESPACE_CHILD_OFFSET + Database.PTR_SIZE;
 
 	// Only used when writing to database, which is single-threaded
-	private LinkedList<Runnable> postProcesses = new LinkedList<Runnable>(); 
-	
+	private final LinkedList<Runnable> postProcesses = new LinkedList<Runnable>();
+
 	public PDOMCPPLinkage(PDOM pdom, long record) {
 		super(pdom, record);
 	}
@@ -151,13 +169,13 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 	class ConfigureTemplateParameters implements Runnable {
 		private final IPDOMCPPTemplateParameter[] fPersisted;
 		private final ICPPTemplateParameter[] fOriginal;
-		
+
 		public ConfigureTemplateParameters(ICPPTemplateParameter[] original, IPDOMCPPTemplateParameter[] params) {
 			fOriginal= original;
 			fPersisted= params;
 			postProcesses.add(this);
 		}
-		
+
 		@Override
 		public void run() {
 			for (int i = 0; i < fOriginal.length; i++) {
@@ -167,18 +185,18 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			}
 		}
 	}
-	
+
 	class ConfigurePartialSpecialization implements Runnable {
 		IPDOMPartialSpecialization partial;
 		ICPPClassTemplatePartialSpecialization binding;
-		
+
 		public ConfigurePartialSpecialization(IPDOMPartialSpecialization partial,
 				ICPPClassTemplatePartialSpecialization binding) {
 			this.partial = partial;
 			this.binding = binding;
 			postProcesses.add(this);
 		}
-		
+
 		@Override
 		public void run() {
 			try {
@@ -192,7 +210,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			}
 		}
 	}
-	
+
 	class ConfigureFunctionTemplate implements Runnable {
 		private final PDOMCPPFunctionTemplate fTemplate;
 		private final IPDOMCPPTemplateParameter[] fTemplateParameters;
@@ -200,7 +218,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 		private final ICPPFunctionType fOriginalFunctionType;
 		private final ICPPParameter[] fOriginalParameters;
 		private final IType[] fOriginalExceptionSpec;
-		
+
 		public ConfigureFunctionTemplate(ICPPFunctionTemplate original, PDOMCPPFunctionTemplate template) throws DOMException {
 			fTemplate = template;
 			fTemplateParameters= template.getTemplateParameters();
@@ -210,7 +228,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			fOriginalExceptionSpec= template.extractExceptionSpec(original);
 			postProcesses.add(this);
 		}
-		
+
 		@Override
 		public void run() {
 			for (int i = 0; i < fOriginalTemplateParameters.length; i++) {
@@ -221,7 +239,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			fTemplate.initData(fOriginalFunctionType, fOriginalParameters, fOriginalExceptionSpec);
 		}
 	}
-	
+
 	/**
 	 * Adds or returns existing binding for the given name.
 	 */
@@ -235,10 +253,10 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 		PDOMBinding pdomBinding = addBinding(binding, name);
 		if (pdomBinding instanceof PDOMCPPClassType || pdomBinding instanceof PDOMCPPClassSpecialization) {
 			if (binding instanceof ICPPClassType && name.isDefinition()) {
-				addImplicitMethods(pdomBinding, (ICPPClassType) binding);
+				addImplicitMethods(pdomBinding, (ICPPClassType) binding, name);
 			}
 		}
-		
+
 		handlePostProcesses();
 		return pdomBinding;
 	}
@@ -260,18 +278,18 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 		if (cannotAdapt(inputBinding)) {
 			return null;
 		}
-		
+
 		PDOMBinding pdomBinding= attemptFastAdaptBinding(inputBinding);
 		if (pdomBinding == null) {
 			// assign names to anonymous types.
 			IBinding binding= PDOMASTAdapter.getAdapterForAnonymousASTBinding(inputBinding);
-			if (binding == null) 
+			if (binding == null)
 				return null;
 
 			final PDOMNode parent= adaptOrAddParent(true, binding);
 			if (parent == null)
 				return null;
-		
+
 			long fileLocalRec[]= {0};
 			pdomBinding = adaptBinding(parent, binding, fileLocalRec);
 			if (pdomBinding != null) {
@@ -282,7 +300,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 					if (pdomBinding != null) {
 						getPDOM().putCachedResult(inputBinding, pdomBinding);
 						if (inputBinding instanceof CPPClosureType) {
-							addImplicitMethods(pdomBinding, (ICPPClassType) binding);
+							addImplicitMethods(pdomBinding, (ICPPClassType) binding, fromName);
 						}
 					}
 				} catch (DOMException e) {
@@ -332,9 +350,9 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 		PDOMNode parent2= null;
 
 		// template parameters are created directly by their owners.
-		if (binding instanceof ICPPTemplateParameter) 
+		if (binding instanceof ICPPTemplateParameter)
 			return null;
-		
+
 		if (binding instanceof ICPPSpecialization) {
 			IBinding specialized = ((ICPPSpecialization) binding).getSpecializedBinding();
 			PDOMBinding pdomSpecialized= addBinding(specialized, null);
@@ -410,7 +428,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 				insertIntoNestedBindingsIndex(pdomBinding);
 			}
 		}
-		
+
 		return pdomBinding;
 	}
 
@@ -421,8 +439,8 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			((PDOMCPPNamespace) node).addToList(record + FIRST_NAMESPACE_CHILD_OFFSET);
 		}
 	}
-	
-	private PDOMBinding createSpecialization(PDOMNode parent, PDOMBinding orig, IBinding special) 
+
+	private PDOMBinding createSpecialization(PDOMNode parent, PDOMBinding orig, IBinding special)
 			throws CoreException, DOMException {
 		PDOMBinding result= null;
 		if (special instanceof ICPPDeferredClassInstance) {
@@ -448,7 +466,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			result= new PDOMCPPFieldSpecialization(this, parent, (ICPPField) special, orig);
 		} else if (special instanceof ICPPFunctionTemplate) {
 			if (special instanceof ICPPConstructor) {
-				result= new PDOMCPPConstructorTemplateSpecialization( this, parent, (ICPPConstructor) special, orig); 
+				result= new PDOMCPPConstructorTemplateSpecialization( this, parent, (ICPPConstructor) special, orig);
 			} else if (special instanceof ICPPMethod) {
 				result= new PDOMCPPMethodTemplateSpecialization( this, parent, (ICPPMethod) special, orig);
 			} else if (special instanceof ICPPFunction) {
@@ -469,21 +487,18 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 		} else if (special instanceof ICPPUsingDeclaration) {
 			result= new PDOMCPPUsingDeclarationSpecialization(this, parent, (ICPPUsingDeclaration) special, orig);
 		}
-		
+
 		return result;
 	}
-	
-	private void addImplicitMethods(PDOMBinding type, ICPPClassType binding) throws CoreException {
+
+	private void addImplicitMethods(PDOMBinding type, ICPPClassType binding, IASTNode point) throws CoreException {
 		try {
 			final long fileLocalRec= type.getLocalToFileRec();
 			IScope scope = binding.getCompositeScope();
 			if (scope instanceof ICPPClassScope) {
 				List<ICPPMethod> old= new ArrayList<ICPPMethod>();
 				if (type instanceof ICPPClassType) {
-					IScope oldScope = ((ICPPClassType)type).getCompositeScope();
-					if (oldScope instanceof ICPPClassScope) {
-						old.addAll(Arrays.asList(((ICPPClassScope) oldScope).getImplicitMethods()));
-					}
+					ArrayUtil.addAll(old, ClassTypeHelper.getImplicitMethods((ICPPClassType) type, point));
 				}
 				ICPPMethod[] implicit= ((ICPPClassScope) scope).getImplicitMethods();
 				for (ICPPMethod method : implicit) {
@@ -520,7 +535,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 				} else if (binding instanceof ICPPFunction) {
 					return CPP_FUNCTION_INSTANCE;
 				} else if (binding instanceof ICPPClassType) {
-					return CPP_CLASS_INSTANCE;		
+					return CPP_CLASS_INSTANCE;
 				}
 			} else if (binding instanceof ICPPClassTemplatePartialSpecialization) {
 				if (binding instanceof ICPPClassTemplatePartialSpecializationSpecialization)
@@ -602,7 +617,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 		} else if (binding instanceof ITypedef) {
 			return CPPTYPEDEF;
 		}
-			
+
 		return 0;
 	}
 
@@ -665,7 +680,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			if (fileLocalRecHolder == null)
 				return glob;
 			final long loc= getLocalToFileRec(parent, binding, glob);
-			if (loc == 0) 
+			if (loc == 0)
 				return glob;
 			fileLocalRecHolder[0]= loc;
 			return CPPFindBinding.findBinding(getIndex(), this, binding, loc);
@@ -676,7 +691,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			if (fileLocalRecHolder == null)
 				return glob;
 			final long loc= getLocalToFileRec(parent, binding, glob);
-			if (loc == 0) 
+			if (loc == 0)
 				return glob;
 			fileLocalRecHolder[0]= loc;
 			return CPPFindBinding.findBinding(btree, this, binding,	loc);
@@ -688,7 +703,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 		if (parent instanceof IPDOMMemberOwner) {
 			PDOMBinding glob= CPPFindBinding.findBinding(parent, this, binding, 0);
 			final long loc= getLocalToFileRec(parent, binding, glob);
-			if (loc == 0) 
+			if (loc == 0)
 				return glob;
 			fileLocalRecHolder[0]= loc;
 			return CPPFindBinding.findBinding(parent, this, binding, loc);
@@ -697,7 +712,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 	}
 
 	/**
-	 * Adapts the parent of the given binding to an object contained in this linkage. May return 
+	 * Adapts the parent of the given binding to an object contained in this linkage. May return
 	 * <code>null</code> if the binding cannot be adapted or the binding does not exist and addParent
 	 * is set to <code>false</code>.
 	 * @param binding the binding to adapt
@@ -730,7 +745,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 				owner= owner.getOwner();
 			}
 		}
-		
+
 		if (owner == null)
 			return this;
 
@@ -749,7 +764,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			postProcesses.removeFirst().run();
 		}
 	}
-	
+
 	@Override
 	public PDOMNode getNode(long record, int nodeType) throws CoreException {
 		switch (nodeType) {
@@ -846,7 +861,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 	@Override
 	public void onCreateName(PDOMFile file, IASTName name, PDOMName pdomName) throws CoreException {
 		super.onCreateName(file, name, pdomName);
-		
+
 		IASTNode parentNode= name.getParent();
 		if (parentNode instanceof ICPPASTQualifiedName) {
 			if (name != ((ICPPASTQualifiedName) parentNode).getLastName())
@@ -880,7 +895,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			IScope container= CPPVisitor.getContainingScope(name);
 			boolean doit= false;
 			PDOMCPPNamespace containerNS= null;
-			
+
 			IASTNode node= ASTInternal.getPhysicalNodeOfScope(container);
 			if (node instanceof IASTTranslationUnit) {
 				doit= true;
@@ -914,7 +929,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 					}
 				}
 			}
-		} else if (parentNode instanceof ICPPASTFunctionDeclarator) {			
+		} else if (parentNode instanceof ICPPASTFunctionDeclarator) {
 			if (parentNode.getParent() instanceof IASTSimpleDeclaration) {
 				IASTSimpleDeclaration grandparentNode = (IASTSimpleDeclaration) parentNode.getParent();
 				if (grandparentNode.getDeclSpecifier() instanceof ICPPASTDeclSpecifier) {
@@ -957,7 +972,7 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 	@Override
 	public void onDeleteName(PDOMName pdomName) throws CoreException {
 		super.onDeleteName(pdomName);
-		
+
 		if (pdomName.isBaseSpecifier()) {
 			PDOMName derivedClassName= (PDOMName) pdomName.getEnclosingDefinition();
 			if (derivedClassName != null) {
@@ -1014,42 +1029,82 @@ class PDOMCPPLinkage extends PDOMLinkage implements IIndexCPPBindingConstants {
 			if (file != null) {
 				return file;
 			}
-		} 
+		}
 		if (binding instanceof ICPPMember) {
 			return null;
 		}
 		return super.getLocalToFile(binding, glob);
 	}
-	
-	@Override 
+
+	@Override
 	public PDOMBinding addTypeBinding(IBinding type) throws CoreException {
 		return addBinding(type, null);
 	}
-	
+
 	@Override
 	public IType unmarshalType(ITypeMarshalBuffer buffer) throws CoreException {
 		int firstByte= buffer.getByte();
-		switch((firstByte & ITypeMarshalBuffer.KIND_MASK)) {
-		case ITypeMarshalBuffer.ARRAY:
+		switch ((firstByte & ITypeMarshalBuffer.KIND_MASK)) {
+		case ITypeMarshalBuffer.ARRAY_TYPE:
 			return CPPArrayType.unmarshal(firstByte, buffer);
 		case ITypeMarshalBuffer.BASIC_TYPE:
 			return CPPBasicType.unmarshal(firstByte, buffer);
-		case ITypeMarshalBuffer.CVQUALIFIER:
+		case ITypeMarshalBuffer.CVQUALIFIER_TYPE:
 			return CPPQualifierType.unmarshal(firstByte, buffer);
 		case ITypeMarshalBuffer.FUNCTION_TYPE:
 			return CPPFunctionType.unmarshal(firstByte, buffer);
-		case ITypeMarshalBuffer.POINTER:
+		case ITypeMarshalBuffer.POINTER_TYPE:
 			return CPPPointerType.unmarshal(firstByte, buffer);
 		case ITypeMarshalBuffer.PROBLEM_TYPE:
 			return ProblemType.unmarshal(firstByte, buffer);
-		case ITypeMarshalBuffer.REFERENCE:
+		case ITypeMarshalBuffer.REFERENCE_TYPE:
 			return CPPReferenceType.unmarshal(firstByte, buffer);
-		case ITypeMarshalBuffer.PACK_EXPANSION:
+		case ITypeMarshalBuffer.PACK_EXPANSION_TYPE:
 			return CPPParameterPackType.unmarshal(firstByte, buffer);
-		case ITypeMarshalBuffer.POINTER_TO_MEMBER:
+		case ITypeMarshalBuffer.POINTER_TO_MEMBER_TYPE:
 			return CPPPointerToMemberType.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.DEPENDENT_EXPRESSION_TYPE:
+			return TypeOfDependentExpression.unmarshal(firstByte, buffer);
 		}
-		
+
 		throw new CoreException(CCorePlugin.createStatus("Cannot unmarshal a type, first byte=" + firstByte)); //$NON-NLS-1$
+	}
+
+	@Override
+	public ISerializableEvaluation unmarshalEvaluation(ITypeMarshalBuffer buffer) throws CoreException {
+		int firstByte= buffer.getByte();
+		switch ((firstByte & ITypeMarshalBuffer.KIND_MASK)) {
+		case ITypeMarshalBuffer.EVAL_BINARY:
+			return EvalBinary.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_BINARY_TYPE_ID:
+			return EvalBinaryTypeId.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_BINDING:
+			return EvalBinding.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_COMMA:
+			return EvalComma.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_COMPOUND:
+			return EvalCompound.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_CONDITIONAL:
+			return EvalConditional.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_FIXED:
+			return EvalFixed.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_FUNCTION_CALL:
+			return EvalFunctionCall.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_FUNCTION_SET:
+			return EvalFunctionSet.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_ID:
+			return EvalID.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_INIT_LIST:
+			return EvalInitList.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_MEMBER_ACCESS:
+			return EvalMemberAccess.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_TYPE_ID:
+			return EvalTypeId.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_UNARY:
+			return EvalUnary.unmarshal(firstByte, buffer);
+		case ITypeMarshalBuffer.EVAL_UNARY_TYPE_ID:
+			return EvalUnaryTypeID.unmarshal(firstByte, buffer);
+		}
+		throw new CoreException(CCorePlugin.createStatus("Cannot unmarshal an evaluation, first byte=" + firstByte)); //$NON-NLS-1$
 	}
 }

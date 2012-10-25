@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Markus Schorn - initial API and implementation
+ *     Markus Schorn - initial API and implementation
  *******************************************************************************/ 
 package org.eclipse.cdt.ui.tests.text.selection;
 
@@ -33,9 +33,6 @@ import org.eclipse.cdt.ui.testplugin.CTestPlugin;
 import org.eclipse.cdt.internal.core.dom.parser.ASTNode;
 
 public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexer {
-
-	private static final int MAX_WAIT_TIME = 8000;
-
 	private String sourceIndexerID;
 	private IIndex index;
 
@@ -99,12 +96,12 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("basicDefinition.h", hcode); 
         IFile file = importFile("testBasicDefinition.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         
         int hoffset= hcode.indexOf("MyInt"); 
         int soffset = scode.indexOf("MyInt"); 
-        IASTNode decl = testF3(file, soffset+2);
-        IASTNode def = testF3(hfile, hoffset+2);
+        IASTNode decl = testF3(file, soffset + 2);
+        IASTNode def = testF3(hfile, hoffset + 2);
         assertTrue(def instanceof IASTName);
         assertTrue(decl instanceof IASTName);
         assertEquals("MyInt", ((IASTName) decl).toString()); //$NON-NLS-1$
@@ -116,8 +113,8 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         
         hoffset= hcode.indexOf("MyConst"); 
         soffset = scode.indexOf("MyConst"); 
-        decl = testF3(file, soffset+2);
-        def = testF3(hfile, hoffset+2);
+        decl = testF3(file, soffset + 2);
+        def = testF3(hfile, hoffset + 2);
         assertTrue(def instanceof IASTName);
         assertTrue(decl instanceof IASTName);
         assertEquals("MyConst", ((IASTName) decl).toString()); //$NON-NLS-1$
@@ -129,8 +126,8 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         
         hoffset= hcode.indexOf("MyFunc"); 
         soffset = scode.indexOf("MyFunc"); 
-        decl = testF3(file, soffset+2);
-        def = testF3(hfile, hoffset+2);
+        decl = testF3(file, soffset + 2);
+        def = testF3(hfile, hoffset + 2);
         assertTrue(def instanceof IASTName);
         assertTrue(decl instanceof IASTName);
         assertEquals("MyFunc", ((IASTName) decl).toString()); //$NON-NLS-1$
@@ -142,8 +139,8 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         
         hoffset= hcode.indexOf("MyStruct"); 
         soffset = scode.indexOf("MyStruct"); 
-        decl = testF3(file, soffset+2);
-        def = testF3(hfile, hoffset+2);
+        decl = testF3(file, soffset + 2);
+        def = testF3(hfile, hoffset + 2);
         assertTrue(def instanceof IASTName);
         assertTrue(decl instanceof IASTName);
         assertEquals("MyStruct", ((IASTName) decl).toString()); //$NON-NLS-1$
@@ -153,8 +150,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         assertEquals(hoffset, def.getFileLocation().getNodeOffset());
         assertEquals(8, ((ASTNode) def).getLength());
     }
-	
-    
+
 	// // the header
 	// extern int a; 				// declares 
 	// extern const int c = 1; 		// defines 
@@ -181,7 +177,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("testCPPSpecDeclsDefs.h", hcode); 
         IFile file = importFile("testCPPSpecDeclsDefs.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
 		        
         int offset0= hcode.indexOf("a;");
         int offset1= scode.indexOf("a;"); 
@@ -293,7 +289,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("testBug101287.h", hcode); 
         IFile file = importFile("testBug101287.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
 		        
@@ -317,7 +313,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFileWithLink("testBug103697.h", hcode); 
         IFile file = importFileWithLink("testBug103697.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
                 
@@ -345,7 +341,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("testBug78354.h", hcode); 
         IFile file = importFile("testBug78354.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
         
@@ -378,7 +374,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("testBug190730.h", hcode); 
         IFile file = importFile("testBug190730.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
         
@@ -404,7 +400,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("testBug190730_2.h", hcode); 
         IFile file = importFile("testBug190730_2.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
         
@@ -432,7 +428,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("macrodef.h", hcode); 
         IFile file = importFile("macronavi.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
         
@@ -465,7 +461,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("macrodef.h", hcode); 
         IFile file = importFile("macronavi.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
         
@@ -489,7 +485,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("aheader.h", hcode); 
         IFile file = importFile("includenavi.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
 
@@ -509,7 +505,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         String scode= buffers[1].toString();
         IFile hfile = importFile("aheader.h", hcode); 
         IFile file = importFile("source.c", scode); 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
         IASTNode decl;
         int offset0, offset1;
 
@@ -539,7 +535,7 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         IFile hfile = importFile("aheader.h", hcode); 
         IFile file = importFile("source.c", code); 
         int offset= code.indexOf("myFunc(0)");
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
 
         IASTNode decl= testF3(file, offset);
         assertTrue(decl instanceof IASTName);
@@ -555,8 +551,8 @@ public abstract class CSelectionTestsAnyIndexer extends BaseSelectionTestsIndexe
         IFile file = importFile("source.c", code); 
         int offset= code.indexOf("__LINE__");
 
-        TestSourceReader.waitUntilFileIsIndexed(index, file, MAX_WAIT_TIME);
-        // just make sure that no NPE is thrown.
+        TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
+        // Just make sure that no NPE is thrown.
         testF3(file, offset);
     }
 }

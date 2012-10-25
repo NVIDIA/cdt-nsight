@@ -258,7 +258,7 @@ public class ExtractFunctionRefactoring extends CRefactoring {
 	}
 
 	private void checkForNonExtractableStatements(NodeContainer container, RefactoringStatus status) {
-		NonExtractableStmtFinder finder = new NonExtractableStmtFinder();
+		NonExtractableStatementFinder finder = new NonExtractableStatementFinder();
 		for (IASTNode node : container.getNodesToWrite()) {
 			node.accept(finder);
 			if (finder.containsContinue()) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 QNX Software Systems and others.
+ * Copyright (c) 2007, 2012 QNX Software Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,15 +9,20 @@
  *     QNX - Initial API and implementation
  *     Andrew Ferguson (Symbian)
  *     Markus Schorn (Wind River Systems)
+ *     Sergey Prigogin (Google)
+ *     Thomas Corbat (IFS)
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.pdom.dom.cpp;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.dom.IPDOMVisitor;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IField;
 import org.eclipse.cdt.core.dom.ast.IScope;
@@ -33,6 +38,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPMethod;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPSpecialization;
 import org.eclipse.cdt.core.parser.util.ObjectMap;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPClassSpecialization;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPClassSpecialization.RecursionResolvingBinding;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ClassTypeHelper;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPClassSpecializationScope;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.CPPTemplates;
@@ -50,28 +56,39 @@ import org.eclipse.core.runtime.CoreException;
  */
 class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 		ICPPClassSpecialization, IPDOMMemberOwner, IPDOMCPPClassType {
+	private static final int FIRST_BASE = PDOMCPPSpecialization.RECORD_SIZE + 0;
+	private static final int MEMBER_LIST = PDOMCPPSpecialization.RECORD_SIZE + 4;
+	private static final int FINAL = PDOMCPPSpecialization.RECORD_SIZE + 8; // byte
 
-	private static final int FIRSTBASE = PDOMCPPSpecialization.RECORD_SIZE + 0;
-	private static final int MEMBERLIST = PDOMCPPSpecialization.RECORD_SIZE + 4;
-	
 	/**
 	 * The size in bytes of a PDOMCPPClassSpecialization record in the database.
 	 */
 	@SuppressWarnings("hiding")
-	protected static final int RECORD_SIZE = PDOMCPPSpecialization.RECORD_SIZE + 8;
-	
+	protected static final int RECORD_SIZE = PDOMCPPSpecialization.RECORD_SIZE + 9;
+
 	private volatile ICPPClassScope fScope;
-	private ObjectMap specializationMap= null; // Obtained from the synchronized PDOM cache
-	
+	private ObjectMap specializationMap; // Obtained from the synchronized PDOM cache
+	private final ThreadLocal<Set<IBinding>> fInProgress= new ThreadLocal<Set<IBinding>>();
+
 	public PDOMCPPClassSpecialization(PDOMLinkage linkage, PDOMNode parent, ICPPClassType classType,
 			PDOMBinding specialized) throws CoreException {
 		super(linkage, parent, (ICPPSpecialization) classType, specialized);
+		setFinal(classType);
 	}
 
 	public PDOMCPPClassSpecialization(PDOMLinkage linkage, long bindingRecord) {
 		super(linkage, bindingRecord);
 	}
-	
+
+	@Override
+	public void update(PDOMLinkage linkage, IBinding newBinding) throws CoreException {
+		if (newBinding instanceof ICPPClassType) {
+			ICPPClassType ct= (ICPPClassType) newBinding;
+			setFinal(ct);
+			super.update(linkage, newBinding);
+		}
+	}
+
 	@Override
 	protected int getRecordSize() {
 		return RECORD_SIZE;
@@ -86,11 +103,16 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 	public ICPPClassType getSpecializedBinding() {
 		return (ICPPClassType) super.getSpecializedBinding();
 	}
-	
+
 	@Override
-	public IBinding specializeMember(IBinding original) {	
+	public IBinding specializeMember(IBinding original) {
+		return specializeMember(original, null);
+	}
+
+	@Override
+	public IBinding specializeMember(IBinding original, IASTNode point) {
 		if (specializationMap == null) {
-			final Long key= record+PDOMCPPLinkage.CACHE_INSTANCE_SCOPE;
+			final Long key= record + PDOMCPPLinkage.CACHE_INSTANCE_SCOPE;
 			Object cached= getPDOM().getCachedResult(key);
 			if (cached != null) {
 				specializationMap= (ObjectMap) cached;
@@ -111,12 +133,22 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 				specializationMap= (ObjectMap) getPDOM().putCachedResult(key, newMap, false);
 			}
 		}
+		Set<IBinding> set;
 		synchronized (specializationMap) {
 			IBinding result= (IBinding) specializationMap.get(original);
-			if (result != null) 
+			if (result != null)
 				return result;
+			set= fInProgress.get();
+			if (set == null) {
+				set= new HashSet<IBinding>();
+				fInProgress.set(set);
+			}
+			if (!set.add(original))
+				return RecursionResolvingBinding.createFor(original, point);
 		}
-		IBinding newSpec= CPPTemplates.createSpecialization(this, original);
+		IBinding newSpec= CPPTemplates.createSpecialization(this, original, point);
+		set.remove(original);
+
 		synchronized (specializationMap) {
 			IBinding oldSpec= (IBinding) specializationMap.put(original, newSpec);
 			if (oldSpec != null) {
@@ -134,7 +166,7 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 				if (hasOwnScope()) {
 					fScope= new PDOMCPPClassScope(this);
 					return fScope;
-				} 
+				}
 			} catch (CoreException e) {
 			}
 			fScope= new PDOMCPPClassSpecializationScope(this);
@@ -147,24 +179,24 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 	}
 
 	public PDOMCPPBase getFirstBase() throws CoreException {
-		long rec = getDB().getRecPtr(record + FIRSTBASE);
+		long rec = getDB().getRecPtr(record + FIRST_BASE);
 		return rec != 0 ? new PDOMCPPBase(getLinkage(), rec) : null;
 	}
 
 	private void setFirstBase(PDOMCPPBase base) throws CoreException {
 		long rec = base != null ? base.getRecord() : 0;
-		getDB().putRecPtr(record + FIRSTBASE, rec);
+		getDB().putRecPtr(record + FIRST_BASE, rec);
 	}
-	
+
 	public void addBase(PDOMCPPBase base) throws CoreException {
-		getPDOM().removeCachedResult(record+PDOMCPPLinkage.CACHE_BASES);
+		getPDOM().removeCachedResult(record + PDOMCPPLinkage.CACHE_BASES);
 		PDOMCPPBase firstBase = getFirstBase();
 		base.setNextBase(firstBase);
 		setFirstBase(base);
 	}
-	
+
 	public void removeBase(PDOMName pdomName) throws CoreException {
-		getPDOM().removeCachedResult(record+PDOMCPPLinkage.CACHE_BASES);
+		getPDOM().removeCachedResult(record + PDOMCPPLinkage.CACHE_BASES);
 		PDOMCPPBase base= getFirstBase();
 		PDOMCPPBase predecessor= null;
 		long nameRec= pdomName.getRecord();
@@ -185,25 +217,31 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 			base.delete();
 		}
 	}
-	
-	// implementation of class type
+
 	@Override
 	public ICPPBase[] getBases() {
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getBases(null);
+	}
+
+	@Override
+	public ICPPBase[] getBases(IASTNode point) {
 		IScope scope= getCompositeScope();
 		if (scope instanceof ICPPClassSpecializationScope) {
-			return ((ICPPClassSpecializationScope) scope).getBases();
-		} 
-		
-		// this is an explicit specialization
+			return ((ICPPClassSpecializationScope) scope).getBases(point);
+		}
+
+		// This is an explicit specialization
 		Long key= record + PDOMCPPLinkage.CACHE_BASES;
 		ICPPBase[] bases= (ICPPBase[]) getPDOM().getCachedResult(key);
-		if (bases != null) 
+		if (bases != null)
 			return bases;
 
 		try {
 			List<PDOMCPPBase> list = new ArrayList<PDOMCPPBase>();
-			for (PDOMCPPBase base = getFirstBase(); base != null; base = base.getNextBase())
+			for (PDOMCPPBase base = getFirstBase(); base != null; base = base.getNextBase()) {
 				list.add(base);
+			}
 			Collections.reverse(list);
 			bases = list.toArray(new ICPPBase[list.size()]);
 			getPDOM().putCachedResult(key, bases);
@@ -213,12 +251,18 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 		}
 		return ICPPBase.EMPTY_BASE_ARRAY;
 	}
-	
+
 	@Override
 	public ICPPConstructor[] getConstructors() {
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getConstructors(null);
+	}
+
+	@Override
+	public ICPPConstructor[] getConstructors(IASTNode point) {
 		IScope scope= getCompositeScope();
 		if (scope instanceof ICPPClassSpecializationScope) {
-			return ((ICPPClassSpecializationScope) scope).getConstructors();
+			return ((ICPPClassSpecializationScope) scope).getConstructors(point);
 		}
 		try {
 			PDOMClassUtil.ConstructorCollector visitor= new PDOMClassUtil.ConstructorCollector();
@@ -232,9 +276,15 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 
 	@Override
 	public ICPPMethod[] getDeclaredMethods() {
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getDeclaredMethods(null);
+	}
+
+	@Override
+	public ICPPMethod[] getDeclaredMethods(IASTNode point) {
 		IScope scope= getCompositeScope();
 		if (scope instanceof ICPPClassSpecializationScope) {
-			return ((ICPPClassSpecializationScope) scope).getDeclaredMethods();
+			return ((ICPPClassSpecializationScope) scope).getDeclaredMethods(point);
 		}
 		try {
 			PDOMClassUtil.MethodCollector methods = new PDOMClassUtil.MethodCollector(false);
@@ -248,10 +298,16 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 
 	@Override
 	public ICPPField[] getDeclaredFields() {
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getDeclaredFields(null);
+	}
+
+	@Override
+	public ICPPField[] getDeclaredFields(IASTNode point) {
 		IScope scope= getCompositeScope();
 		if (scope instanceof ICPPClassSpecializationScope) {
-			return ((ICPPClassSpecializationScope) scope).getDeclaredFields();
-		} 
+			return ((ICPPClassSpecializationScope) scope).getDeclaredFields(point);
+		}
 		try {
 			PDOMClassUtil.FieldCollector visitor = new PDOMClassUtil.FieldCollector();
 			PDOMCPPClassScope.acceptViaCache(this, visitor, false);
@@ -261,13 +317,19 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 			return ICPPField.EMPTY_CPPFIELD_ARRAY;
 		}
 	}
-	
+
 	@Override
 	public ICPPClassType[] getNestedClasses() {
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getNestedClasses(null);
+	}
+
+	@Override
+	public ICPPClassType[] getNestedClasses(IASTNode point) {
 		IScope scope= getCompositeScope();
 		if (scope instanceof ICPPClassSpecializationScope) {
-			return ((ICPPClassSpecializationScope) scope).getNestedClasses();
-		} 
+			return ((ICPPClassSpecializationScope) scope).getNestedClasses(point);
+		}
 		try {
 			PDOMClassUtil.NestedClassCollector visitor = new PDOMClassUtil.NestedClassCollector();
 			PDOMCPPClassScope.acceptViaCache(this, visitor, false);
@@ -280,25 +342,49 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 
 	@Override
 	public IBinding[] getFriends() {
-		// not yet supported.
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getFriends(null);
+	}
+
+	@Override
+	public IBinding[] getFriends(IASTNode point) {
+		// Not yet supported.
 		return IBinding.EMPTY_BINDING_ARRAY;
 	}
 
 	@Override
-	public ICPPMethod[] getMethods() { 
-		return ClassTypeHelper.getMethods(this);
+	public ICPPMethod[] getMethods() {
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getMethods(null);
+	}
+
+	@Override
+	public ICPPMethod[] getMethods(IASTNode point) {
+		return ClassTypeHelper.getMethods(this, point);
 	}
 
 	@Override
 	public ICPPMethod[] getAllDeclaredMethods() {
-		return ClassTypeHelper.getAllDeclaredMethods(this);
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getAllDeclaredMethods(null);
 	}
-	
+
+	@Override
+	public ICPPMethod[] getAllDeclaredMethods(IASTNode point) {
+		return ClassTypeHelper.getAllDeclaredMethods(this, point);
+	}
+
 	@Override
 	public IField[] getFields() {
-		return ClassTypeHelper.getFields(this);
+		CCorePlugin.log(new Exception("Unsafe method call. Instantiation of dependent expressions may not work.")); //$NON-NLS-1$
+		return getFields(null);
 	}
-	
+
+	@Override
+	public IField[] getFields(IASTNode point) {
+		return ClassTypeHelper.getFields(this, point);
+	}
+
 	@Override
 	public IField findField(String name) {
 		return ClassTypeHelper.findField(this, name);
@@ -330,7 +416,7 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 
 		return CPPClassSpecialization.isSameClassSpecialization(this, (ICPPClassSpecialization) type);
 	}
-	
+
 	@Override
 	public Object clone() {
 		try {
@@ -342,13 +428,13 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 
 	@Override
 	public void addChild(PDOMNode member) throws CoreException {
-		PDOMNodeLinkedList list = new PDOMNodeLinkedList(getLinkage(), record + MEMBERLIST);
+		PDOMNodeLinkedList list = new PDOMNodeLinkedList(getLinkage(), record + MEMBER_LIST);
 		list.addMember(member);
 	}
 
 	@Override
 	public void acceptUncached(IPDOMVisitor visitor) throws CoreException {
-		PDOMNodeLinkedList list = new PDOMNodeLinkedList(getLinkage(), record + MEMBERLIST);
+		PDOMNodeLinkedList list = new PDOMNodeLinkedList(getLinkage(), record + MEMBER_LIST);
 		list.accept(visitor);
 	}
 
@@ -356,9 +442,23 @@ class PDOMCPPClassSpecialization extends PDOMCPPSpecialization implements
 	public void accept(IPDOMVisitor visitor) throws CoreException {
 		PDOMCPPClassScope.acceptViaCache(this, visitor, false);
 	}
-	
+
 	@Override
 	public boolean isAnonymous() {
 		return false;
+	}
+
+	@Override
+	public boolean isFinal() {
+		try {
+			return getDB().getByte(record + FINAL) != 0;
+		} catch (CoreException e){
+			CCorePlugin.log(e);
+			return false;
+		}
+	}
+
+	private void setFinal(ICPPClassType ct) throws CoreException {
+		getDB().putByte(record + FINAL, (byte) (ct.isFinal() ? 1 : 0));
 	}
 }

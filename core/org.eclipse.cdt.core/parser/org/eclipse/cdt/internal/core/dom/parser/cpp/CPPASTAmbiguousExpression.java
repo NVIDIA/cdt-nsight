@@ -13,21 +13,20 @@ package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTExpression;
 import org.eclipse.cdt.core.parser.util.ArrayUtil;
 import org.eclipse.cdt.internal.core.dom.parser.ASTAmbiguousNode;
 import org.eclipse.cdt.internal.core.dom.parser.IASTAmbiguousExpression;
 
-public class CPPASTAmbiguousExpression extends ASTAmbiguousNode implements
-        IASTAmbiguousExpression {
-
-    private IASTExpression [] exp = new IASTExpression[2];
-    private int expPos=-1;
+public class CPPASTAmbiguousExpression extends ASTAmbiguousNode
+		implements IASTAmbiguousExpression, ICPPASTExpression {
+    private IASTExpression[] exp = new IASTExpression[2];
+    private int expPos= -1;
     
     public CPPASTAmbiguousExpression(IASTExpression... expressions) {
 		for(IASTExpression e : expressions)
 			addExpression(e);
 	}
-
     
     @Override
 	public IASTExpression copy() {
@@ -43,7 +42,7 @@ public class CPPASTAmbiguousExpression extends ASTAmbiguousNode implements
 	public void addExpression(IASTExpression e) {
         assertNotFrozen();
     	if (e != null) {
-    		exp = ArrayUtil.appendAt( IASTExpression.class, exp, ++expPos, e );
+    		exp = ArrayUtil.appendAt(IASTExpression.class, exp, ++expPos, e);
     		e.setParent(this);
 			e.setPropertyInParent(SUBEXPRESSION);
     	}
@@ -51,7 +50,7 @@ public class CPPASTAmbiguousExpression extends ASTAmbiguousNode implements
 
     @Override
 	public IASTExpression[] getExpressions() {
-        exp = ArrayUtil.trimAt( IASTExpression.class, exp, expPos );
+        exp = ArrayUtil.trimAt(IASTExpression.class, exp, expPos);
     	return exp;
     }
 

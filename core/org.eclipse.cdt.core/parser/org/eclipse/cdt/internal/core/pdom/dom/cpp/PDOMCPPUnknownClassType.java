@@ -1,13 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 Google, Inc and others.
+ * Copyright (c) 2008, 2012 Google, Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Sergey Prigogin (Google) - initial API and implementation
- *    Markus Schorn (Wind River Systems)
+ *     Sergey Prigogin (Google) - initial API and implementation
+ *     Markus Schorn (Wind River Systems)
+ *     Thomas Corbat (IFS)
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.pdom.dom.cpp;
 
@@ -45,9 +46,8 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * @author Sergey Prigogin
  */
-class PDOMCPPUnknownClassType extends PDOMCPPUnknownBinding implements ICPPClassScope, ICPPUnknownClassType,
-		IPDOMMemberOwner, IIndexType, IIndexScope {
-
+class PDOMCPPUnknownClassType extends PDOMCPPUnknownBinding
+		implements ICPPClassScope, ICPPUnknownClassType, IPDOMMemberOwner, IIndexType, IIndexScope {
 	private static final int KEY = PDOMCPPBinding.RECORD_SIZE + 0; // byte
 	private static final int MEMBERLIST = PDOMCPPBinding.RECORD_SIZE + 4;
 	@SuppressWarnings("hiding")
@@ -59,7 +59,7 @@ class PDOMCPPUnknownClassType extends PDOMCPPUnknownBinding implements ICPPClass
 		super(linkage, parent, classType);
 
 		setKind(classType);
-		// linked list is initialized by storage being zero'd by malloc
+		// Linked list is initialized by storage being zero'd by malloc
 	}
 
 	public PDOMCPPUnknownClassType(PDOMLinkage linkage, long bindingRecord) {
@@ -140,8 +140,13 @@ class PDOMCPPUnknownClassType extends PDOMCPPUnknownBinding implements ICPPClass
 		return null;
 	}
 	
-	@Override
+	@Deprecated @Override
 	public IBinding[] getBindings(IASTName name, boolean resolve, boolean prefixLookup, IIndexFileSet fileSet) {
+		return IBinding.EMPTY_BINDING_ARRAY;
+	}
+
+	@Override
+	public IBinding[] getBindings(ScopeLookupData lookup) {
 		return IBinding.EMPTY_BINDING_ARRAY;
 	}
 	
@@ -240,7 +245,7 @@ class PDOMCPPUnknownClassType extends PDOMCPPUnknownBinding implements ICPPClass
     }
 
     /* (non-Javadoc)
-     * @see org.eclipse.cdt.core.dom.ast.IType#isSameType(org.eclipse.cdt.core.dom.ast.IType)
+     * @see IType#isSameType(IType)
      */
     @Override
 	public boolean isSameType(IType type) {
@@ -258,8 +263,8 @@ class PDOMCPPUnknownClassType extends PDOMCPPUnknownBinding implements ICPPClass
 		}
 		
 		if (type instanceof ICPPUnknownClassType 
-				&& type instanceof ICPPUnknownClassInstance == false
-				&& type instanceof ICPPDeferredClassInstance == false) {
+				&& !(type instanceof ICPPUnknownClassInstance)
+				&& !(type instanceof ICPPDeferredClassInstance)) {
 			ICPPUnknownClassType rhs= (ICPPUnknownClassType) type;
 			if (CharArrayUtils.equals(getNameCharArray(), rhs.getNameCharArray())) {
 				final IBinding lhsContainer = getOwner();
@@ -279,6 +284,11 @@ class PDOMCPPUnknownClassType extends PDOMCPPUnknownBinding implements ICPPClass
 	
 	@Override
 	public boolean isAnonymous() {
+		return false;
+	}
+
+	@Override
+	public boolean isFinal() {
 		return false;
 	}
 }

@@ -6,8 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    John Camelon (IBM Rational Software) - Initial API and implementation
- *    Markus Schorn (Wind River Systems)
+ *     John Camelon (IBM Rational Software) - Initial API and implementation
+ *     Markus Schorn (Wind River Systems)
  *******************************************************************************/
 package org.eclipse.cdt.core.dom.ast;
 
@@ -16,9 +16,8 @@ package org.eclipse.cdt.core.dom.ast;
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IASTTypeIdExpression extends IASTExpression {
-
 	/**
-	 * <code>op_sizeof</code> sizeof( typeId ) expression
+	 * <code>op_sizeof</code> sizeof (typeId) expression
 	 */
 	public static final int op_sizeof = 0;
 
@@ -121,13 +120,31 @@ public interface IASTTypeIdExpression extends IASTExpression {
 	 * Built-in type trait of g++. 
 	 * @since 5.3
 	 */
-	public static final int op_is_polymorphic=17;
+	public static final int op_is_polymorphic= 17;
 	
 	/**
 	 * Built-in type trait of g++. 
 	 * @since 5.3
 	 */
 	public static final int op_is_union= 18;
+			
+	/**
+	 * Built-in type trait of g++. 
+	 * Experimental API. May change without notice.
+	 */
+	public static final int op_is_literal_type= 19;
+			
+	/**
+	 * Built-in type trait of g++. 
+	 * Experimental API. May change without notice.
+	 */
+	public static final int op_is_standard_layout= 20;
+			
+	/**
+	 * Built-in type trait of g++. 
+	 * Experimental API. May change without notice.
+	 */
+	public static final int op_is_trivial= 21;
 			
 	/**
 	 * @deprecated constants should be declared here, to avoid using the same constant in different

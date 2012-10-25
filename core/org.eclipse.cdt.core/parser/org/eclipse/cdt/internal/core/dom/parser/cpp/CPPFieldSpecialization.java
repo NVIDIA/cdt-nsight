@@ -6,8 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Andrew Niefer (IBM) - Initial API and implementation
- *    Markus Schorn (Wind River Systems)
+ *     Andrew Niefer (IBM) - Initial API and implementation
+ *     Markus Schorn (Wind River Systems)
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
@@ -18,24 +18,25 @@ import org.eclipse.cdt.core.dom.ast.IValue;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassType;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPField;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPTemplateParameterMap;
-import org.eclipse.cdt.internal.core.dom.parser.IInternalVariable;
-import org.eclipse.cdt.internal.core.dom.parser.Value;
 
 /**
  * Binding for a specialization of a field.
  */
-public class CPPFieldSpecialization extends CPPSpecialization implements ICPPField, IInternalVariable {
-	private IType type = null;
-	private IValue value= null;
+public class CPPFieldSpecialization extends CPPSpecialization implements ICPPField {
+	private final IType type;
+	private final IValue value;
 
-	public CPPFieldSpecialization( IBinding orig, ICPPClassType owner, ICPPTemplateParameterMap tpmap) {
+	public CPPFieldSpecialization(IBinding orig, ICPPClassType owner, ICPPTemplateParameterMap tpmap,
+			IType type, IValue value) {
 		super(orig, owner, tpmap);
+		this.type= type;
+		this.value= value;
 	}
 
 	private ICPPField getField() {
 		return (ICPPField) getSpecializedBinding();
 	}
-	
+
 	@Override
 	public int getVisibility() {
 		return getField().getVisibility();
@@ -45,12 +46,9 @@ public class CPPFieldSpecialization extends CPPSpecialization implements ICPPFie
 	public ICPPClassType getClassOwner() {
 		return getField().getClassOwner();
 	}
-	
+
 	@Override
 	public IType getType() {
-		if (type == null) {
-			type= specializeType(getField().getType());
-		}
 		return type;
 	}
 
@@ -91,21 +89,6 @@ public class CPPFieldSpecialization extends CPPSpecialization implements ICPPFie
 
 	@Override
 	public IValue getInitialValue() {
-		return getInitialValue(Value.MAX_RECURSION_DEPTH);
-	}
-
-	@Override
-	public IValue getInitialValue(int maxRecursionDepth) {
-		if (value == null) {
-			ICPPField field= getField();
-			IValue v;
-			if (field instanceof IInternalVariable) {
-				v= ((IInternalVariable) field).getInitialValue(maxRecursionDepth);
-			} else {
-				v= getField().getInitialValue();
-			}
-			value= specializeValue(v, maxRecursionDepth);
-		}
 		return value;
 	}
 	

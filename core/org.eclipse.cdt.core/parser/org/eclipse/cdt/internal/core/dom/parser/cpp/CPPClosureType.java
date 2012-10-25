@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 Wind River Systems, Inc. and others.
+ * Copyright (c) 2010, 2012 Wind River Systems, Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     Markus Schorn (Wind River Systems) - initial API and implementation
  *     Jens Elmenthaler - http://bugs.eclipse.org/173458 (camel case completion)
+ *     Thomas Corbat (IFS)
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
@@ -152,7 +153,7 @@ public class CPPClosureType extends PlatformObject implements ICPPClassType, ICP
 					IASTExpression expr= rtstmt.getReturnValue();
 					if (expr != null) {
 						IType type= expr.getExpressionType();
-						type= Conversions.lvalue_to_rvalue(type);
+						type= Conversions.lvalue_to_rvalue(type, false);
 						if (type != null) {
 							return type;
 						}
@@ -338,6 +339,11 @@ public class CPPClosureType extends PlatformObject implements ICPPClassType, ICP
 	public void addDeclaration(IASTNode node) {
 	}
 
+	@Override
+	public boolean isFinal() {
+		return false;
+	}
+
 
 	private final class ClassScope implements ICPPClassScope {
 		@Override
@@ -404,18 +410,27 @@ public class CPPClosureType extends PlatformObject implements ICPPClassType, ICP
 
 		@Override
 		public IBinding[] getBindings(IASTName name, boolean resolve, boolean prefixLookup) {
-			if (name instanceof ICPPASTTemplateId)
-				return IBinding.EMPTY_BINDING_ARRAY;
-			
-			if (prefixLookup)
-				return getPrefixBindings(name.getSimpleID());
-			return getBindings(name.getSimpleID());
+			return getBindings(new ScopeLookupData(name, resolve, prefixLookup));
 		}
 
+		/**
+		 * @deprecated Use {@link #getBindings(ScopeLookupData)} instead
+		 */
+		@Deprecated
 		@Override
 		public IBinding[] getBindings(IASTName name, boolean resolve, boolean prefixLookup,
 				IIndexFileSet acceptLocalBindings) {
-			return getBindings(name, resolve, prefixLookup);
+					return getBindings(new ScopeLookupData(name, resolve, prefixLookup));
+				}
+
+		@Override
+		public IBinding[] getBindings(ScopeLookupData lookup) {
+			if (lookup.getLookupName() instanceof ICPPASTTemplateId)
+				return IBinding.EMPTY_BINDING_ARRAY;
+			
+			if (lookup.isPrefixLookup())
+				return getPrefixBindings(lookup.getLookupKey());
+			return getBindings(lookup.getLookupKey());
 		}
 
 		@Override
