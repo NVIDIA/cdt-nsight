@@ -18,6 +18,7 @@
 		<module>build/org.eclipse.cdt.managedbuilder.ui</module>
 		<module>core/org.eclipse.cdt.core</module>
 		<module>core/org.eclipse.cdt.ui</module>
+		<module>debug/org.eclipse.cdt.debug.ui</module>
 		<module>debug/org.eclipse.cdt.debug.core</module>
 		<module>doc/org.eclipse.cdt.doc.user</module>
 		<module>dsf/org.eclipse.cdt.dsf.ui</module>
