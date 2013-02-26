@@ -8,11 +8,12 @@
  * Contributors:
  *     Markus Schorn - initial API and implementation
  *     Sergey Prigogin (Google)
- *******************************************************************************/ 
+ *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
 import static org.eclipse.cdt.core.dom.ast.IASTExpression.ValueCategory.PRVALUE;
 
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.IValue;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPParameterPackType;
@@ -27,11 +28,17 @@ import org.eclipse.core.runtime.Assert;
 public class CPPTemplateNonTypeArgument implements ICPPTemplateArgument {
 	private final ICPPEvaluation fEvaluation;
 
-	public CPPTemplateNonTypeArgument(ICPPEvaluation evaluation) {
+	public CPPTemplateNonTypeArgument(ICPPEvaluation evaluation, IASTNode point) {
 		Assert.isNotNull(evaluation);
-		fEvaluation= evaluation;
+		if (evaluation instanceof EvalFixed || point == null ||
+				evaluation.isTypeDependent() || evaluation.isValueDependent()) {
+			fEvaluation= evaluation;
+		} else {
+			fEvaluation= new EvalFixed(evaluation.getTypeOrFunctionSet(point),
+					evaluation.getValueCategory(point), evaluation.getValue(point));
+		}
 	}
-	
+
 	public CPPTemplateNonTypeArgument(IValue value, IType type) {
 		fEvaluation = new EvalFixed(type, PRVALUE, value);
 	}
@@ -39,6 +46,11 @@ public class CPPTemplateNonTypeArgument implements ICPPTemplateArgument {
 	@Override
 	public boolean isTypeValue() {
 		return false;
+	}
+
+	@Override
+	public IType getOriginalTypeValue() {
+		return null;
 	}
 
 	@Override
@@ -52,15 +64,20 @@ public class CPPTemplateNonTypeArgument implements ICPPTemplateArgument {
 	}
 
 	@Override
+	public ICPPEvaluation getNonTypeEvaluation() {
+		return fEvaluation;
+	}
+
+	@Override
 	public IValue getNonTypeValue() {
 		return fEvaluation.getValue(null);
 	}
-	
+
 	@Override
 	public IType getTypeOfNonTypeValue() {
 		return fEvaluation.getTypeOrFunctionSet(null);
 	}
-	
+
 	@Override
 	public boolean isPackExpansion() {
 		return fEvaluation.getTypeOrFunctionSet(null) instanceof ICPPParameterPackType;
@@ -79,7 +96,7 @@ public class CPPTemplateNonTypeArgument implements ICPPTemplateArgument {
 				} else {
 					evaluation = new EvalTypeId(t, fEvaluation);
 				}
-				return new CPPTemplateNonTypeArgument(evaluation);
+				return new CPPTemplateNonTypeArgument(evaluation, null);
 			}
 		}
 		return null;
@@ -93,9 +110,5 @@ public class CPPTemplateNonTypeArgument implements ICPPTemplateArgument {
 	@Override
 	public String toString() {
 		return getNonTypeValue().toString();
-	}
-
-	public ICPPEvaluation getEvaluation() {
-		return fEvaluation;
 	}
 }

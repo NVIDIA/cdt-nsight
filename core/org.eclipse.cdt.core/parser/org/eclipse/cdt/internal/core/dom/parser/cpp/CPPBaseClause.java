@@ -1,14 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Andrew Niefer (IBM Corporation) - initial API and implementation
- *	  Bryan Wilkinson (QNX)
- *    Markus Schorn (Wind River Systems)
+ *     Andrew Niefer (IBM Corporation) - initial API and implementation
+ *	   Bryan Wilkinson (QNX)
+ *     Markus Schorn (Wind River Systems)
+ *     Nathan Ridge
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
@@ -16,6 +17,7 @@ import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUti
 import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil.getNestedType;
 
 import org.eclipse.cdt.core.dom.IName;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IProblemBinding;
 import org.eclipse.cdt.core.dom.ast.ISemanticProblem;
@@ -24,40 +26,43 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier.ICPPASTBaseSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPBase;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassType;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPTemplateParameter;
 
 public class CPPBaseClause implements ICPPBase, ICPPInternalBase {
-    private ICPPASTBaseSpecifier base;
-	private IBinding baseClass;
+    private final ICPPASTBaseSpecifier base;
+	private IType baseClass;
     
     public CPPBaseClause(ICPPASTBaseSpecifier base) {
         this.base = base;
     }
     
-    /* (non-Javadoc)
-     * @see org.eclipse.cdt.core.dom.ast.cpp.ICPPBase#getBaseClass()
-     */
     @Override
 	public IBinding getBaseClass() {
+		IType type= getBaseClassType();
+		type = getNestedType(type, TDEF);
+		if (type instanceof IBinding)
+			return (IBinding) type;
+		return null;
+    }
+
+    @Override
+    public IType getBaseClassType() {
 		if (baseClass == null) {
 	    	IBinding b = base.getName().resolveBinding();
 	    	if (b instanceof IProblemBinding) {
 	    		baseClass =  new CPPClassType.CPPClassTypeProblem(base.getName(), ((IProblemBinding) b).getID());
+	    	} else if (!(b instanceof IType)) {
+	    		baseClass =  new CPPClassType.CPPClassTypeProblem(base.getName(), ISemanticProblem.BINDING_NO_CLASS);
 	    	} else {
-	    		IType t= null;
-	    		if (b instanceof IType) {
-	    			t= getNestedType((IType) b, TDEF);
-	    		}
-	    		if (t instanceof ICPPClassType || t instanceof ICPPTemplateParameter) {
-	    			baseClass = (IBinding) t;
-	    		} else {
+	    		baseClass= (IType) b;
+	    		IType check= getNestedType(baseClass, TDEF);
+	    		if (!(check instanceof ICPPClassType || check instanceof ICPPUnknownType)) {
 	    			baseClass = new CPPClassType.CPPClassTypeProblem(base.getName(), ISemanticProblem.BINDING_NO_CLASS);
 	    		}
 	    	}
 		}
 		return baseClass;
     }
-
+    
     /* (non-Javadoc)
      * @see org.eclipse.cdt.core.dom.ast.cpp.ICPPBase#getVisibility()
      */
@@ -86,6 +91,12 @@ public class CPPBaseClause implements ICPPBase, ICPPInternalBase {
 
 	@Override
 	public void setBaseClass(IBinding cls) {
+		if (cls instanceof IType)
+			baseClass = (IType) cls;
+	}
+
+	@Override
+	public void setBaseClass(IType cls) {
 		baseClass = cls;
 	}
 
@@ -94,7 +105,19 @@ public class CPPBaseClause implements ICPPBase, ICPPInternalBase {
 		return base.getName();
 	}
 
-    @Override
+    /* (non-Javadoc)
+	 * @see org.eclipse.cdt.core.dom.ast.cpp.ICPPBase#getClassDefinitionName()
+	 */
+	@Override
+	public IName getClassDefinitionName() {
+		IASTNode parent = base.getParent();
+		if (parent instanceof ICPPASTCompositeTypeSpecifier) {
+			return ((ICPPASTCompositeTypeSpecifier) parent).getName();
+		}
+		return null;
+	}
+
+	@Override
 	public ICPPBase clone() {
         ICPPBase t = null;
    		try {

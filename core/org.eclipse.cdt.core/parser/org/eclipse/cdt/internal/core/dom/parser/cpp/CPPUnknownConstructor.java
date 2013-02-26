@@ -8,20 +8,26 @@
  * Contributors:
  *     Markus Schorn - initial API and implementation
  *     Thomas Corbat (IFS)
+ *     Nathan Ridge
  *******************************************************************************/ 
 package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassType;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPConstructor;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPFunction;
 
 /**
  * Represents a reference to a constructor (instance), which cannot be resolved because 
  * it depends on a template parameter. A compiler would resolve it during instantiation.
  */
-public class CPPUnknownConstructor extends CPPUnknownFunction implements ICPPConstructor {
+public class CPPUnknownConstructor extends CPPDeferredFunction implements ICPPConstructor {
 
 	public CPPUnknownConstructor(ICPPClassType owner) {
-		super(owner, owner.getNameCharArray());
+		super(owner, owner.getNameCharArray(), null);
+	}
+
+	public CPPUnknownConstructor(ICPPClassType owner, ICPPFunction[] candidates) {
+		super(owner, owner.getNameCharArray(), candidates);
 	}
 
 	@Override

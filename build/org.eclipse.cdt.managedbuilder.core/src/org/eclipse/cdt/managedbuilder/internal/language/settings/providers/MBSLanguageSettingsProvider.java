@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 Andrew Gvozdev and others.
+ * Copyright (c) 2009, 2013 Andrew Gvozdev and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,14 @@
 package org.eclipse.cdt.managedbuilder.internal.language.settings.providers;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.cdt.core.AbstractExecutableExtensionBase;
+import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
+import org.eclipse.cdt.core.cdtvariables.ICdtVariableManager;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsBroadcastingProvider;
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsStorage;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
@@ -22,11 +27,17 @@ import org.eclipse.cdt.core.settings.model.ICFileDescription;
 import org.eclipse.cdt.core.settings.model.ICFolderDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSetting;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
+import org.eclipse.cdt.core.settings.model.ICPathEntry;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingBase;
+import org.eclipse.cdt.core.settings.model.util.CDataUtil;
+import org.eclipse.cdt.managedbuilder.core.ManagedBuilderCorePlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
 
 /**
  * Implementation of language settings provider for CDT Managed Build System.
@@ -50,24 +61,55 @@ public class MBSLanguageSettingsProvider extends AbstractExecutableExtensionBase
 			languageSettings = getLanguageSettings(rcDescription);
 		}
 
-		List<ICLanguageSettingEntry> list = new ArrayList<ICLanguageSettingEntry>();
+		Set<ICLanguageSettingEntry> set = new LinkedHashSet<ICLanguageSettingEntry>();
 
 		if (languageSettings != null) {
 			for (ICLanguageSetting langSetting : languageSettings) {
 				if (langSetting != null) {
 					String id = langSetting.getLanguageId();
-					if (id != null && id.equals(languageId)) {
+					if (id == languageId || (id != null && id.equals(languageId))) {
 						int kindsBits = langSetting.getSupportedEntryKinds();
 						for (int kind=1; kind <= kindsBits; kind <<= 1) {
 							if ((kindsBits & kind) != 0) {
-								list.addAll(langSetting.getSettingEntriesList(kind));
+								List<ICLanguageSettingEntry> additions = langSetting.getSettingEntriesList(kind);
+								for (ICLanguageSettingEntry entry : additions) {
+									if (entry instanceof ICPathEntry) {
+										// have to use getName() rather than getLocation() and not use IPath operations to avoid collapsing ".."
+										String pathStr = ((ICPathEntry) entry).getName();
+										if (!new Path(pathStr).isAbsolute()) {
+											// We need to add project-rooted entry for relative path as MBS counts it this way in some UI
+											// The relative entry below also should be added for indexer to resolve from source file locations
+
+											ICdtVariableManager varManager = CCorePlugin.getDefault().getCdtVariableManager();
+											try {
+												// Substitute build/environment variables
+												String location = varManager.resolveValue(pathStr, "", null, cfgDescription); //$NON-NLS-1$
+												if (!new Path(location).isAbsolute()) {
+													IStringVariableManager mngr = VariablesPlugin.getDefault().getStringVariableManager();
+													String projectRootedPath = mngr.generateVariableExpression("workspace_loc", rc.getProject().getName()) + Path.SEPARATOR + pathStr; //$NON-NLS-1$
+													ICLanguageSettingEntry projectRootedEntry = (ICLanguageSettingEntry) CDataUtil.createEntry(kind, projectRootedPath, projectRootedPath, null, entry.getFlags());
+													if (!set.contains(projectRootedEntry)) {
+														set.add(projectRootedEntry);
+													}
+												}
+											} catch (CdtVariableException e) {
+												// Swallow exceptions but also log them
+												ManagedBuilderCorePlugin.log(e);
+											}
+											
+										}
+									}
+									if (!set.contains(entry)) {
+										set.add(entry);
+									}
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-		return LanguageSettingsStorage.getPooledList(list);
+		return LanguageSettingsStorage.getPooledList(new ArrayList<ICLanguageSettingEntry>(set));
 	}
 
 	/**

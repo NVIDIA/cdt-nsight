@@ -6,10 +6,10 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Bryan Wilkinson (QNX) - Initial API and implementation
- *    Andrew Ferguson (Symbian)
- *    Markus Schorn (Wind River Systems)
- *    Sergey Prigogin (Google)
+ *     Bryan Wilkinson (QNX) - Initial API and implementation
+ *     Andrew Ferguson (Symbian)
+ *     Markus Schorn (Wind River Systems)
+ *     Sergey Prigogin (Google)
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.pdom.dom.cpp;
 
@@ -60,12 +60,14 @@ public class PDOMCPPClassTemplate extends PDOMCPPClassType
 	
 	private volatile ICPPTemplateParameter[] params;  // Cached template parameters.
 	
-	public PDOMCPPClassTemplate(PDOMCPPLinkage linkage, PDOMNode parent, ICPPClassTemplate template)	throws CoreException, DOMException {
+	public PDOMCPPClassTemplate(PDOMCPPLinkage linkage, PDOMNode parent, ICPPClassTemplate template)
+			throws CoreException, DOMException {
 		super(linkage, parent, template);
 		
 		final Database db = getDB();
-		final ICPPTemplateParameter[] origParams= template.getTemplateParameters();
-		final IPDOMCPPTemplateParameter[] params = PDOMTemplateParameterArray.createPDOMTemplateParameters(linkage, this, origParams);
+		ICPPTemplateParameter[] origParams= template.getTemplateParameters();
+		IPDOMCPPTemplateParameter[] params =
+				PDOMTemplateParameterArray.createPDOMTemplateParameters(linkage, this, origParams);
 		long rec= PDOMTemplateParameterArray.putArray(db, params);
 		db.putRecPtr(record + PARAMETERS, rec);
 		db.putShort(record + RELEVANT_PARAMETERS, (short) params.length);
@@ -126,7 +128,8 @@ public class PDOMCPPClassTemplate extends PDOMCPPClassType
 		}
 	}
 
-	private void updateTemplateParameters(PDOMLinkage linkage, ICPPTemplateParameter[] newParams) throws CoreException, DOMException {
+	private void updateTemplateParameters(PDOMLinkage linkage, ICPPTemplateParameter[] newParams)
+			throws CoreException, DOMException {
 		final Database db = getDB();
 		long rec= db.getRecPtr(record + PARAMETERS);
 		IPDOMCPPTemplateParameter[] allParams;
@@ -166,7 +169,7 @@ public class PDOMCPPClassTemplate extends PDOMCPPClassType
 		
 		if (additionalPars > 0 || reorder) {
 			params= null;
-			IPDOMCPPTemplateParameter[] newAllParams= new IPDOMCPPTemplateParameter[allParams.length+additionalPars];
+			IPDOMCPPTemplateParameter[] newAllParams= new IPDOMCPPTemplateParameter[allParams.length + additionalPars];
 			for (int j = 0; j < newParamLength; j++) {
 				int idx= result[j];
 				if (idx >= 0) {
@@ -247,8 +250,9 @@ public class PDOMCPPClassTemplate extends PDOMCPPClassType
 		// exclude other kinds of class templates
 		if (type instanceof ICPPClassTemplatePartialSpecialization ||
 				type instanceof ICPPTemplateTemplateParameter ||
-				type instanceof ICPPClassSpecialization)
+				type instanceof ICPPClassSpecialization) {
 			return false;
+		}
 				
 		ICPPClassType ctype= (ICPPClassType) type;
 		if (ctype.getKey() != getKey())

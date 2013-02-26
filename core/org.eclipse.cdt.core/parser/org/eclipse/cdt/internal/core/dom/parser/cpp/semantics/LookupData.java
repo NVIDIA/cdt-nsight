@@ -20,7 +20,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.dom.ast.ASTNodeProperty;
+import org.eclipse.cdt.core.dom.ast.DOMException;
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
@@ -42,6 +44,7 @@ import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IScope;
 import org.eclipse.cdt.core.dom.ast.IScope.ScopeLookupData;
 import org.eclipse.cdt.core.dom.ast.IType;
+import org.eclipse.cdt.core.dom.ast.IVariable;
 import org.eclipse.cdt.core.dom.ast.c.ICASTFieldDesignator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier.ICPPASTBaseSpecifier;
@@ -76,7 +79,7 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPEvaluation;
  * Context data for IASTName lookup
  */
 public class LookupData extends ScopeLookupData {
-	final public ICPPTemplateArgument[] fTemplateArguments;
+	public ICPPTemplateArgument[] fTemplateArguments;
 	public Map<ICPPNamespaceScope, List<ICPPNamespaceScope>> usingDirectives= Collections.emptyMap();
 	
 	/** Used to ensure we don't visit things more than once. */
@@ -116,11 +119,15 @@ public class LookupData extends ScopeLookupData {
 		if (n == null)
 			throw new IllegalArgumentException();
 
+		ICPPTemplateArgument[] args = null;
 		if (n instanceof ICPPASTTemplateId) {
-			fTemplateArguments= CPPTemplates.createTemplateArgumentArray((ICPPASTTemplateId) n);
-		} else {
-			fTemplateArguments= null;
+			try {
+				args= CPPTemplates.createTemplateArgumentArray((ICPPASTTemplateId) n);
+			} catch (DOMException e) {
+				CCorePlugin.log(e);
+			}
 		}
+		fTemplateArguments= args;
 		configureWith(n);
 	}
 	
@@ -330,12 +337,12 @@ public class LookupData extends ScopeLookupData {
         return false;
     }
 
-    public boolean hasTypeOrMemberFunctionResult() {
+    public boolean hasTypeOrMemberFunctionOrVariableResult() {
     	if (foundItems == null)
     		return false;
     	if (foundItems instanceof Object[]) {
     		for (Object item : (Object[]) foundItems) {
-    			if (item instanceof ICPPMethod || item instanceof IType) {
+    			if (item instanceof ICPPMethod || item instanceof IType || item instanceof IVariable) {
     				return true;
     			}
     		}

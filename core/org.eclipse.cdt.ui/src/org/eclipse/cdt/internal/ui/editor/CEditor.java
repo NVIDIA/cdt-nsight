@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,6 @@ import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.action.GroupMarker;
@@ -151,7 +150,6 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
@@ -1637,7 +1635,7 @@ public class CEditor extends TextEditor implements ICEditor, ISelectionChangedLi
 			fOutlinePage = new CContentOutlinePage(this);
 			fOutlinePage.addSelectionChangedListener(this);
 		}
-		setOutlinePageInput(fOutlinePage, getEditorInput());
+		setOutlinePageInputIfNotSame(fOutlinePage, getEditorInput());
 		return fOutlinePage;
 	}
 
@@ -2564,6 +2562,16 @@ public class CEditor extends TextEditor implements ICEditor, ISelectionChangedLi
 		if (page != null) {
 			IWorkingCopyManager manager = CUIPlugin.getDefault().getWorkingCopyManager();
 			page.setInput(manager.getWorkingCopy(input));
+		}
+	}
+
+	private static void setOutlinePageInputIfNotSame(CContentOutlinePage page, IEditorInput input) {
+		if (page != null) {
+			IWorkingCopyManager manager = CUIPlugin.getDefault().getWorkingCopyManager();
+			IWorkingCopy workingCopy = manager.getWorkingCopy(input);
+			if (workingCopy != page.getRoot()) {
+				page.setInput(workingCopy);
+			}
 		}
 	}
 
@@ -3655,7 +3663,7 @@ public class CEditor extends TextEditor implements ICEditor, ISelectionChangedLi
 		}
 
 		stores.add(CUIPlugin.getDefault().getPreferenceStore());
-		stores.add(new ScopedPreferenceStore(InstanceScope.INSTANCE, CCorePlugin.PLUGIN_ID));
+		stores.add(CUIPlugin.getDefault().getCorePreferenceStore());
 		stores.add(EditorsUI.getPreferenceStore());
 
 		return new ChainedPreferenceStore(stores.toArray(new IPreferenceStore[stores.size()]));

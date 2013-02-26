@@ -8,13 +8,14 @@
  * Contributors:
  *     Markus Schorn - initial API and implementation
  *     Sergey Prigogin (Google)
- *******************************************************************************/ 
+ *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.parser.cpp;
 
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.IValue;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPParameterPackType;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPTemplateArgument;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil;
 import org.eclipse.core.runtime.Assert;
 
 /**
@@ -22,12 +23,19 @@ import org.eclipse.core.runtime.Assert;
  */
 public class CPPTemplateTypeArgument implements ICPPTemplateArgument {
 	private final IType fType;
+	private final IType fOriginalType;
 
 	public CPPTemplateTypeArgument(IType type) {
-		Assert.isNotNull(type);
-		fType= type;
+		this(SemanticUtil.getSimplifiedType(type), type);
 	}
-	
+
+	public CPPTemplateTypeArgument(IType simplifiedType, IType originalType) {
+		Assert.isNotNull(simplifiedType);
+		Assert.isNotNull(originalType);
+		fType= simplifiedType;
+		fOriginalType= originalType;
+	}
+
 	@Override
 	public boolean isTypeValue() {
 		return true;
@@ -44,15 +52,25 @@ public class CPPTemplateTypeArgument implements ICPPTemplateArgument {
 	}
 
 	@Override
+	public IType getOriginalTypeValue() {
+		return fOriginalType;
+	}
+
+	@Override
+	public ICPPEvaluation getNonTypeEvaluation() {
+		return null;
+	}
+
+	@Override
 	public IValue getNonTypeValue() {
 		return null;
 	}
-	
+
 	@Override
 	public IType getTypeOfNonTypeValue() {
 		return null;
 	}
-	
+
 	@Override
 	public boolean isPackExpansion() {
 		return fType instanceof ICPPParameterPackType;

@@ -235,7 +235,7 @@ public class ManagedBuildCoreTests20 extends TestCase {
 		IProjectType projType = ManagedBuildManager.getExtensionProjectType("test.sub");
 		assertNotNull(projType);
 
-		// Create the managed-project (.cdtbuild) for our project
+		// Create the managed-project for our project
 		IManagedProject newProject = null;
 		try {
 			newProject = ManagedBuildManager.createManagedProject(project, projType);
@@ -515,7 +515,7 @@ public class ManagedBuildCoreTests20 extends TestCase {
 		IProjectType projType = ManagedBuildManager.getExtensionProjectType("test.root");
 		assertNotNull(projType);
 
-		// Create the managed-project (.cdtbuild) for our project that builds a dummy executable
+		// Create the managed-project for our project that builds a dummy executable
 		IManagedProject newProject = ManagedBuildManager.createManagedProject(project, projType);
 		assertEquals(newProject.getName(), projType.getName());
 		assertFalse(newProject.equals(projType));

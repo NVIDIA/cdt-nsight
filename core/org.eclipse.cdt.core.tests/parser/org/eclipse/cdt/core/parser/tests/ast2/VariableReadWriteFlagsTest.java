@@ -23,7 +23,7 @@ import org.eclipse.cdt.internal.core.pdom.dom.PDOMName;
 /**
  * Unit tests for CPPVariableReadWriteFlags and CVariableReadWriteFlags classes.
  */
-public class VariableReadWriteFlagsTest extends AST2BaseTest {
+public class VariableReadWriteFlagsTest extends AST2TestBase {
 	private static final int READ = PDOMName.READ_ACCESS;
 	private static final int WRITE = PDOMName.WRITE_ACCESS;
 
@@ -157,6 +157,39 @@ public class VariableReadWriteFlagsTest extends AST2BaseTest {
 		a.assertReadWriteFlags("g(&a, b, c)", "a", READ);
 		a.assertReadWriteFlags("g(&a, b, c)", "b", READ);
 		a.assertReadWriteFlags("g(&a, b, c)", "c", READ);
+	}
+
+	//	struct A {
+	//	  A(int* x, int& y);
+	//	  A(const int* x, const int& y, int z);
+	//	};
+	//
+	//	void test(int a, int b, int c) {
+	//	  A u = A(&a, b);
+	//	  A* v = new A(&a, b);
+	//	  A w(&a, b);
+	//	  A x = A(&a, b, c);
+	//	  A* y = new A(&a, b, c);
+	//	  A z(&a, b, c);
+	//	};
+	public void testConstructorCall_393068() throws Exception {
+		AssertionHelper a = getCPPAssertionHelper();
+		a.assertReadWriteFlags("= A(&a, b)", "a", READ | WRITE);
+		a.assertReadWriteFlags("= A(&a, b)", "b", READ | WRITE);
+		a.assertReadWriteFlags("new A(&a, b)", "a", READ | WRITE);
+		a.assertReadWriteFlags("new A(&a, b)", "b", READ | WRITE);
+		a.assertReadWriteFlags("w(&a, b)", "a", READ | WRITE);
+		a.assertReadWriteFlags("w(&a, b)", "b", READ | WRITE);
+		a.assertReadWriteFlags("w(&a, b)", "w", WRITE);
+		a.assertReadWriteFlags("= A(&a, b, c)", "a", READ);
+		a.assertReadWriteFlags("= A(&a, b, c)", "b", READ);
+		a.assertReadWriteFlags("= A(&a, b, c)", "c", READ);
+		a.assertReadWriteFlags("new A(&a, b, c)", "a", READ);
+		a.assertReadWriteFlags("new A(&a, b, c)", "b", READ);
+		a.assertReadWriteFlags("new A(&a, b, c)", "c", READ);
+		a.assertReadWriteFlags("z(&a, b, c)", "a", READ);
+		a.assertReadWriteFlags("z(&a, b, c)", "b", READ);
+		a.assertReadWriteFlags("z(&a, b, c)", "c", READ);
 	}
 
 	//	struct A {

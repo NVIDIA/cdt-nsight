@@ -87,14 +87,14 @@ public class EvalInitList extends CPPEvaluation {
 	@Override
 	public void marshal(ITypeMarshalBuffer buffer, boolean includeValue) throws CoreException {
 		buffer.putByte(ITypeMarshalBuffer.EVAL_INIT_LIST);
-		buffer.putShort((short) fClauses.length);
+		buffer.putInt(fClauses.length);
 		for (ICPPEvaluation arg : fClauses) {
 			buffer.marshalEvaluation(arg, includeValue);
 		}
 	}
 
 	public static ISerializableEvaluation unmarshal(int firstByte, ITypeMarshalBuffer buffer) throws CoreException {
-		int len= buffer.getShort();
+		int len= buffer.getInt();
 		ICPPEvaluation[] args = new ICPPEvaluation[len];
 		for (int i = 0; i < args.length; i++) {
 			args[i]= (ICPPEvaluation) buffer.unmarshalEvaluation();
@@ -108,6 +108,25 @@ public class EvalInitList extends CPPEvaluation {
 		ICPPEvaluation[] clauses = fClauses;
 		for (int i = 0; i < fClauses.length; i++) {
 			ICPPEvaluation clause = fClauses[i].instantiate(tpMap, packOffset, within, maxdepth, point);
+			if (clause != fClauses[i]) {
+				if (clauses == fClauses) {
+					clauses = new ICPPEvaluation[fClauses.length];
+					System.arraycopy(fClauses, 0, clauses, 0, fClauses.length);
+				}
+				clauses[i] = clause;
+			}
+		}
+		if (clauses == fClauses)
+			return this;
+		return new EvalInitList(clauses);
+	}
+
+	@Override
+	public ICPPEvaluation computeForFunctionCall(CPPFunctionParameterMap parameterMap,
+			int maxdepth, IASTNode point) {
+		ICPPEvaluation[] clauses = fClauses;
+		for (int i = 0; i < fClauses.length; i++) {
+			ICPPEvaluation clause = fClauses[i].computeForFunctionCall(parameterMap, maxdepth, point);
 			if (clause != fClauses[i]) {
 				if (clauses == fClauses) {
 					clauses = new ICPPEvaluation[fClauses.length];

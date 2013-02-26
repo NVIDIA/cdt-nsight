@@ -258,7 +258,12 @@ public class CPPParameter extends PlatformObject implements ICPPParameter, ICPPI
 	
 	@Override
 	public IBinding getOwner() {
-		return CPPVisitor.findEnclosingFunction(fDeclarations[0]);
+		IASTFunctionDeclarator decl =
+				CPPVisitor.findAncestorWithType(fDeclarations[0], IASTFunctionDeclarator.class);
+		if (decl == null)
+			return null;
+		IASTName name= decl.getName();
+		return name != null ? name.resolveBinding() : null;
 	}
 
 	@Override

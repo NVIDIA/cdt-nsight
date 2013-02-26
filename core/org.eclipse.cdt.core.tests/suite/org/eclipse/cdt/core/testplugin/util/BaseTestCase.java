@@ -27,6 +27,7 @@ import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.ElementChangedEvent;
 import org.eclipse.cdt.core.model.ICProject;
@@ -37,15 +38,21 @@ import org.eclipse.cdt.internal.core.CCoreInternals;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNameBase;
 import org.eclipse.cdt.internal.core.pdom.CModelListener;
 import org.eclipse.cdt.internal.core.pdom.PDOMManager;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 
 public class BaseTestCase extends TestCase {
-	protected static final int INDEXER_TIMEOUT_SEC = 10;
+	private static final String DEFAULT_INDEXER_TIMEOUT_SEC = "10";
+	private static final String INDEXER_TIMEOUT_PROPERTY = "indexer.timeout";
+	protected static final int INDEXER_TIMEOUT_SEC =
+			Integer.parseInt(System.getProperty(INDEXER_TIMEOUT_PROPERTY, DEFAULT_INDEXER_TIMEOUT_SEC));
 	private boolean fExpectFailure;
 	private int fBugNumber;
 	private int fExpectedLoggedNonOK;
@@ -156,7 +163,7 @@ public class BaseTestCase extends TestCase {
 			try {
 				super.runBare();
 			} catch (Throwable e) {
-				testThrowable=e;
+				testThrowable= e;
 			}
 
 			if (statusLog.size() != fExpectedLoggedNonOK) {
@@ -164,7 +171,7 @@ public class BaseTestCase extends TestCase {
 				msg.append("non-OK status objects in log differs from actual (" + statusLog.size() + ").\n");
 				Throwable cause= null;
 				if (!statusLog.isEmpty()) {
-					synchronized(statusLog) {
+					synchronized (statusLog) {
 						for (IStatus status : statusLog) {
 							IStatus[] ss= {status};
 							ss= status instanceof MultiStatus ? ((MultiStatus) status).getChildren() : ss;
@@ -236,7 +243,6 @@ public class BaseTestCase extends TestCase {
      * in the log should fail the test. If the logged number of non-OK status objects
      * differs from the last value passed, the test is failed. If this method is not called
      * at all, the expected number defaults to zero.
-     * @param value
      */
     public void setExpectedNumberOfLoggedNonOKStatusObjects(int count) {
     	fExpectedLoggedNonOK= count;
@@ -247,7 +253,7 @@ public class BaseTestCase extends TestCase {
      * is a very basic means of doing that.
      */
     static protected class ModelJoiner implements IElementChangedListener {
-		private boolean[] changed= new boolean[1];
+		private final boolean[] changed= new boolean[1];
 
 		public ModelJoiner() {
 			CoreModel.getDefault().addElementChangedListener(this);
@@ -290,6 +296,8 @@ public class BaseTestCase extends TestCase {
 	}
 
     public static void waitForIndexer(ICProject project) throws InterruptedException {
+		Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_REFRESH, null);
+
 		final PDOMManager indexManager = CCoreInternals.getPDOMManager();
 		assertTrue(indexManager.joinIndexer(INDEXER_TIMEOUT_SEC * 1000, npm()));
 		long waitms= 1;
@@ -297,6 +305,11 @@ public class BaseTestCase extends TestCase {
 			Thread.sleep(waitms);
 			waitms *= 2;
 		}
+		assertTrue(indexManager.isProjectRegistered(project));
 		assertTrue(indexManager.joinIndexer(INDEXER_TIMEOUT_SEC * 1000, npm()));
+	}
+    
+	public static void waitUntilFileIsIndexed(IIndex index, IFile file) throws Exception {
+		TestSourceReader.waitUntilFileIsIndexed(index, file, INDEXER_TIMEOUT_SEC * 1000);
 	}
 }

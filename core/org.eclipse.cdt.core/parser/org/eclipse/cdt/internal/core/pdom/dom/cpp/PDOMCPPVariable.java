@@ -6,9 +6,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Doug Schaefer (QNX) - Initial API and implementation
- *    Markus Schorn (Wind River Systems)
- *    IBM Corporation
+ *     Doug Schaefer (QNX) - Initial API and implementation
+ *     Markus Schorn (Wind River Systems)
+ *     IBM Corporation
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.pdom.dom.cpp;
 
@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.CoreException;
  * Binding for a c++ variable in the index, serves as a base class for fields.
  */
 class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
-
 	private static final int TYPE_OFFSET = PDOMCPPBinding.RECORD_SIZE;
 	private static final int VALUE_OFFSET = TYPE_OFFSET + Database.TYPE_SIZE;
 	protected static final int ANNOTATIONS = VALUE_OFFSET + Database.VALUE_SIZE; // byte
@@ -42,7 +41,7 @@ class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
 	
 	public PDOMCPPVariable(PDOMLinkage linkage, PDOMNode parent, IVariable variable) throws CoreException {
 		super(linkage, parent, variable.getNameCharArray());
-		
+
 		// Find the type record
 		Database db = getDB();
 		setType(parent.getLinkage(), variable.getType());
@@ -77,11 +76,11 @@ class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
 	protected byte encodeFlags(IVariable variable) {
 		return PDOMCPPAnnotation.encodeAnnotation(variable);
 	}
-	
+
 	public PDOMCPPVariable(PDOMLinkage linkage, long record) {
 		super(linkage, record);
 	}
-	
+
 	@Override
 	protected int getRecordSize() {
 		return RECORD_SIZE;
@@ -91,11 +90,11 @@ class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
 	public int getNodeType() {
 		return IIndexCPPBindingConstants.CPPVARIABLE;
 	}
-	
+
 	@Override
 	public boolean isMutable() {
 		// ISO/IEC 14882:2003 7.1.1.8
-		return false; 
+		return false;
 	}
 
 	@Override
@@ -107,7 +106,7 @@ class PDOMCPPVariable extends PDOMCPPBinding implements ICPPVariable {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public IValue getInitialValue() {
 		try {

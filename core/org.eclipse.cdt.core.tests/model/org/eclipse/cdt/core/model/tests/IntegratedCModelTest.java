@@ -8,16 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*
- * Created on Jun 3, 2003
- * by bnicolle
- */
 package org.eclipse.cdt.core.model.tests;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
-import junit.framework.TestCase;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.dom.IPDOMManager;
@@ -27,6 +21,7 @@ import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.core.testplugin.CProjectHelper;
 import org.eclipse.cdt.core.testplugin.CTestPlugin;
+import org.eclipse.cdt.core.testplugin.util.BaseTestCase;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -34,18 +29,13 @@ import org.eclipse.core.runtime.Path;
 
 /**
  * @author bnicolle
- *
  */
-public abstract class IntegratedCModelTest extends TestCase {
-
+public abstract class IntegratedCModelTest extends BaseTestCase {
 	private ICProject fCProject;
 	private IFile sourceFile;
 	private NullProgressMonitor monitor;
 	private boolean structuralParse = false;
 
-	/**
-	 * 
-	 */
 	public IntegratedCModelTest() {
 		super();
 	}
@@ -84,7 +74,7 @@ public abstract class IntegratedCModelTest extends TestCase {
 				e.printStackTrace();
 			}
 		}
-		CCorePlugin.getIndexManager().joinIndexer(2000, new NullProgressMonitor());
+		waitForIndexer(fCProject);
 	}
 
 	@Override
@@ -114,5 +104,4 @@ public abstract class IntegratedCModelTest extends TestCase {
 	public void setStructuralParse(boolean structuralParse) {
 		this.structuralParse = structuralParse;
 	}
-
 }

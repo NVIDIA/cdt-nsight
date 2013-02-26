@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Google, Inc and others.
+ * Copyright (c) 2011, 2013 Google, Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	   Sergey Prigogin (Google) - initial API and implementation
+ *     Nathan Ridge
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.parser;
 
@@ -58,10 +59,12 @@ public class SizeofCalculator {
 	public final SizeAndAlignment size_2;
 	public final SizeAndAlignment size_4;
 	public final SizeAndAlignment size_8;
+	public final SizeAndAlignment size_16;
 	public final SizeAndAlignment sizeof_pointer;
 	public final SizeAndAlignment sizeof_int;
 	public final SizeAndAlignment sizeof_long;
 	public final SizeAndAlignment sizeof_long_long;
+	public final SizeAndAlignment sizeof_int128;
 	public final SizeAndAlignment sizeof_short;
 	public final SizeAndAlignment sizeof_bool;
 	public final SizeAndAlignment sizeof_wchar_t;
@@ -71,6 +74,8 @@ public class SizeofCalculator {
 	public final SizeAndAlignment sizeof_complex_double;
 	public final SizeAndAlignment sizeof_long_double;
 	public final SizeAndAlignment sizeof_complex_long_double;
+	public final SizeAndAlignment sizeof_float128;
+	public final SizeAndAlignment sizeof_complex_float128;
 
 	private final IASTTranslationUnit ast;
 
@@ -118,12 +123,18 @@ public class SizeofCalculator {
 		size_2 = new SizeAndAlignment(2, Math.min(2, maxAlignment));
 		size_4 = new SizeAndAlignment(4, Math.min(4, maxAlignment));
 		size_8 = new SizeAndAlignment(8, Math.min(8, maxAlignment));
+		size_16 = new SizeAndAlignment(16, Math.min(16, maxAlignment));
 		sizeof_pointer = getSize(sizeofMacros, "__SIZEOF_POINTER__", maxAlignment); //$NON-NLS-1$
 		sizeof_int = getSize(sizeofMacros, "__SIZEOF_INT__", maxAlignment); //$NON-NLS-1$
 		sizeof_long = getSize(sizeofMacros, "__SIZEOF_LONG__", maxAlignment); //$NON-NLS-1$
 		sizeof_long_long = getSize(sizeofMacros, "__SIZEOF_LONG_LONG__", maxAlignment); //$NON-NLS-1$
+		sizeof_int128 = getSize(sizeofMacros, "__SIZEOF_INT128__", maxAlignment); //$NON-NLS-1$
 		sizeof_short = getSize(sizeofMacros, "__SIZEOF_SHORT__", maxAlignment); //$NON-NLS-1$
-		sizeof_bool = getSize(sizeofMacros, "__SIZEOF_BOOL__", maxAlignment); //$NON-NLS-1$
+		SizeAndAlignment size = getSize(sizeofMacros, "__SIZEOF_BOOL__", maxAlignment); //$NON-NLS-1$
+		// __SIZEOF_BOOL__ is not defined by GCC but sizeof(bool) is needed for template resolution.
+		if (size == null)
+			size = SIZE_1;
+		sizeof_bool = size;
 		sizeof_wchar_t = getSize(sizeofMacros, "__SIZEOF_WCHAR_T__", maxAlignment); //$NON-NLS-1$
 		sizeof_float = getSize(sizeofMacros, "__SIZEOF_FLOAT__", maxAlignment); //$NON-NLS-1$
 		sizeof_complex_float = getSizeOfPair(sizeof_float);
@@ -131,18 +142,22 @@ public class SizeofCalculator {
 		sizeof_complex_double = getSizeOfPair(sizeof_double);
 		sizeof_long_double = getSize(sizeofMacros, "__SIZEOF_LONG_DOUBLE__", maxAlignment); //$NON-NLS-1$
 		sizeof_complex_long_double = getSizeOfPair(sizeof_long_double);
+		sizeof_float128 = size_16;  // GCC does not define __SIZEOF_FLOAT128__
+		sizeof_complex_float128 = getSizeOfPair(sizeof_float128);
 	}
 
 	private SizeofCalculator() {
 		size_2 = new SizeAndAlignment(2, 2);
 		size_4 = new SizeAndAlignment(4, 4);
 		size_8 = new SizeAndAlignment(8, 8);
+		size_16 = new SizeAndAlignment(16, 16);
 		sizeof_pointer = null;
 		sizeof_int = null;
 		sizeof_long = null;
 		sizeof_long_long = null;
+		sizeof_int128 = size_16;
 		sizeof_short = null;
-		sizeof_bool = null;
+		sizeof_bool = SIZE_1;
 		sizeof_wchar_t = null;
 		sizeof_float = null;
 		sizeof_complex_float = null;
@@ -150,6 +165,8 @@ public class SizeofCalculator {
 		sizeof_complex_double = null;
 		sizeof_long_double = null;
 		sizeof_complex_long_double = null;
+		sizeof_float128 = size_16;
+		sizeof_complex_float128 = getSizeOfPair(sizeof_float128);
 		ast = null;
 	}
 
@@ -166,7 +183,12 @@ public class SizeofCalculator {
 		if (type instanceof IBasicType) {
 			return sizeAndAlignment((IBasicType) type);
 		}
-		if (type instanceof IPointerType || type instanceof ICPPReferenceType) {
+		// [expr.sizeof]/2: "When applied to a reference or a reference type, the
+		// result is the size of the referenced type."
+		if (type instanceof ICPPReferenceType) {
+			return sizeAndAlignment(((ICPPReferenceType) type).getType());
+		}
+		if (type instanceof IPointerType) {
 			if (type instanceof ICPPPointerToMemberType)
 				return null;
 			return sizeof_pointer;
@@ -201,13 +223,16 @@ public class SizeofCalculator {
 		case eInt:
 			return type.isShort() ?	sizeof_short : type.isLong() ? sizeof_long :
 					type.isLongLong() ? sizeof_long_long : sizeof_int;
-		case eFloat: {
+		case eInt128:
+			return sizeof_int128;
+		case eFloat:
 			return type.isComplex() ? sizeof_complex_float : sizeof_float;
-		}
 		case eDouble:
 			return type.isComplex() ?
 					(type.isLong() ? sizeof_long_double : sizeof_double) :
 					(type.isLong() ? sizeof_complex_long_double : sizeof_complex_double);
+		case eFloat128:
+			return type.isComplex() ? sizeof_complex_float128 : sizeof_float128;
 		case eWChar:
 			return sizeof_wchar_t;
 		case eChar16:
@@ -215,7 +240,7 @@ public class SizeofCalculator {
 		case eChar32:
 			return size_4;
 		case eNullPtr:
-			return sizeAndAlignmentOfPointer();
+			return sizeof_pointer;
 		default:
 			return null;
 		}
@@ -295,14 +320,24 @@ public class SizeofCalculator {
 			if (field.isStatic())
 				continue;
 			IType fieldType = field.getType();
-			SizeAndAlignment info = sizeAndAlignment(fieldType);
+			SizeAndAlignment info;
+			// sizeof() on a reference type returns the size of the referenced type.
+			// However, a reference field in a structure only occupies as much space
+			// as a pointer.
+			if (fieldType instanceof ICPPReferenceType) {
+				info = sizeof_pointer;
+			} else {
+				info = sizeAndAlignment(fieldType);
+			}
 			if (info == null)
 				return null;
 			if (union) {
 				if (size < info.size)
 					size = info.size;
 			} else {
-				size += info.alignment - (size - 1) % info.alignment - 1 + info.size;
+				if (size > 0)
+					size += info.alignment - (size - 1) % info.alignment - 1;
+				size += info.size;
 			}
 			if (maxAlignment < info.alignment)
 				maxAlignment = info.alignment;

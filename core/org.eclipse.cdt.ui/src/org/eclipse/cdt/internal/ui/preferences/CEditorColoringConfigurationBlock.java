@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *     Anton Leherbauer (Wind River Systems
  *     Andrew Ferguson (Symbian)
  *******************************************************************************/
-
 package org.eclipse.cdt.internal.ui.preferences;
 
 import java.io.BufferedReader;
@@ -88,7 +87,6 @@ import org.eclipse.cdt.internal.ui.text.util.CColorManager;
  * @since 4.0
  */
 class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
-
 	/**
 	 * Item in the highlighting color list.
 	 */
@@ -180,7 +178,6 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	}
 
 	private static class SemanticHighlightingColorListItem extends HighlightingColorListItem {
-
 		/** Enablement preference key */
 		private final String fEnableKey;
 		/** <code>true</code> if this highlight is n/a when semantic highlighting is disabled **/
@@ -228,9 +225,6 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * Color list label provider.
 	 */
 	private class ColorListLabelProvider extends LabelProvider implements IColorProvider {
-		/*
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-		 */
 		@Override
 		public String getText(Object element) {
 			if (element instanceof String)
@@ -238,17 +232,11 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			return ((HighlightingColorListItem) element).getDisplayName();
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-		 */
 		@Override
 		public Color getBackground(Object element) {
 			return null;
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-		 */
 		@Override
 		public Color getForeground(Object element) {
 			if (element instanceof SemanticHighlightingColorListItem
@@ -266,26 +254,15 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * Color list content provider.
 	 */
 	private class ColorListContentProvider implements ITreeContentProvider {
-
-		/*
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-		 */
 		@Override
 		public Object[] getElements(Object inputElement) {
 			return categories.keySet().toArray();
 		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-		 */
+	
 		@Override
 		public void dispose() {
 		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
-		 * java.lang.Object, java.lang.Object)
-		 */
+	
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
@@ -636,11 +613,10 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	}
 
 	private Control createSyntaxPage(final Composite parent) {
-
-		Composite colorComposite = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
+		Composite colorComposite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		colorComposite.setLayout(layout);
 
 		Link link = new Link(colorComposite, SWT.NONE);
@@ -980,46 +956,40 @@ class CEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
-				{ createHighlightedRange(2, 8, 5, SemanticHighlightings.MACRO_DEFINITION) },
-				{ createHighlightedRange(3, 16, 3, SemanticHighlightings.NAMESPACE) },
-				{ createHighlightedRange(5, 21, 4, SemanticHighlightings.TYPEDEF) },
-				{ createHighlightedRange(6, 11, 6, SemanticHighlightings.FUNCTION_DECLARATION),
-						createHighlightedRange(6, 11, 6, SemanticHighlightings.FUNCTION) },
-				{ createHighlightedRange(6, 18, 4, SemanticHighlightings.TYPEDEF) },
-				{ createHighlightedRange(6, 23, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
-				{ createHighlightedRange(7, 6, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
-				{ createHighlightedRange(7, 22, 7, SemanticHighlightings.EXTERNAL_SDK),
-						createHighlightedRange(7, 22, 7, SemanticHighlightings.FUNCTION) },
-				{ createHighlightedRange(7, 30, 6, SemanticHighlightings.GLOBAL_VARIABLE) },
-				{ createHighlightedRange(8, 2, 4, SemanticHighlightings.GLOBAL_VARIABLE) },
-				{ createHighlightedRange(8, 7, 2, SemanticHighlightings.OVERLOADED_OPERATOR) },
-				{ createHighlightedRange(9, 9, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
-				{ createHighlightedRange(11, 6, 7, SemanticHighlightings.CLASS) },
-				{ createHighlightedRange(13, 7, 6, SemanticHighlightings.ENUM) },
-				{ createHighlightedRange(13, 16, 4, SemanticHighlightings.ENUMERATOR) },
-				{ createHighlightedRange(13, 22, 3, SemanticHighlightings.ENUMERATOR) },
-				{ createHighlightedRange(13, 27, 3, SemanticHighlightings.ENUMERATOR) },
-				{ createHighlightedRange(14, 14, 11, SemanticHighlightings.STATIC_FIELD),
-						createHighlightedRange(13, 14, 11, SemanticHighlightings.FIELD) },
-				{ createHighlightedRange(15, 6, 5, SemanticHighlightings.FIELD) },
-				{ createHighlightedRange(16, 10, 6, SemanticHighlightings.ENUM) },
-				{ createHighlightedRange(16, 17, 7, SemanticHighlightings.METHOD_DECLARATION),
-						createHighlightedRange(15, 17, 7, SemanticHighlightings.METHOD) },
-				{ createHighlightedRange(17, 7, 6, SemanticHighlightings.METHOD_DECLARATION),
-						createHighlightedRange(16, 7, 6, SemanticHighlightings.METHOD) },
-				{ createHighlightedRange(17, 14, 6, SemanticHighlightings.ENUM) },
-				{ createHighlightedRange(17, 21, 1, SemanticHighlightings.PARAMETER_VARIABLE) },
-				{ createHighlightedRange(18, 8, 5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
-				{ createHighlightedRange(18, 20, 5, SemanticHighlightings.MACRO_REFERENCE) },
-				{ createHighlightedRange(19, 0, 5, SemanticHighlightings.LABEL) },
-				{ createHighlightedRange(19, 7, 6, SemanticHighlightings.FUNCTION) },
-				{ createHighlightedRange(19, 14, 5, SemanticHighlightings.LOCAL_VARIABLE) },
-				{ createHighlightedRange(20, 4, 7, SemanticHighlightings.METHOD) },
-				{ createHighlightedRange(21, 4, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION),
-						createHighlightedRange(20, 4, 12, SemanticHighlightings.METHOD) },
-				{ createHighlightedRange(22, 4, 7, SemanticHighlightings.PROBLEM) },
-				{ createHighlightedRange(24, 14, 12, SemanticHighlightings.METHOD_DECLARATION),
-						createHighlightedRange(23, 14, 12, SemanticHighlightings.METHOD) }, };
+			{ createHighlightedRange( 2,  8,  5, SemanticHighlightings.MACRO_DEFINITION) },
+			{ createHighlightedRange( 3, 16,  3, SemanticHighlightings.NAMESPACE) },
+			{ createHighlightedRange( 5, 21,  4, SemanticHighlightings.TYPEDEF) },
+			{ createHighlightedRange( 6, 11,  6, SemanticHighlightings.FUNCTION_DECLARATION),  createHighlightedRange( 6, 11,  6, SemanticHighlightings.FUNCTION) },
+			{ createHighlightedRange( 6, 18,  4, SemanticHighlightings.TYPEDEF) },
+			{ createHighlightedRange( 6, 23,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange( 7,  6,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange( 7, 22,  7, SemanticHighlightings.EXTERNAL_SDK), createHighlightedRange( 7, 22,  7, SemanticHighlightings.FUNCTION) },
+			{ createHighlightedRange( 7, 30,  6, SemanticHighlightings.GLOBAL_VARIABLE) },
+			{ createHighlightedRange( 8, 2,   4, SemanticHighlightings.GLOBAL_VARIABLE) },
+			{ createHighlightedRange( 8, 7,   2, SemanticHighlightings.OVERLOADED_OPERATOR) },
+			{ createHighlightedRange( 9,  9,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange(11,  6,  7, SemanticHighlightings.CLASS) },
+			{ createHighlightedRange(13,  7,  6, SemanticHighlightings.ENUM) },
+			{ createHighlightedRange(13, 16,  4, SemanticHighlightings.ENUMERATOR) },
+			{ createHighlightedRange(13, 22,  3, SemanticHighlightings.ENUMERATOR) },
+			{ createHighlightedRange(13, 27,  3, SemanticHighlightings.ENUMERATOR) },
+			{ createHighlightedRange(14, 14, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(14, 14, 11, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange(15,  6,  5, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange(16, 10,  6, SemanticHighlightings.ENUM) },
+			{ createHighlightedRange(16, 17,  7, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(16, 17,  7, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(17,  7,  6, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(17,  7,  6, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(17, 14,  6, SemanticHighlightings.ENUM) },
+			{ createHighlightedRange(17, 21,  1, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange(18,  8,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
+			{ createHighlightedRange(18, 20,  5, SemanticHighlightings.MACRO_REFERENCE) },
+			{ createHighlightedRange(19,  0,  5, SemanticHighlightings.LABEL) },
+			{ createHighlightedRange(19,  7,  6, SemanticHighlightings.FUNCTION) },
+			{ createHighlightedRange(19, 14,  5, SemanticHighlightings.LOCAL_VARIABLE) },
+			{ createHighlightedRange(20,  4,  7, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(21,  4, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(21,  4, 12, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(22,  4,  7, SemanticHighlightings.PROBLEM) },
+			{ createHighlightedRange(24, 14, 12, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(24, 14, 12, SemanticHighlightings.METHOD) },
+		};
 	}
 
 	/**

@@ -632,26 +632,27 @@ public class Builder extends HoldsOptions implements IBuilder, IMatchKeyProvider
 
 	private int decodeParallelizationNumber(String value) {
 		int parallelNumber = -1;
-		if (VALUE_OPTIMAL.equals(value)) {
+		if (value == null || VALUE_OPTIMAL.equals(value)) {
 			parallelNumber = -getOptimalParallelJobNum();
 		} else if (VALUE_UNLIMITED.equals(value)) {
 			parallelNumber = UNLIMITED_JOBS;
 		} else {
 			try {
 				parallelNumber = Integer.decode(value);
+				if (parallelNumber <= 0) {
+					// compatibility with legacy representation - it was that inconsistent
+					if (isInternalBuilder()) {
+						// "optimal" for Internal Builder
+						parallelNumber = -getOptimalParallelJobNum();
+					} else {
+						// unlimited for External Builder
+						parallelNumber = UNLIMITED_JOBS;
+					}
+				}
 			} catch (NumberFormatException e) {
 				ManagedBuilderCorePlugin.log(e);
-				parallelNumber = getOptimalParallelJobNum();
-			}
-			if (parallelNumber <= 0) {
-				// compatibility with legacy representation - it was that inconsistent
-				if (isInternalBuilder()) {
-					// "optimal" for Internal Builder
-					parallelNumber = -getOptimalParallelJobNum();
-				} else {
-					// unlimited for External Builder
-					parallelNumber = UNLIMITED_JOBS;
-				}
+				// default to "optimal" if not recognized
+				parallelNumber = -getOptimalParallelJobNum();
 			}
 		}
 		return parallelNumber;
@@ -1840,11 +1841,10 @@ public class Builder extends HoldsOptions implements IBuilder, IMatchKeyProvider
 //				}
 				
 				if(!buildPath.isAbsolute()){
-					buildPath = project.getFullPath().append(buildPath);
 					IStringVariableManager mngr = VariablesPlugin.getDefault().getStringVariableManager();
-	
-					result = buildPath.toString();
-					result = mngr.generateVariableExpression("workspace_loc", result); //$NON-NLS-1$
+					// build dir may not exist yet and non-existent paths will resolve to empty string by VariablesPlugin
+					// so append relative part outside of expression, i.e. ${workspace_loc:/Project}/BuildDir
+					result = mngr.generateVariableExpression("workspace_loc", project.getFullPath().toString()) + Path.SEPARATOR + buildPath.toString(); //$NON-NLS-1$
 				} else {
 					result = buildPath.toString();
 				}
@@ -2522,7 +2522,13 @@ public class Builder extends HoldsOptions implements IBuilder, IMatchKeyProvider
 	 * The function never returns number smaller than 1.
 	 */
 	public int getOptimalParallelJobNum() {
-		return Runtime.getRuntime().availableProcessors();
+		// Bug 398426: On my Mac running parallel builds at full tilt hangs the desktop.
+		// Need to pull it back one.
+		int j = Runtime.getRuntime().availableProcessors();
+		if (j > 1 && Platform.getOS().equals(Platform.OS_MACOSX))
+			return j - 1;
+		else
+			return j;
 	}
 	
 	/**

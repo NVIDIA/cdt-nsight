@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 Wind River Systems, Inc. and others.
+ * Copyright (c) 2006, 2013 Wind River Systems, Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,9 @@
  *     IBM Corporation
  *     Sergey Prigogin (Google)
  *     Jens Elmenthaler - http://bugs.eclipse.org/173458 (camel case completion)
+ *     Nathan Ridge
  *******************************************************************************/
-package org.eclipse.cdt.ui.tests.text.contentassist2;
-
-import java.io.File;
+package org.eclipse.cdt.ui.tests.text.contentassist2;import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,9 +25,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.testplugin.TestScannerProvider;
 import org.eclipse.cdt.core.testplugin.util.BaseTestCase;
+;
 
 /**
  * A collection of code completion tests.
@@ -862,11 +861,11 @@ public class CompletionTests extends AbstractContentAssistTest {
 		};
 		String disturbContent= readTaggedComment(DISTURB_FILE_NAME);
 		IFile dfile= createFile(fProject, DISTURB_FILE_NAME, disturbContent);
-		assertTrue(CCorePlugin.getIndexManager().joinIndexer(8000, npm()));
+		waitForIndexer(fCProject);
 		assertCompletionResults(fCursorOffset, expected, AbstractContentAssistTest.COMPARE_REP_STRINGS);
 		
 		dfile.delete(true, npm());
-		assertTrue(CCorePlugin.getIndexManager().joinIndexer(8000, npm()));
+		waitForIndexer(fCProject);
 		assertCompletionResults(fCursorOffset, expected2, AbstractContentAssistTest.COMPARE_REP_STRINGS);
 	}
 	
@@ -1329,7 +1328,7 @@ public class CompletionTests extends AbstractContentAssistTest {
 	//	    v.push_back(/*cursor*/);
 	//	} 
 	public void testTypedefSpecialization_Bug307818() throws Exception {
-		final String[] expected= { "push_back(const vector<int>::value_type & value) : void" };
+		final String[] expected= { "push_back(const vector<MyType>::value_type & value) : void" };
 		assertParameterHint(expected);
 	}
 	
@@ -1365,5 +1364,20 @@ public class CompletionTests extends AbstractContentAssistTest {
 	public void testBuiltinMacroSegmentMatch() throws Exception {
 		final String[] expected= { "__builtin_va_arg(ap, type)" };
 		assertCompletionResults(fCursorOffset, expected, COMPARE_ID_STRINGS);
+	}
+
+	//	namespace N {
+	//	  void foo(int);
+	//	}
+	//	using N::f/*cursor*/
+	public void testUsingDeclaration_Bug379631() throws Exception {
+		final String[] expected= { "foo;" };
+		assertCompletionResults(fCursorOffset, expected, COMPARE_REP_STRINGS);
+	}
+
+	//	template <typen/*cursor*/
+	public void testTemplateDeclaration_Bug397288() throws Exception {
+		final String[] expected= { "typename" };
+		assertContentAssistResults(fCursorOffset, 0, expected, true, false, false, COMPARE_REP_STRINGS);
 	}
 }

@@ -23,33 +23,37 @@ public class GCCKeywords {
 	public static final String __ALIGNOF__ = "__alignof__"; 
 	public static final String __ATTRIBUTE__ = "__attribute__"; 
 	public static final String __DECLSPEC = "__declspec"; 
+	/** Experimental constant. May change without notice. */
+	public static final String __DECLTYPE = "__decltype";
+	/** Experimental constant. May change without notice. */
+	public static final String __INT128 = "__int128";
+	/** Experimental constant. May change without notice. */
+	public static final String __FLOAT128 = "__float128";
 
-	public static final char[] 
+	public static final char[]
 		cpTYPEOF = 			TYPEOF.toCharArray(),
 		cp__ALIGNOF__ = 	__ALIGNOF__.toCharArray(),
 		cp__ATTRIBUTE__ = 	__ATTRIBUTE__.toCharArray(),
 		cp__DECLSPEC = 		__DECLSPEC.toCharArray(),
-		cp__ALIGNOF = 		"__alignof".toCharArray(), 
-		cp__ATTRIBUTE = 	"__attribute".toCharArray(), 
-		cp__ASM= 			"__asm".toCharArray(), 
-		cp__ASM__= 			"__asm__".toCharArray(), 
-		cp__CONST= 			"__const".toCharArray(), 
-		cp__CONST__= 		"__const__".toCharArray(), 
-		cp__INLINE= 		"__inline".toCharArray(), 
-		cp__INLINE__= 		"__inline__".toCharArray(), 
-		cp__RESTRICT= 		"__restrict".toCharArray(), 
-		cp__RESTRICT__= 	"__restrict__".toCharArray(), 
-		cp__VOLATILE= 		"__volatile".toCharArray(), 
-		cp__VOLATILE__= 	"__volatile__".toCharArray(), 
-		cp__SIGNED= 		"__signed".toCharArray(), 
-		cp__SIGNED__= 		"__signed__".toCharArray(), 
-		cp__TYPEOF= 		"__typeof".toCharArray(), 
+		cp__ALIGNOF = 		"__alignof".toCharArray(),
+		cp__ATTRIBUTE = 	"__attribute".toCharArray(),
+		cp__ASM= 			"__asm".toCharArray(),
+		cp__ASM__= 			"__asm__".toCharArray(),
+		cp__CONST= 			"__const".toCharArray(),
+		cp__CONST__= 		"__const__".toCharArray(),
+		cp__INLINE= 		"__inline".toCharArray(),
+		cp__INLINE__= 		"__inline__".toCharArray(),
+		cp__RESTRICT= 		"__restrict".toCharArray(),
+		cp__RESTRICT__= 	"__restrict__".toCharArray(),
+		cp__VOLATILE= 		"__volatile".toCharArray(),
+		cp__VOLATILE__= 	"__volatile__".toCharArray(),
+		cp__SIGNED= 		"__signed".toCharArray(),
+		cp__SIGNED__= 		"__signed__".toCharArray(),
+		cp__TYPEOF= 		"__typeof".toCharArray(),
 		cp__TYPEOF__= 		"__typeof__".toCharArray();
 
-	/**
-	 * @since 5.3
-	 */
-	public static final char[] 
+	/** @since 5.3 */
+	public static final char[]
 		cp__has_nothrow_assign= 		"__has_nothrow_assign".toCharArray(),
 		cp__has_nothrow_copy= 			"__has_nothrow_copy".toCharArray(),
 		cp__has_nothrow_constructor= 	"__has_nothrow_constructor".toCharArray(),
@@ -68,9 +72,12 @@ public class GCCKeywords {
 		cp__is_union= 					"__is_union".toCharArray();
 
 	/**
-	 * Experimental API. May change without notice.
+	 * Experimental constants. May change without notice.
 	 */
 	public static final char[] 
+		cp__DECLTYPE=			 		__DECLTYPE.toCharArray(),
+		cp__float128= 					__FLOAT128.toCharArray(),
+		cp__int128= 					__INT128.toCharArray(),
 		cp__is_literal_type= 			"__is_literal_type".toCharArray(),
 		cp__is_standard_layout= 		"__is_standard_layout".toCharArray(),
 		cp__is_trivial= 			    "__is_trivial".toCharArray();

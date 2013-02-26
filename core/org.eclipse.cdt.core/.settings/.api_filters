@@ -8,6 +8,18 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/IASTSimpleDeclSpecifier.java" type="org.eclipse.cdt.core.dom.ast.IASTSimpleDeclSpecifier">
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="t_float128"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="t_int128"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="parser/org/eclipse/cdt/core/dom/ast/IASTTypeIdExpression.java" type="org.eclipse.cdt.core.dom.ast.IASTTypeIdExpression">
         <filter id="1209008130">
             <message_arguments>
@@ -37,10 +49,29 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/IBasicType.java" type="org.eclipse.cdt.core.dom.ast.IBasicType$Kind">
+        <filter id="1177550852">
+            <message_arguments>
+                <message_argument value="eFloat128"/>
+            </message_arguments>
+        </filter>
+        <filter id="1177550852">
+            <message_arguments>
+                <message_argument value="eInt128"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="parser/org/eclipse/cdt/core/dom/ast/IScope.java" type="org.eclipse.cdt.core.dom.ast.IScope$ScopeLookupData">
         <filter id="1211105284">
             <message_arguments>
                 <message_argument value="ScopeLookupData"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/cpp/ICPPASTAliasDeclaration.java" type="org.eclipse.cdt.core.dom.ast.cpp.ICPPASTAliasDeclaration">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.eclipse.cdt.core.dom.ast.cpp.ICPPASTAliasDeclaration"/>
             </message_arguments>
         </filter>
     </resource>
@@ -58,6 +89,32 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/cpp/ICPPASTTypeId.java" type="org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTypeId">
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="copy()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="copy(IASTNode.CopyStyle)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/cpp/ICPPAliasTemplate.java" type="org.eclipse.cdt.core.dom.ast.cpp.ICPPAliasTemplate">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.eclipse.cdt.core.dom.ast.cpp.ICPPAliasTemplate"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="parser/org/eclipse/cdt/core/dom/ast/cpp/ICPPAliasTemplateInstance.java" type="org.eclipse.cdt.core.dom.ast.cpp.ICPPAliasTemplateInstance">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.eclipse.cdt.core.dom.ast.cpp.ICPPAliasTemplateInstance"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="parser/org/eclipse/cdt/core/dom/ast/cpp/ICPPMethodSpecialization.java" type="org.eclipse.cdt.core.dom.ast.cpp.ICPPMethodSpecialization">
         <filter id="1110441988">
             <message_arguments>
@@ -66,6 +123,36 @@
         </filter>
     </resource>
     <resource path="parser/org/eclipse/cdt/core/parser/GCCKeywords.java" type="org.eclipse.cdt.core.parser.GCCKeywords">
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="__DECLTYPE"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="__FLOAT128"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="__INT128"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="cp__DECLTYPE"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="cp__float128"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="cp__int128"/>
+            </message_arguments>
+        </filter>
         <filter id="1143996420">
             <message_arguments>
                 <message_argument value="cp__is_literal_type"/>
@@ -96,6 +183,16 @@
         <filter id="1211105284">
             <message_arguments>
                 <message_argument value="tTT_is_trivial"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="t__float128"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="t__int128"/>
             </message_arguments>
         </filter>
     </resource>

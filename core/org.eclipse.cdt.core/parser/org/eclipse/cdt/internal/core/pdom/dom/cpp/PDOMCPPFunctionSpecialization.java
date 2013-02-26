@@ -23,6 +23,9 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPMethod;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPParameter;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPSpecialization;
 import org.eclipse.cdt.internal.core.dom.parser.ProblemFunctionType;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPFunction;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPComputableFunction;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.ICPPEvaluation;
 import org.eclipse.cdt.internal.core.index.IIndexCPPBindingConstants;
 import org.eclipse.cdt.internal.core.pdom.db.Database;
 import org.eclipse.cdt.internal.core.pdom.dom.PDOMBinding;
@@ -34,7 +37,8 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * Binding for function specialization in the index. 
  */
-class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICPPFunction {
+class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization
+		implements ICPPFunction, ICPPComputableFunction {
 	/**
 	 * Offset of total number of function parameters (relative to the beginning of the record).
 	 */
@@ -59,26 +63,32 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 	/**
 	 * Offset of annotation information (relative to the beginning of the record).
 	 */
-	protected static final int ANNOTATION_OFFSET = EXCEPTION_SPEC + Database.PTR_SIZE; // short
-	
-	private static final int REQUIRED_ARG_COUNT_OFFSET= ANNOTATION_OFFSET + 2;
+	protected static final int ANNOTATION = EXCEPTION_SPEC + Database.PTR_SIZE; // short
 
-	private static final int EXTENSION_BITS_OFFSET = REQUIRED_ARG_COUNT_OFFSET + 4;
+	/** Offset of the number of the required arguments. */
+	private static final int REQUIRED_ARG_COUNT = ANNOTATION + 2; // short
+
+	/** Offset of the return expression for constexpr functions. */
+	private static final int RETURN_EXPRESSION = REQUIRED_ARG_COUNT + 2; // Database.EVALUATION_SIZE
 	/**
-	 * The size in bytes of a PDOMCPPFunction record in the database.
+	 * The size in bytes of a PDOMCPPFunctionSpecialization record in the database.
 	 */
 	@SuppressWarnings("hiding")
+	protected static final int EXTENSION_BITS_OFFSET = RETURN_EXPRESSION + Database.EVALUATION_SIZE;
+
 	protected static final int RECORD_SIZE = EXTENSION_BITS_OFFSET + 2;
 
 	private static final short ANNOT_PARAMETER_PACK = 8;
 	private static final short ANNOT_IS_DELETED = 9;
+	private static final short ANNOT_IS_CONSTEXPR = 10;
 
 
 	private ICPPFunctionType fType; // No need for volatile, all fields of ICPPFunctionTypes are final.
 	private short fAnnotation= -1;
 	private int fRequiredArgCount= -1;
-
-	public PDOMCPPFunctionSpecialization(PDOMLinkage linkage, PDOMNode parent, ICPPFunction astFunction, PDOMBinding specialized) throws CoreException {
+	
+	public PDOMCPPFunctionSpecialization(PDOMLinkage linkage, PDOMNode parent, ICPPFunction astFunction,
+			PDOMBinding specialized) throws CoreException {
 		super(linkage, parent, (ICPPSpecialization) astFunction, specialized);
 		
 		Database db = getDB();
@@ -88,7 +98,7 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 			getLinkage().storeType(record + FUNCTION_TYPE, astFt);
 		}
 
-		ICPPFunction origAstFunc= (ICPPFunction) ((ICPPSpecialization)astFunction).getSpecializedBinding();
+		ICPPFunction origAstFunc= (ICPPFunction) ((ICPPSpecialization) astFunction).getSpecializedBinding();
 		ICPPParameter[] origAstParams= origAstFunc.getParameters();
 		if (origAstParams.length == 0) {
 			db.putInt(record + NUM_PARAMS, 0);
@@ -100,24 +110,33 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 			db.putRecPtr(record + FIRST_PARAM, 0);
 			PDOMCPPParameter origPar= null;
 			PDOMCPPParameterSpecialization next= null;
-			for (int i= length-1; i >= 0; --i) {
+			for (int i= length; --i >= 0;) {
 				// There may be fewer or less original parameters, because of parameter packs.
 				if (i < origAstParams.length - 1) {
 					// Normal case
 					origPar= new PDOMCPPParameter(linkage, specialized, origAstParams[i], null);
 				} else if (origPar == null) {
 					// Use last parameter
-					origPar= new PDOMCPPParameter(linkage, specialized, origAstParams[origAstParams.length-1], null);
+					origPar= new PDOMCPPParameter(linkage, specialized, origAstParams[origAstParams.length - 1], null);
 				}
 				next= new PDOMCPPParameterSpecialization(linkage, this, astParams[i], origPar, next);
 			}
 			db.putRecPtr(record + FIRST_PARAM, next == null ? 0 : next.getRecord());
 		}
 		fAnnotation = getAnnotation(astFunction);
+<<<<<<< HEAD
 		db.putShort(record + ANNOTATION_OFFSET, fAnnotation);	
 		fExtendedBits = astFunction.getExtendedBits();
 		db.putShort(record + EXTENSION_BITS_OFFSET, fExtendedBits);
 		db.putInt(record + REQUIRED_ARG_COUNT_OFFSET, astFunction.getRequiredArgumentCount());
+=======
+		db.putShort(record + ANNOTATION, fAnnotation);	
+		db.putShort(record + REQUIRED_ARG_COUNT , (short) astFunction.getRequiredArgumentCount());
+		ICPPEvaluation returnExpression = CPPFunction.getReturnExpression(astFunction);
+		if (returnExpression != null) {
+			linkage.storeEvaluation(record + RETURN_EXPRESSION, returnExpression);
+		}
+>>>>>>> eclipseorg/cdt_8_1
 		long typelist= 0;
 		if (astFunction instanceof ICPPMethod && ((ICPPMethod) astFunction).isImplicit()) {
 			// Don't store the exception specification, it is computed on demand.
@@ -134,6 +153,9 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 		}
 		if (astFunction.isDeleted()) {
 			annot |= (1 << ANNOT_IS_DELETED);
+		}
+		if (astFunction.isConstexpr()) {
+			annot |= (1 << ANNOT_IS_CONSTEXPR);
 		}
 		return (short) annot;
 	}
@@ -160,7 +182,7 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 	private short readAnnotation() {
 		if (fAnnotation == -1) {
 			try {
-				fAnnotation= getDB().getShort(record + ANNOTATION_OFFSET);
+				fAnnotation= getDB().getShort(record + ANNOTATION);
 			} catch (CoreException e) {
 				fAnnotation= 0;
 			}
@@ -209,8 +231,8 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 		if (fType == null) {
 			try {
 				fType= (ICPPFunctionType) getLinkage().loadType(record + FUNCTION_TYPE);
-			} catch(CoreException ce) {
-				CCorePlugin.log(ce);
+			} catch (CoreException e) {
+				CCorePlugin.log(e);
 				fType= new ProblemFunctionType(ISemanticProblem.TYPE_NOT_PERSISTED);
 			}
 		}
@@ -221,6 +243,11 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 	public boolean isAuto() {
 		// ISO/IEC 14882:2003 7.1.1.2
 		return false; 
+	}
+
+	@Override
+	public boolean isConstexpr() {
+		return getBit(readAnnotation(), ANNOT_IS_CONSTEXPR);
 	}
 
 	@Override
@@ -258,7 +285,7 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 	public int getRequiredArgumentCount() {
 		if (fRequiredArgCount == -1) {
 			try {
-				fRequiredArgCount= getDB().getInt(record + REQUIRED_ARG_COUNT_OFFSET);
+				fRequiredArgCount= getDB().getShort(record + REQUIRED_ARG_COUNT );
 			} catch (CoreException e) {
 				fRequiredArgCount= 0;
 			}
@@ -291,7 +318,7 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 	@Override
 	public int pdomCompareTo(PDOMBinding other) {
 		int cmp= super.pdomCompareTo(other);
-		return cmp==0 ? PDOMCPPFunction.compareSignatures(this, other) : cmp;
+		return cmp == 0 ? PDOMCPPFunction.compareSignatures(this, other) : cmp;
 	}
 
 	@Override
@@ -317,5 +344,18 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization implements ICP
 			}
 		}
 		return fExtendedBits;
+	}
+
+	@Override
+	public ICPPEvaluation getReturnExpression() {
+		if (!isConstexpr())
+			return null;
+
+		try {
+			return (ICPPEvaluation) getLinkage().loadEvaluation(record + RETURN_EXPRESSION);
+		} catch (CoreException e) {
+			CCorePlugin.log(e);
+			return null;
+		}
 	}
 }

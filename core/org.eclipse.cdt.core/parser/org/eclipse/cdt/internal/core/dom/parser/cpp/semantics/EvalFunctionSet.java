@@ -8,6 +8,7 @@
  * Contributors:
  *     Markus Schorn - initial API and implementation
  *     Sergey Prigogin (Google)
+ *     Nathan Ridge
  *******************************************************************************/
 package org.eclipse.cdt.internal.core.dom.parser.cpp.semantics;
 
@@ -23,6 +24,7 @@ import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.IValue;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassSpecialization;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassTemplate;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPFunction;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPTemplateArgument;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPTemplateParameterMap;
@@ -110,12 +112,12 @@ public class EvalFunctionSet extends CPPEvaluation {
 			firstByte |= ITypeMarshalBuffer.FLAG2;
 
 		buffer.putByte((byte) firstByte);
-		buffer.putShort((short) bindings.length);
+		buffer.putInt(bindings.length);
 		for (ICPPFunction binding : bindings) {
 			buffer.marshalBinding(binding);
 		}
 		if (args != null) {
-			buffer.putShort((short) args.length);
+			buffer.putInt(args.length);
 			for (ICPPTemplateArgument arg : args) {
 				buffer.marshalTemplateArgument(arg);
 			}
@@ -124,14 +126,14 @@ public class EvalFunctionSet extends CPPEvaluation {
 
 	public static ISerializableEvaluation unmarshal(int firstByte, ITypeMarshalBuffer buffer) throws CoreException {
 		final boolean addressOf= (firstByte & ITypeMarshalBuffer.FLAG1) != 0;
-		int bindingCount= buffer.getShort();
+		int bindingCount= buffer.getInt();
 		ICPPFunction[] bindings= new ICPPFunction[bindingCount];
 		for (int i = 0; i < bindings.length; i++) {
 			bindings[i]= (ICPPFunction) buffer.unmarshalBinding();
 		}
 		ICPPTemplateArgument[] args= null;
 		if ((firstByte & ITypeMarshalBuffer.FLAG2) != 0) {
-			int len= buffer.getShort();
+			int len= buffer.getInt();
 			args = new ICPPTemplateArgument[len];
 			for (int i = 0; i < args.length; i++) {
 				args[i]= buffer.unmarshalTemplateArgument();
@@ -145,12 +147,16 @@ public class EvalFunctionSet extends CPPEvaluation {
 			ICPPClassSpecialization within, int maxdepth, IASTNode point) {
 		ICPPTemplateArgument[] originalArguments = fFunctionSet.getTemplateArguments();
 		ICPPTemplateArgument[] arguments = originalArguments;
-		arguments = instantiateArguments(originalArguments, tpMap, packOffset, within, point);
+		if (originalArguments != null)
+			arguments = instantiateArguments(originalArguments, tpMap, packOffset, within, point);
 
 		IBinding originalOwner = fFunctionSet.getOwner();
 		IBinding owner = originalOwner;
-		if (originalOwner instanceof ICPPUnknownBinding) {
+		if (owner instanceof ICPPUnknownBinding) {
 			owner = resolveUnknown((ICPPUnknownBinding) owner, tpMap, packOffset, within, point);
+		} else if (owner instanceof ICPPClassTemplate) {
+			owner = resolveUnknown(CPPTemplates.createDeferredInstance((ICPPClassTemplate) owner),
+					tpMap, packOffset, within, point);
 		} else if (owner instanceof IType) {
 			IType type = CPPTemplates.instantiateType((IType) owner, tpMap, packOffset, within, point);
 			if (type instanceof IBinding)
@@ -168,6 +174,12 @@ public class EvalFunctionSet extends CPPEvaluation {
 		if (Arrays.equals(arguments, originalArguments) && functions == originalFunctions)
 			return this;
 		return new EvalFunctionSet(new CPPFunctionSet(functions, arguments, null), fAddressOf);
+	}
+
+	@Override
+	public ICPPEvaluation computeForFunctionCall(CPPFunctionParameterMap parameterMap,
+			int maxdepth, IASTNode point) {
+		return this;
 	}
 
 	/**

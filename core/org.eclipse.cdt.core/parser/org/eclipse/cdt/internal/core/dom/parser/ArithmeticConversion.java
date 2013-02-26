@@ -7,18 +7,21 @@
  *
  * Contributors:
  *     Markus Schorn - initial API and implementation
+ *     Nathan Ridge
  *******************************************************************************/ 
 package org.eclipse.cdt.internal.core.dom.parser;
 
 import static org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil.TDEF;
 
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IBasicType;
 import org.eclipse.cdt.core.dom.ast.IBasicType.Kind;
 import org.eclipse.cdt.core.dom.ast.IEnumeration;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPBasicType;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPEnumeration;
+import org.eclipse.cdt.internal.core.dom.parser.SizeofCalculator.SizeAndAlignment;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.semantics.SemanticUtil;
 
 /**
@@ -33,6 +36,7 @@ public abstract class ArithmeticConversion {
 		eComplex(IBasicType.IS_COMPLEX);
 	
 		private final int fModifier;
+
 		private Domain(int modifier) {
 			fModifier= modifier;
 		}
@@ -120,11 +124,13 @@ public abstract class ArithmeticConversion {
 			case eChar16:
 			case eChar32:
 			case eInt:
+			case eInt128:
 			case eWChar:
 				return true;
 				
 			case eDouble:
 			case eFloat:
+			case eFloat128:
 			case eUnspecified:
 			case eVoid:
 			case eNullPtr:
@@ -219,6 +225,7 @@ public abstract class ArithmeticConversion {
 			case eWChar:
 			case eChar16:
 				return createBasicType(Kind.eInt, domain.getModifier());
+
 			case eChar32:
 				// Assuming 32 bits
 				return createBasicType(Kind.eInt, domain.getModifier() | IBasicType.IS_UNSIGNED);
@@ -227,11 +234,15 @@ public abstract class ArithmeticConversion {
 				if (bt.isShort())
 					return createBasicType(Kind.eInt, domain.getModifier());
 				return adjustDomain(bt, domain);
-				
+
+			case eInt128:
+				return createBasicType(Kind.eInt128, domain.getModifier() | IBasicType.IS_UNSIGNED);
+
 			case eVoid:
 			case eUnspecified:
 			case eDouble:
 			case eFloat:
+			case eFloat128:
 			case eNullPtr:
 				assert false;
 			}
@@ -271,6 +282,8 @@ public abstract class ArithmeticConversion {
 	}
 
 	private Rank getIntegerRank(IBasicType type) {
+		if (type.getKind() == Kind.eInt128)
+			return Rank.eLongLong;
 		assert type.getKind() == Kind.eInt;
 		if (type.isLongLong())
 			return Rank.eLongLong;
@@ -282,7 +295,7 @@ public abstract class ArithmeticConversion {
 	private boolean isLongDouble(IType type) {
 		if (type instanceof IBasicType) {
 			final IBasicType bt= (IBasicType) type;
-			return bt.isLong() && bt.getKind() == Kind.eDouble;
+			return bt.isLong() && bt.getKind() == Kind.eDouble || bt.getKind() == Kind.eFloat128;
 		}
 		return false;
 	}
@@ -356,5 +369,59 @@ public abstract class ArithmeticConversion {
 		default:
 			return false;
 		}
+	}
+
+	/**
+	 * Make a best-effort guess at the sizeof() of an integral type.  
+	 */
+	private static long getApproximateSize(ICPPBasicType type) {
+		switch (type.getKind()) {
+			case eChar: return 1;
+			case eWChar: return 2;
+			case eInt: 
+				// Note: we return 6 for long so that both long -> int 
+				//       and long long -> long conversions are reported 
+				//       as narrowing, to be on the safe side.
+				return type.isShort() ? 2 
+				     : type.isLong() ? 6
+				     : type.isLongLong() ? 8 
+				     : 4;
+			case eBoolean: return 1;
+			case eChar16: return 2;
+			case eChar32: return 4;
+			case eInt128: return 16;
+			default: return 0;  // shouldn't happen
+		}
+	}
+
+	/**
+	 * Checks whether a target integral type can represent all values of a source integral type.
+	 * @param target the target integral type
+	 * @param source the source integral type
+	 * @param point point for sizeof lookup
+	 * @return whether the target integral type can represent all values of the source integral type
+	 */
+	public static boolean fitsIntoType(ICPPBasicType target, ICPPBasicType source, IASTNode point) {
+		// A boolean cannot represent any other type.
+		if (target.getKind() == Kind.eBoolean && source.getKind() != Kind.eBoolean)
+			return false;
+		// A boolean can be represented by any other integral type.
+		if (source.getKind() == Kind.eBoolean)
+			return true;
+
+		// If the source is signed, it might be negative, so an unsigned target cannot represent it.
+		if (!source.isUnsigned() && target.isUnsigned())
+			return false;
+
+		// Otherwise, go by the size and signedness of the type.
+		SizeAndAlignment sourceSizeAndAlignment = SizeofCalculator.getSizeAndAlignment(source, point); 
+		SizeAndAlignment targetSizeAndAlignment = SizeofCalculator.getSizeAndAlignment(target, point);
+		long sizeofSource = sourceSizeAndAlignment == null ? getApproximateSize(source) : sourceSizeAndAlignment.size;
+		long sizeofTarget = targetSizeAndAlignment == null ? getApproximateSize(target) : targetSizeAndAlignment.size;
+
+		if (sizeofSource == sizeofTarget)
+			return target.isUnsigned() == source.isUnsigned();
+		else
+			return sizeofSource < sizeofTarget;
 	}
 }

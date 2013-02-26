@@ -28,6 +28,7 @@ import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.ITypedef;
 import org.eclipse.cdt.core.dom.ast.IValue;
 import org.eclipse.cdt.core.dom.ast.IVariable;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPBase;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassTemplate;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPClassType;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPConstructor;
@@ -102,7 +103,8 @@ public class IndexUpdateTests extends IndexTestBase {
 		if (fCProject == null) {
 			fCProject= CProjectHelper.createCProject("indexUpdateTestsC", null, IPDOMManager.ID_FAST_INDEXER);
 		}
-		CCorePlugin.getIndexManager().joinIndexer(INDEXER_WAIT_TIME, npm());
+		waitForIndexer(fCppProject);
+		waitForIndexer(fCProject);
 		fIndex= CCorePlugin.getIndexManager().getIndex(new ICProject[] {fCProject, fCppProject});
 	}
 
@@ -113,7 +115,8 @@ public class IndexUpdateTests extends IndexTestBase {
 		}
 		IProject project= cpp ? fCppProject.getProject() : fCProject.getProject();
 		fHeader= TestSourceReader.createFile(project, "header.h", fContents[++fContentUsed].toString());
-		assertTrue(CCorePlugin.getIndexManager().joinIndexer(INDEXER_WAIT_TIME, npm()));
+		waitForIndexer(fCppProject);
+		waitForIndexer(fCProject);
 	}
 
 	private void updateHeader() throws Exception {
@@ -122,7 +125,7 @@ public class IndexUpdateTests extends IndexTestBase {
 		IProject project= fHeader.getProject();
 		fHeader= TestSourceReader.createFile(project, "header.h",
 				fContents[++fContentUsed].toString() + "\n// " + fContentUsed); 
-		TestSourceReader.waitUntilFileIsIndexed(fIndex, fHeader, INDEXER_WAIT_TIME);
+		waitUntilFileIsIndexed(fIndex, fHeader);
 	}
 
 	private void setupFile(int totalFileVersions, boolean cpp) throws Exception {
@@ -130,10 +133,10 @@ public class IndexUpdateTests extends IndexTestBase {
 			fContents= getContentsForTest(totalFileVersions);
 			fContentUsed= -1;
 		}
-		IProject project= cpp ? fCppProject.getProject() : fCProject.getProject();
-		fFile= TestSourceReader.createFile(project, "file" + (cpp ? ".cpp" : ".c"), fContents[++fContentUsed].toString());
+		ICProject cproject= cpp ? fCppProject : fCProject;
+		fFile= TestSourceReader.createFile(cproject.getProject(), "file" + (cpp ? ".cpp" : ".c"), fContents[++fContentUsed].toString());
 		TestSourceReader.waitUntilFileIsIndexed(fIndex, fFile, INDEXER_WAIT_TIME);
-		assertTrue(CCorePlugin.getIndexManager().joinIndexer(INDEXER_WAIT_TIME, npm()));
+		waitForIndexer(cproject);
 	}
 	
 	private void updateFile() throws Exception {
@@ -141,7 +144,7 @@ public class IndexUpdateTests extends IndexTestBase {
 		// Indexer would not reindex the file if its contents remain the same. 
 		fFile= TestSourceReader.createFile(fFile.getParent(), fFile.getName(),
 				fContents[++fContentUsed].toString() + "\n// " + fContentUsed); 
-		TestSourceReader.waitUntilFileIsIndexed(fIndex, fFile, INDEXER_WAIT_TIME);
+		waitUntilFileIsIndexed(fIndex, fFile);
 	}
 
 	@Override
@@ -153,7 +156,6 @@ public class IndexUpdateTests extends IndexTestBase {
 		if (fHeader != null) {
 			fHeader.delete(true, npm());
 		}
-		CCorePlugin.getIndexManager().joinIndexer(INDEXER_WAIT_TIME, npm());
 		super.tearDown();
 	}
 		
@@ -238,7 +240,8 @@ public class IndexUpdateTests extends IndexTestBase {
 		for (int i = 0; i < nchars.length; i++) {
 			nchars[i]= names[i].toCharArray();
 		}
-		return fIndex.findBindings(nchars, IndexFilter.ALL_DECLARED, npm())[0];
+		IIndexBinding[] bindings = fIndex.findBindings(nchars, IndexFilter.ALL_DECLARED, npm());
+		return bindings.length > 0 ? bindings[0] : null;
 	}
 
 	private String msg() {
@@ -254,7 +257,6 @@ public class IndexUpdateTests extends IndexTestBase {
 	// short globalVar;
 
 	// register int globalVar;
-
 	public void testGlobalCppVariable() throws Exception {
 		setupFile(3, true);
 		checkCppVariable("globalVar", INT, new String[]{});
@@ -343,7 +345,6 @@ public class IndexUpdateTests extends IndexTestBase {
 	// struct my_struct {int fField;};
 	
 	// struct my_struct {short fField;};
-	
 	public void testCField() throws Exception {
 		setupFile(2, false);
 		checkVariable("my_struct::fField", INT, new String[]{});
@@ -400,7 +401,6 @@ public class IndexUpdateTests extends IndexTestBase {
 		checkModifier(modifiers, PRIVATE, visibility == ICPPMember.v_private);
 	}
 
-
 	// class MyClass {int method(int a, int b);};
 	
 	// class MyClass {short method(int a, int b);};
@@ -420,7 +420,6 @@ public class IndexUpdateTests extends IndexTestBase {
 	// class MyClass {int method(char a){};};
 	
 	// class MyClass {virtual int method(char a) = 0;};
-
 	public void testCppMethod() throws Exception {
 		setupFile(10, true);
 		checkCppMethod("MyClass::method", new String[] {INT, INT, INT}, new String[]{PRIVATE});
@@ -451,7 +450,6 @@ public class IndexUpdateTests extends IndexTestBase {
 	
 	// #include "header.h"
 	// char MyClass::method(int a, int b);
-	
 	public void testFixedCppMethod() throws Exception {
 		setupHeader(3, true);
 		checkCppMethod("MyClass::method", new String[] {INT, INT, INT}, new String[]{PROTECTED});
@@ -491,7 +489,6 @@ public class IndexUpdateTests extends IndexTestBase {
 	// class MyClass {protected: MyClass(char a, int b);};
 
 	// class MyClass {private: MyClass(char a, int b);};
-
 	public void testCppConstructor() throws Exception {
 		setupFile(6, true);
 		checkCppConstructor("MyClass::MyClass", new String[] {"", INT, INT}, new String[]{PRIVATE});
@@ -585,7 +582,8 @@ public class IndexUpdateTests extends IndexTestBase {
 			}
 			checkCppConstructor((ICPPConstructor) ctors[0], new String[]{"", constRefType}, m2);
 
-			IIndexBinding[] assignmentOps= fIndex.findBindings(new char[][]{nchars, "operator =".toCharArray()}, IndexFilter.ALL_DECLARED_OR_IMPLICIT, npm());
+			IIndexBinding[] assignmentOps= fIndex.findBindings(
+					new char[][] {nchars, "operator =".toCharArray() }, IndexFilter.ALL_DECLARED_OR_IMPLICIT, npm());
 			count= 0;
 			for (int i = 0; i < assignmentOps.length; i++) {
 				IIndexBinding assignmentOp= assignmentOps[i];
@@ -714,7 +712,6 @@ public class IndexUpdateTests extends IndexTestBase {
 			fIndex.releaseReadLock();
 		}
 	}
-	
 	
 	// class myType {
 	//    int a;
@@ -945,8 +942,7 @@ public class IndexUpdateTests extends IndexTestBase {
 		}
 
 		fHeader= TestSourceReader.createFile(fHeader.getParent(), fHeader.getName(), fContents[0].toString().replaceAll("globalVar", "newVar"));
-		TestSourceReader.waitUntilFileIsIndexed(fIndex, fHeader, INDEXER_WAIT_TIME);
-		assertTrue(CCorePlugin.getIndexManager().joinIndexer(INDEXER_WAIT_TIME, npm()));
+		waitUntilFileIsIndexed(fIndex, fHeader);
 
 		fIndex.acquireReadLock();
 		try {
@@ -1181,7 +1177,6 @@ public class IndexUpdateTests extends IndexTestBase {
 			fIndex.releaseReadLock();
 		}
 	}
-	
 	
 	// void funcTypeDeletion(int);
 
@@ -1457,6 +1452,45 @@ public class IndexUpdateTests extends IndexTestBase {
 			final ICPPConstructor[] ctors = s.getConstructors();
 			assertEquals(2, ctors.length); // 1 explicit and one implicit ctor
 			assertTrue(ctors[0].isImplicit() != ctors[1].isImplicit());
+		} finally {
+			fIndex.releaseReadLock();
+		}
+	}
+	
+	//	struct Base {
+	//	    void foo() {}
+	//	};
+	//	struct Derived: Base {
+	//		Derived();
+	//	};
+
+	//	struct Base {
+	//	    void foo() {}
+	//	};
+	//	struct Derived: Base {
+	//		Derived();
+	//	};
+	public void testBaseClass_Bug391284() throws Exception {
+		setupFile(2, true);
+		fIndex.acquireReadLock();
+		try { 
+			final ICPPClassType s = (ICPPClassType) findBinding("Derived");
+			assertNotNull(s);
+			final ICPPBase[] bases = s.getBases();
+			assertEquals(1, bases.length); 
+			assertEquals("Base", bases[0].getBaseClass().getName());
+		} finally {
+			fIndex.releaseReadLock();
+		}
+		updateFile();
+		
+		fIndex.acquireReadLock();
+		try { 
+			final ICPPClassType s = (ICPPClassType) findBinding("Derived");
+			assertNotNull(s);
+			final ICPPBase[] bases = s.getBases();
+			assertEquals(1, bases.length); 
+			assertEquals("Base", bases[0].getBaseClass().getName());
 		} finally {
 			fIndex.releaseReadLock();
 		}

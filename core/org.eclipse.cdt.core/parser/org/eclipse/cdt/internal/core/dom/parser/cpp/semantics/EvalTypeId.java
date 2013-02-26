@@ -123,7 +123,7 @@ public class EvalTypeId extends CPPEvaluation {
 		buffer.putByte((byte) firstByte);
 		buffer.marshalType(fInputType);
 		if (includeValue) {
-			buffer.putShort((short) fArguments.length);
+			buffer.putInt(fArguments.length);
 			for (ICPPEvaluation arg : fArguments) {
 				buffer.marshalEvaluation(arg, includeValue);
 			}
@@ -134,7 +134,7 @@ public class EvalTypeId extends CPPEvaluation {
 		IType type= buffer.unmarshalType();
 		ICPPEvaluation[] args= null;
 		if ((firstByte & ITypeMarshalBuffer.FLAG1) != 0) {
-			int len= buffer.getShort();
+			int len= buffer.getInt();
 			args = new ICPPEvaluation[len];
 			for (int i = 0; i < args.length; i++) {
 				args[i]= (ICPPEvaluation) buffer.unmarshalEvaluation();
@@ -163,6 +163,27 @@ public class EvalTypeId extends CPPEvaluation {
 		if (args == fArguments && type == fInputType)
 			return this;
 		return new EvalTypeId(type, args);
+	}
+
+	@Override
+	public ICPPEvaluation computeForFunctionCall(CPPFunctionParameterMap parameterMap,
+			int maxdepth, IASTNode point) {
+		ICPPEvaluation[] args = fArguments;
+		if (fArguments != null) {
+			for (int i = 0; i < fArguments.length; i++) {
+				ICPPEvaluation arg = fArguments[i].computeForFunctionCall(parameterMap, maxdepth, point);
+				if (arg != fArguments[i]) {
+					if (args == fArguments) {
+						args = new ICPPEvaluation[fArguments.length];
+						System.arraycopy(fArguments, 0, args, 0, fArguments.length);
+					}
+					args[i] = arg;
+				}
+			}
+		}
+		if (args == fArguments)
+			return this;
+		return new EvalTypeId(fInputType, args);
 	}
 
 	@Override

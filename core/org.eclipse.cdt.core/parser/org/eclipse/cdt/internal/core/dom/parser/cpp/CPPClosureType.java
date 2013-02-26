@@ -103,15 +103,15 @@ public class CPPClosureType extends PlatformObject implements ICPPClassType, ICP
 		// Function call operator
 		final IType returnType= getReturnType();
 		final IType[] parameterTypes= getParameterTypes();
-		ft= new CPPFunctionType(returnType, parameterTypes, isMutable(), false, false);
+		ft= new CPPFunctionType(returnType, parameterTypes, !isMutable(), false, false);
 
 		ICPPParameter[] params = new ICPPParameter[parameterTypes.length];
 		for (int i = 0; i < params.length; i++) {
-			params[i]= new CPPParameter(parameterTypes[i], 0);
+			params[i]= new CPPParameter(parameterTypes[i], i);
 		}
 		m= new CPPImplicitMethod(scope, OverloadableOperator.PAREN.toCharArray(), ft, params) {
 			@Override
-			public boolean isImplicit() {return false;}
+			public boolean isImplicit() { return false; }
 		};
 		result[4]= m;
 		
@@ -147,7 +147,7 @@ public class CPPClosureType extends PlatformObject implements ICPPClassType, ICP
 			IASTStatement[] stmts = body.getStatements();
 			if (stmts.length > 0) {
 				// Gnu extension allows to deduce return type in complex compound statements
-				IASTStatement stmt= stmts[stmts.length-1];
+				IASTStatement stmt= stmts[stmts.length - 1];
 				if (stmt instanceof IASTReturnStatement) {
 					IASTReturnStatement rtstmt= (IASTReturnStatement) stmt;
 					IASTExpression expr= rtstmt.getReturnValue();

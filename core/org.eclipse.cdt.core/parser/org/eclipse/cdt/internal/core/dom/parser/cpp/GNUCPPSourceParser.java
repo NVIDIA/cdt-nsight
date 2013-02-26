@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2002, 2012 IBM Corporation and others.
+ * Copyright (c) 2002, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,6 +66,7 @@ import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IScope;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTAliasDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTAmbiguousTemplateArgument;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTArrayDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCapture;
@@ -764,6 +765,7 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
     	BinaryOperator lastOperator= null;
     	NameOrTemplateIDVariants variants= null;
 
+		IToken variantMark= mark();
 		if (expr == null) {
 			Object e = castExpressionForBinaryExpression(strat);
 			if (e instanceof IASTExpression) {
@@ -773,20 +775,21 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
 
 				final Variant variant = (Variant) e;
 				expr= variant.getExpression();
-				variants.addBranchPoint(variant.getNext(), lastOperator, allowAssignment, conditionCount);
+				variants.addBranchPoint(variant.getNext(), null, allowAssignment, conditionCount);
 			}
     	}
 
-		boolean doneExpression= false;
-    	do {
+		boolean stopWithNextOperator= false;
+    	castExprLoop: for(;;) {
     		// Typically after a binary operator there cannot be a throw expression
     		boolean allowThrow= false;
     		// Brace initializers are allowed on the right hand side of an expression
     		boolean allowBraceInitializer= false;
 
-    		BacktrackException tryRecovery= null;
-			final int operatorOffset= LA().getOffset();
-    		lt1= LT(1);
+    		boolean doneExpression= false;
+    		BacktrackException failure= null;
+			final int opOffset= LA().getOffset();
+    		lt1= stopWithNextOperator ? IToken.tSEMI : LT(1);
     		switch (lt1) {
     		case IToken.tQUESTION:
     			conditionCount++;
@@ -879,7 +882,7 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
     			if (LT(2) != IToken.tGT_in_SHIFTR) {
     				IToken token = LA(1);
 					backtrack.initialize(token.getOffset(), token.getLength());
-					tryRecovery= backtrack;
+					failure= backtrack;
 					break;
     			}
 
@@ -907,35 +910,45 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
     			doneExpression= true;
     			break;
     		}
-
-			if (!doneExpression && tryRecovery == null) {
-				consume(); // consumes the operator
-
-    			// Link variants that are closed by the new operator
-    			if (variants != null) {
-    				variants.closeVariants(operatorOffset, lastOperator);
+    		
+    		// Close variants
+    		if (failure == null) {
+    			if (doneExpression) { 
+    				if (variants != null && !variants.hasRightBound(opOffset)) {
+    					// We have a longer variant, ignore this one.
+    					backtrack.initialize(opOffset, 1);
+    					failure= backtrack;
+    				} else {
+    					break castExprLoop;
+    				}
+    			} 
+    			// Close variants with matching end
+    			if (variants != null && lastOperator != null) {
+    				variants.closeVariants(opOffset, lastOperator);
     			}
+    		} 
 
-    			// Determine next sub-expression
-    			if (lt1 == IToken.tQUESTION && LT(1) == IToken.tCOLON) {
-    				// Missing sub-expression after '?' (gnu-extension)
-    				expr= null;
-    			} else if (allowThrow && LT(1) == IToken.t_throw) {
-    				// Throw expression
-    				expr= throwExpression();
-    				lt1= LT(1);
-    				if (lt1 != IToken.tCOLON && lt1 != IToken.tCOMMA)
-    					break;
-    			} else if (allowBraceInitializer && LT(1) == IToken.tLBRACE) {
-    				// Brace initializer
-    				expr= bracedInitList(true);
-    				lt1= LT(1);
-    				if (lt1 != IToken.tCOLON && lt1 != IToken.tCOMMA)
-    					break;
-    			} else {
-    				// Cast expression
-    				IToken m= mark();
-    				try {
+    		if (failure == null && !doneExpression) {
+    			// Determine next cast-expression
+    			consume(); // consumes the operator
+        		stopWithNextOperator= false;
+    			try {
+    				if (lt1 == IToken.tQUESTION && LT(1) == IToken.tCOLON) {
+    					// Missing sub-expression after '?' (gnu-extension)
+    					expr= null;
+    				} else if (allowThrow && LT(1) == IToken.t_throw) {
+    					// Throw expression
+    					expr= throwExpression();
+    					lt1= LT(1);
+    					if (lt1 != IToken.tCOLON && lt1 != IToken.tCOMMA)
+    						stopWithNextOperator= true;
+    				} else if (allowBraceInitializer && LT(1) == IToken.tLBRACE) {
+    					// Brace initializer
+    					expr= bracedInitList(true);
+    					lt1= LT(1);
+    					if (lt1 != IToken.tCOLON && lt1 != IToken.tCOMMA)
+    						stopWithNextOperator= true;
+    				} else {
     					Object e = castExpressionForBinaryExpression(strat);
     					if (e instanceof IASTExpression) {
     						expr= (IASTExpression) e;
@@ -947,55 +960,49 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
 
     						variants.addBranchPoint(ae.getNext(), lastOperator, allowAssignment, conditionCount);
     					}
-    				} catch (BacktrackException e) {
-    					if (variants == null)
-    						throw e;
-    					tryRecovery= e;
-    					backup(m);
     				}
+    				continue castExprLoop;
+    			} catch (BacktrackException e) {
+    				failure= e;
     			}
-    		}
+    		} 
 
-    		if (tryRecovery != null || doneExpression) {
-    			if (variants != null) {
-    				if (lt1 == IToken.tEOC) {
-    					variants.discardOpenVariants(operatorOffset);
-    				} else {
-    					// Try fall-back to an open variant
-    					Variant fallback= variants.findFallback(operatorOffset);
-    					if (fallback == null) {
-    						if (tryRecovery != null)
-    							throw tryRecovery;
-    						variants.discardOpenVariants(operatorOffset);
-    					} else {
-    						// Restore state and continue
-    						doneExpression= false;
-    						BranchPoint varPoint= fallback.getOwner();
-    						allowAssignment= varPoint.isAllowAssignment();
-    						conditionCount= varPoint.getConditionCount();
-    						lastOperator= varPoint.getLeftOperator();
-    						expr= fallback.getExpression();
-    						variants.useFallback(fallback);
+    		// We need a new variant
+    		Variant variant= variants == null ? null : variants.selectFallback();
+    		if (variant == null) {
+    			if (failure != null)
+    				throw failure;
+    			throwBacktrack(LA(1));
+    		} else { 
+    			// Restore variant and continue
+    			BranchPoint varPoint= variant.getOwner();
+    			allowAssignment= varPoint.isAllowAssignment();
+    			conditionCount= varPoint.getConditionCount();
+    			lastOperator= varPoint.getLeftOperator();
+    			expr= variant.getExpression();
 
-    						// Advance to the right token
-    						int offset= fallback.getRightOffset();
-    						while (LA().getOffset() < offset) {
-    							consume();
-    						}
-    					}
-    				}
+    			backup(variantMark);
+    			int offset= variant.getRightOffset();
+    			while (LA().getOffset() < offset) {
+    				consume();
     			}
+    			variantMark= mark();
     		}
-    	} while (!doneExpression);
+    	}
 
     	// Check for incomplete conditional expression
     	if (lt1 != IToken.tEOC && conditionCount > 0)
     		throwBacktrack(LA(1));
-
-    	if (variants != null && !variants.isEmpty()) {
-    		CPPASTTemplateIDAmbiguity result = new CPPASTTemplateIDAmbiguity(this, lastOperator, expr, variants.getOrderedBranchPoints());
-    		setRange(result, startOffset, calculateEndOffset(expr));
-    		return result;
+		
+    	if (variants != null) {
+    		BinaryOperator end = new BinaryOperator(lastOperator, expr, -1, 0, 0);
+			variants.closeVariants(LA(1).getOffset(), end);
+    		variants.removeInvalid(end);
+    		if (!variants.isEmpty()) {
+    			CPPASTTemplateIDAmbiguity result = new CPPASTTemplateIDAmbiguity(this, end, variants.getOrderedBranchPoints());
+    			setRange(result, startOffset, calculateEndOffset(expr));
+    			return result;
+    		}
     	}
 
     	return buildExpression(lastOperator, expr);
@@ -1009,7 +1016,7 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
 
 		TemplateIdStrategy strat= new TemplateIdStrategy();
 		Variant variants= null;
-		IASTExpression singleExpression= null;
+		IASTExpression singleResult= null;
 		IASTName[] firstNames= null;
 
 		final IToken mark= mark();
@@ -1018,12 +1025,12 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
 			try {
 				IASTExpression e = castExpression(CastExprCtx.eDirectlyInBExpr, strat);
 				if (variants == null) {
-					if (singleExpression == null || lastToken == null) {
-						singleExpression= e;
+					if (singleResult == null || lastToken == null) {
+						singleResult= e;
 						firstNames= strat.getTemplateNames();
 					} else {
-						variants= new Variant(null, singleExpression, firstNames, lastToken.getOffset());
-						singleExpression= null;
+						variants= new Variant(null, singleResult, firstNames, lastToken.getOffset());
+						singleResult= null;
 						firstNames= null;
 					}
 				}
@@ -1045,7 +1052,7 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
 			}
 			backup(mark);
 		}
-		return variants != null ? variants : singleExpression;
+		return variants != null ? variants : singleResult;
 	}
 
     @Override
@@ -1884,7 +1891,6 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
             default:
                 throw backtrack;
             }
-
             ICPPASTUsingDirective astUD = nodeFactory.newUsingDirective(name);
             if (attributes != null) {
             	for (IASTAttribute attribute : attributes) {
@@ -1895,9 +1901,32 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
             return astUD;
         }
 
+        if(LT(1) == IToken.tIDENTIFIER && LT(2) == IToken.tASSIGN){
+        	return aliasDeclaration(offset);
+        	
+        }
         ICPPASTUsingDeclaration result = usingDeclaration(offset);
         return result;
     }
+
+	private IASTDeclaration aliasDeclaration(final int offset) throws EndOfFileException,
+			BacktrackException {
+		IToken identifierToken = consume();
+		IASTName aliasName = buildName(-1, identifierToken);
+		
+		consume();
+		
+		ICPPASTTypeId aliasedType = typeId(DeclarationOptions.TYPEID);
+		
+		if(LT(1) != IToken.tSEMI){
+			throw backtrack;
+		}
+		int endOffset = consume().getEndOffset();
+		
+		ICPPASTAliasDeclaration aliasDeclaration = nodeFactory.newAliasDeclaration(aliasName, aliasedType);
+		setRange(aliasDeclaration, offset, endOffset);
+		return aliasDeclaration;
+	}
 
 	private ICPPASTUsingDeclaration usingDeclaration(final int offset) throws EndOfFileException, BacktrackException {
 		boolean typeName = false;
@@ -2028,7 +2057,9 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
     	}
 
     	List<ICPPASTTemplateParameter> parms= outerTemplateParameterList();
-    	consume(IToken.tGT, IToken.tGT_in_SHIFTR);
+    	if (LT(1) != IToken.tEOC) {
+    		consume(IToken.tGT, IToken.tGT_in_SHIFTR);
+    	}
     	IASTDeclaration d = declaration(option);
     	ICPPASTTemplateDeclaration templateDecl = nodeFactory.newTemplateDeclaration(d);
 		setRange(templateDecl, offset, calculateEndOffset(d));
@@ -2498,7 +2529,7 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
 			default:
 				throwBacktrack(kind);
 			}
-			return adjustEndOffset(fdef, consume(IToken.tSEMI).getEndOffset());
+			return setRange(fdef, firstOffset, consume(IToken.tSEMI).getEndOffset());
 		}
 
 		if (LT(1) == IToken.tCOLON) {
@@ -2823,6 +2854,13 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
         			encounteredRawType= true;
         			endOffset= consume().getEndOffset();
         			break;
+        		case IGCCToken.t__int128:
+        			if (encounteredTypename)
+        				break declSpecifiers;
+        			simpleType = IASTSimpleDeclSpecifier.t_int128;
+        			encounteredRawType= true;
+        			endOffset= consume().getEndOffset();
+        			break;
         		case IToken.t_float:
         			if (encounteredTypename)
         				break declSpecifiers;
@@ -2834,6 +2872,13 @@ public class GNUCPPSourceParser extends AbstractGNUSourceCodeParser {
         			if (encounteredTypename)
         				break declSpecifiers;
         			simpleType = IASTSimpleDeclSpecifier.t_double;
+        			encounteredRawType= true;
+        			endOffset= consume().getEndOffset();
+        			break;
+        		case IGCCToken.t__float128:
+        			if (encounteredTypename)
+        				break declSpecifiers;
+        			simpleType = IASTSimpleDeclSpecifier.t_float128;
         			encounteredRawType= true;
         			endOffset= consume().getEndOffset();
         			break;
