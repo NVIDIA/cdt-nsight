@@ -94,8 +94,10 @@ abstract public class AbstractDsfService
         
     @Override
     public void shutdown(RequestMonitor rm) {
+        if (fTracker != null) {
         fTracker.dispose();
         fTracker = null;
+        }
         rm.done();
     }
     
