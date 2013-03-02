@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.cdt.debug.internal.ui;
 
+import java.net.URI;
 import java.util.Iterator;
 
 import org.eclipse.cdt.debug.core.CDebugUtils;
@@ -23,6 +24,7 @@ import org.eclipse.cdt.debug.core.model.IEnableDisableTarget;
 import org.eclipse.cdt.debug.internal.ui.disassembly.rendering.DisassemblyEditorInput;
 import org.eclipse.cdt.debug.ui.CDebugUIPlugin;
 import org.eclipse.cdt.debug.ui.breakpoints.CBreakpointPropertyDialogAction;
+import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
@@ -218,9 +220,14 @@ public class CDebugUIUtils {
 		}
 		if ( input instanceof IURIEditorInput)
 		{
-			IPath uriPath = URIUtil.toPath(((IURIEditorInput)input).getURI());
-			if (uriPath != null)
-				return uriPath.toOSString();
+			URI uri = ((IURIEditorInput)input).getURI();
+			if (uri.getScheme() == null || EFS.SCHEME_FILE.equals(uri.getScheme())) {
+			    IPath uriPath = URIUtil.toPath(uri);
+			    if (uriPath != null)
+			        return uriPath.toOSString();
+			} else {
+			    return uri.toASCIIString();
+			}
 		}
 		return ""; //$NON-NLS-1$
 	}
