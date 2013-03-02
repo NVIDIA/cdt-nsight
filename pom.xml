@@ -22,6 +22,7 @@
 		<module>debug/org.eclipse.cdt.debug.core</module>
 		<module>doc/org.eclipse.cdt.doc.user</module>
 		<module>dsf/org.eclipse.cdt.dsf.ui</module>
+		<module>memory/org.eclipse.cdt.debug.ui.memory.floatingpoint</module>
 		<module>releng/org.eclipse.cdt.platform-feature</module>
 		<module>releng/org.eclipse.cdt-feature</module>
 	</modules>
