@@ -85,4 +85,9 @@ public class CPPUnknownField extends CPPUnknownMember implements ICPPField {
 	public IValue getInitialValue() {
 		return null;
 	}
+
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }

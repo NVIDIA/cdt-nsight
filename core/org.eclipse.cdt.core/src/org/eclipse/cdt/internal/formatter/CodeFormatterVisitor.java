@@ -234,7 +234,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 		}
 	}
 
-	private static class TokenRange {
+	protected static class TokenRange {
 		private int offset;
 		private int endOffset;
 
@@ -1907,8 +1907,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 			options.fSpaceBeforeSeparator= preferences.insert_space_before_comma_in_base_types;
 			formatList(baseSpecifiers, options, false, false, null);
 		}
-		scribe.skipToToken(IToken.tLBRACE);
-		
+
 		// Member declarations
 		formatLeftCurlyBrace(line, preferences.brace_position_for_type_declaration);
 		formatOpeningBrace(preferences.brace_position_for_type_declaration, preferences.insert_space_before_opening_brace_in_type_declaration);
@@ -2093,8 +2092,8 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 	 * @param tailFormatter formatter for the trailing text that should be kept together with
 	 * 		the last element of the list.
 	 */
-	protected void formatList(List<? extends IASTNode> elements, ListOptions options,
-			boolean encloseInParen, boolean addEllipsis, Runnable tailFormatter) {
+	protected void formatList(List<?> elements, ListOptions options, boolean encloseInParen,
+			boolean addEllipsis, Runnable tailFormatter) {
 		if (encloseInParen)
 			scribe.printNextToken(Token.tLPAREN, options.fSpaceBeforeOpeningParen);
 
@@ -3914,7 +3913,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 	}
 
 	protected void skipNode(IASTNode node) {
-		final IASTNodeLocation fileLocation= node.getFileLocation();
+		final IASTNodeLocation fileLocation= getFileLocation(node);
 		if (fileLocation != null && fileLocation.getNodeLength() > 0) {
 			final int endOffset= fileLocation.getNodeOffset() + fileLocation.getNodeLength();
 			final int currentOffset= getCurrentPosition();
@@ -4042,7 +4041,7 @@ public class CodeFormatterVisitor extends ASTVisitor implements ICPPASTVisitor, 
 		return false;
 	}
 
-	protected static boolean enclosedInMacroExpansion(IASTNode node) {
+	protected boolean enclosedInMacroExpansion(IASTNode node) {
 		if (fInsideMacroArguments)
 			return false;
 		IASTNodeLocation[] locations= node.getNodeLocations();

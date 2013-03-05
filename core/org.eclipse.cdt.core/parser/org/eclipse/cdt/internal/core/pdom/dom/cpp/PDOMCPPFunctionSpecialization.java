@@ -73,9 +73,9 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization
 	/**
 	 * The size in bytes of a PDOMCPPFunctionSpecialization record in the database.
 	 */
-	@SuppressWarnings("hiding")
 	protected static final int EXTENSION_BITS_OFFSET = RETURN_EXPRESSION + Database.EVALUATION_SIZE;
 
+	@SuppressWarnings("hiding")
 	protected static final int RECORD_SIZE = EXTENSION_BITS_OFFSET + 2;
 
 	private static final short ANNOT_PARAMETER_PACK = 8;
@@ -124,19 +124,14 @@ class PDOMCPPFunctionSpecialization extends PDOMCPPSpecialization
 			db.putRecPtr(record + FIRST_PARAM, next == null ? 0 : next.getRecord());
 		}
 		fAnnotation = getAnnotation(astFunction);
-<<<<<<< HEAD
-		db.putShort(record + ANNOTATION_OFFSET, fAnnotation);	
-		fExtendedBits = astFunction.getExtendedBits();
-		db.putShort(record + EXTENSION_BITS_OFFSET, fExtendedBits);
-		db.putInt(record + REQUIRED_ARG_COUNT_OFFSET, astFunction.getRequiredArgumentCount());
-=======
 		db.putShort(record + ANNOTATION, fAnnotation);	
 		db.putShort(record + REQUIRED_ARG_COUNT , (short) astFunction.getRequiredArgumentCount());
 		ICPPEvaluation returnExpression = CPPFunction.getReturnExpression(astFunction);
 		if (returnExpression != null) {
 			linkage.storeEvaluation(record + RETURN_EXPRESSION, returnExpression);
 		}
->>>>>>> eclipseorg/cdt_8_1
+		fExtendedBits = astFunction.getExtendedBits();
+		db.putShort(record + EXTENSION_BITS_OFFSET, fExtendedBits);
 		long typelist= 0;
 		if (astFunction instanceof ICPPMethod && ((ICPPMethod) astFunction).isImplicit()) {
 			// Don't store the exception specification, it is computed on demand.

@@ -151,4 +151,9 @@ public class CPPDeferredFunction extends CPPUnknownBinding implements ICPPFuncti
 	public ICPPEvaluation getReturnExpression() {
 		return null;
 	}
+
+	@Override
+	public short getExtendedBits() {
+		return 0;
+	}
 }
