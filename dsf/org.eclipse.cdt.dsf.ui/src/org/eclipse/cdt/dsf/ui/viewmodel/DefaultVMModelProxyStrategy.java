@@ -22,6 +22,7 @@ import org.eclipse.cdt.dsf.concurrent.DataRequestMonitor;
 import org.eclipse.cdt.dsf.concurrent.DsfRunnable;
 import org.eclipse.cdt.dsf.concurrent.IDsfStatusConstants;
 import org.eclipse.cdt.dsf.concurrent.RequestMonitor;
+import org.eclipse.cdt.dsf.internal.ui.DsfUIPlugin;
 import org.eclipse.cdt.dsf.ui.viewmodel.datamodel.IDMVMContext;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.ListenerList;
@@ -817,6 +818,14 @@ public class DefaultVMModelProxyStrategy implements IVMModelProxy {
                                 @Override
                                 protected void handleCompleted() {
                                     counts[nodeIndex] = getData();
+                                    // This should never happen (this check was required because our GDB was
+                                    // sending notifications after it presumably quit)
+                                    if (counts[nodeIndex] == null) {
+                                        counts[nodeIndex] = 0;
+                                        DsfUIPlugin.logErrorMessage(
+                                                String.format("Got null children count from child node %s",
+                                                    childNodes[nodeIndex].getClass()));
+                                    }
                                     crm.done();
                                 }
                             } 
