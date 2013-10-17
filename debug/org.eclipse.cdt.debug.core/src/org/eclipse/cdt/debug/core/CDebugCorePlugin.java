@@ -536,5 +536,18 @@ public class CDebugCorePlugin extends Plugin {
 			}
 		} catch (CoreException e) {
 		}
+
+		try {
+		    if (remoteCfg.getPreferredDelegate(runSet) == null) {
+		        ILaunchDelegate[] delegates = remoteCfg.getDelegates(runSet);
+		        for (ILaunchDelegate delegate : delegates) {
+		            if (ICDTLaunchConfigurationConstants.PREFERRED_DEBUG_REMOTE_LAUNCH_DELEGATE.equals(delegate.getId())) {
+		                remoteCfg.setPreferredDelegate(runSet, delegate);
+		                break;
+		            }
+		        }
+		    }
+		} catch (CoreException e) {
+		}
 	}
 }
