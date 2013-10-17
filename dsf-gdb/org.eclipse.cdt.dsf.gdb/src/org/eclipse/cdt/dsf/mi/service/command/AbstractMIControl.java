@@ -538,6 +538,10 @@ public abstract class AbstractMIControl extends AbstractDsfService
 		return count;
 	}
 	
+	protected MIParser createMIParser() {
+	    return new MIParser();
+	}
+	
 	/*
 	 *  Support class which creates a convenient wrapper for holding all information about an
 	 *  individual request.
@@ -696,7 +700,7 @@ public abstract class AbstractMIControl extends AbstractDsfService
 
     private class RxThread extends Thread {
         private final InputStream fInputStream;
-        private final MIParser fMiParser = new MIParser();
+        private final MIParser fMiParser = createMIParser();
 
 		/**
 		 * List of out of band records since the last result record. Out of band
@@ -1051,7 +1055,7 @@ public abstract class AbstractMIControl extends AbstractDsfService
      */
     private class ErrorThread extends Thread {
         private final InputStream fErrorStream;
-        private final MIParser fMiParser = new MIParser();
+        private final MIParser fMiParser = createMIParser();
 
         public ErrorThread(InputStream errorStream) {
             super("MI Error Thread"); //$NON-NLS-1$

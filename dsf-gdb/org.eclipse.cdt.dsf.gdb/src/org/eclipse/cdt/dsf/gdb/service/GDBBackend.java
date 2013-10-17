@@ -10,6 +10,7 @@
  *     Wind River System
  *     Ericsson
  *     Marc Khouzam (Ericsson) - Use the new IMIBackend2 interface (Bug 350837)
+ *     NVIDIA             - Introduce waitForGdbToStart that can be overriden for custom GDBs 
  *******************************************************************************/
 package org.eclipse.cdt.dsf.gdb.service;
 
@@ -562,15 +563,7 @@ public class GDBBackend extends AbstractDsfService implements IGDBBackend, IMIBa
                     }
                     
                     try {
-                        Reader r = new InputStreamReader(getMIInputStream());
-                        BufferedReader reader = new BufferedReader(r);
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            line = line.trim();
-                            if (line.endsWith("(gdb)")) { //$NON-NLS-1$
-                                break;
-                            }
-                        }
+                        waitForGdbToStart();
                     } catch (IOException e) {
                         gdbLaunchRequestMonitor.setStatus(new Status(IStatus.ERROR, GdbPlugin.PLUGIN_ID, -1, "Error reading GDB STDOUT", e)); //$NON-NLS-1$
                         gdbLaunchRequestMonitor.done();
@@ -859,5 +852,17 @@ public class GDBBackend extends AbstractDsfService implements IGDBBackend, IMIBa
     		}
     		fInterruptFailedJob = null;
     	}
+    }
+
+    protected void waitForGdbToStart() throws IOException {
+        Reader r = new InputStreamReader(getMIInputStream());
+        BufferedReader reader = new BufferedReader(r);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            line = line.trim();
+            if (line.endsWith("(gdb)")) { //$NON-NLS-1$
+                break;
+            }
+        }
     }
 }
